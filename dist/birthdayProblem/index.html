@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en-US">
+	<head>
+		<title>Birthday Problem Calculator</title>
+		<style>
+			html {
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				margin: 8px;
+				padding: 0;
+			}
+			th {
+				text-align: left;
+				padding-right: 5px;
+			}
+			#errors {
+				color: red;
+				margin: 8px;
+			}
+			.calculated {
+				box-shadow: 0 0 3px 1px green;
+			}
+		</style>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+		<script>
+			$(function() {
+
+				var $birthdayForm = $("#birthday-form");
+				var $setSize = $("#set-size");
+				var $numDraws = $("#num-draws");
+				var $pctProb = $("#pct-prob");
+				var $minCollisions = $("#min-collisions");
+				var $errors = $("#errors");
+
+				$birthdayForm.on("submit", function(e) {
+					e.preventDefault();
+
+					$( $setSize, $numDraws, $pctProb, $minCollisions ).removeClass("calculated");
+
+					var setSize = $setSize.val();
+					var numDraws = $numDraws.val();
+					var pctProb = $pctProb.val();
+					var minCollisions = $minCollisions.val();
+
+					setSize = setSize ? parseInt(setSize) : Number.NaN;
+					numDraws = numDraws ? parseInt(numDraws) : Number.NaN;
+					pctProb = pctProb ? parseInt(pctProb) : Number.NaN;
+					minCollisions = minCollisions ? parseInt(minCollisions) : Number.NaN;
+
+					try {
+						if( !setSize ) {
+							solveForSetSize( numDraws, pctProb, minCollisions );
+						}
+						else if( !numDraws ) {
+							solveForNumDraws( setSize, pctProb, minCollisions );
+						}
+						else if( !pctProb ) {
+							solveForPctProb( setSize, numDraws, minCollisions );
+						}
+						else {
+							// TODO: What do we do if they've filled in everything?
+							throw new Error("Try not filling in something.");
+						}
+					}
+					catch (e) {
+						$errors.text( e.message || e );
+					}
+				});
+
+				function solveForSetSize( numDraws, pctProb, minCollisions ) {
+					throw new Error("Not Implemented: solveForSetSize()");
+				}
+
+				function solveForNumDraws( setSize, pctProb ) {
+					throw new Error("Not Implemented: solveForNumDraws()");
+				}
+
+				function solveForPctProb( setSize, numDraws ) {
+					var pctProb = calcPctProb( setSize, numDraws );
+					pctProb = Math.round( pctProb );
+					$pctProb.val( pctProb ).addClass("calculated");
+				}
+
+				function calcPctProb( setSize, numDraws ) {
+					var probNoCollision = 1;
+
+					// technically we should start at i=0, but that will always be a noop because
+					// (setSize - 0)/setSize === 1
+					for( var i=1; i<numDraws; i++ ) {
+						probNoCollision *= (setSize - i) / setSize;
+					}
+
+					var probCollision = 1 - probNoCollision;
+					var pctProbCollision = 100 * probCollision;
+					return pctProbCollision;
+				}
+			});
+		</script>
+	</head>
+	<body>
+		<h1>Birthday Problem Calculator</h1>
+		<p>
+			For more info about the the Birthday Problem, see
+			<a href="https://en.wikipedia.org/wiki/Birthday_problem">Wikipedia</a>
+		</p>
+		<p>
+			Leave any field blank to calculate that value!
+		</p>
+		<form id="birthday-form">
+			<table>
+				<tr>
+					<th><label>Set Size:</label></th>
+					<td><input type="number" id="set-size" min="1" value="365" /></td>
+				</tr>
+				<tr>
+					<th><label>Num Draws:</label></th>
+					<td><input type="number" id="num-draws" min="0" value="23" /></td>
+				</tr>
+				<tr>
+					<th><label>Percent Probability:</label></th>
+					<td>
+						<input type="number" id="pct-prob" min="1" max="100" value="50" />%
+						chance of at least
+						<input type="number" id="min-collisions" min="1" value="1" disabled />
+						collision(s).
+					</td>
+				</tr>
+			</table>
+			<button type="submit">Calculate missing value!</button>
+			<div id="errors"></div>
+		</form>
+	</body>
+</html>
