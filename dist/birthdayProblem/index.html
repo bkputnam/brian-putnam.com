@@ -38,6 +38,7 @@
 					e.preventDefault();
 
 					$( $setSize, $numDraws, $pctProb, $minCollisions ).removeClass("calculated");
+					$errors.empty();
 
 					var setSize = $setSize.val();
 					var numDraws = $numDraws.val();
@@ -66,6 +67,7 @@
 					}
 					catch (e) {
 						$errors.text( e.message || e );
+						console.error( e.stack || e );
 					}
 				});
 
@@ -74,13 +76,25 @@
 				}
 
 				function solveForNumDraws( setSize, pctProb ) {
-					throw new Error("Not Implemented: solveForNumDraws()");
+					var targetProb = pctProb / 100;
+
+					var curProb = -1;
+					var probNoCollision = 1;
+					var numDraws = 0;
+					while( curProb < targetProb ) {
+						probNoCollision *= (setSize - numDraws) / setSize;
+						numDraws++;
+						curProb = 1 - probNoCollision;
+					}
+
+					$numDraws.val( numDraws ).addClass( "calculated" );
+					$pctProb.val( Math.round( curProb * 100 ) );
 				}
 
 				function solveForPctProb( setSize, numDraws ) {
 					var pctProb = calcPctProb( setSize, numDraws );
 					pctProb = Math.round( pctProb );
-					$pctProb.val( pctProb ).addClass("calculated");
+					$pctProb.val( pctProb ).addClass( "calculated" );
 				}
 
 				function calcPctProb( setSize, numDraws ) {
