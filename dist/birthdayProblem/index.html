@@ -31,38 +31,35 @@
 				var $setSize = $("#set-size");
 				var $numDraws = $("#num-draws");
 				var $pctProb = $("#pct-prob");
-				var $minCollisions = $("#min-collisions");
 				var $errors = $("#errors");
 
 				$birthdayForm.on("submit", function(e) {
 					e.preventDefault();
 
-					$( $setSize, $numDraws, $pctProb, $minCollisions ).removeClass("calculated");
+					$setSize.add( $numDraws ).add( $pctProb ).removeClass("calculated");
 					$errors.empty();
 
 					var setSize = $setSize.val();
 					var numDraws = $numDraws.val();
 					var pctProb = $pctProb.val();
-					var minCollisions = $minCollisions.val();
 
 					setSize = setSize ? parseInt(setSize) : Number.NaN;
 					numDraws = numDraws ? parseInt(numDraws) : Number.NaN;
-					pctProb = pctProb ? parseInt(pctProb) : Number.NaN;
-					minCollisions = minCollisions ? parseInt(minCollisions) : Number.NaN;
+					pctProb = pctProb ? parseFloat(pctProb) : Number.NaN;
 
 					try {
 						if( !setSize ) {
-							solveForSetSize( numDraws, pctProb, minCollisions );
+							solveForSetSize( numDraws, pctProb );
 						}
 						else if( !numDraws ) {
-							solveForNumDraws( setSize, pctProb, minCollisions );
+							solveForNumDraws( setSize, pctProb );
 						}
 						else if( !pctProb ) {
-							solveForPctProb( setSize, numDraws, minCollisions );
+							solveForPctProb( setSize, numDraws );
 						}
 						else {
 							// TODO: What do we do if they've filled in everything?
-							throw new Error("Try not filling in something.");
+							throw new Error("Leave something blank and it will be calculated.");
 						}
 					}
 					catch (e) {
@@ -71,8 +68,31 @@
 					}
 				});
 
-				function solveForSetSize( numDraws, pctProb, minCollisions ) {
-					throw new Error("Not Implemented: solveForSetSize()");
+				function solveForSetSize( numDraws, pctProb ) {
+
+					var targetProb = pctProb / 100;
+					
+					var prev = numDraws;
+					var cur = numDraws + 1;
+
+					var _calcProb = function( setSize ) {
+						return calcProb( setSize, numDraws );
+					};
+
+					while( _calcProb(cur) > targetProb ) {
+						prev = cur;
+						cur *= 2;
+					}
+
+					var setSize = binarySearchIndices( prev, cur, _calcProb, targetProb );
+					var curProb = _calcProb(setSize);
+					while( curProb > targetProb ) {
+						setSize++;
+						curProb = _calcProb(setSize);
+					}
+
+					$setSize.val( setSize );
+					$pctProb.val( curProb * 100 );
 				}
 
 				function solveForNumDraws( setSize, pctProb ) {
@@ -88,16 +108,15 @@
 					}
 
 					$numDraws.val( numDraws ).addClass( "calculated" );
-					$pctProb.val( Math.round( curProb * 100 ) );
+					$pctProb.val( curProb * 100 );
 				}
 
 				function solveForPctProb( setSize, numDraws ) {
-					var pctProb = calcPctProb( setSize, numDraws );
-					pctProb = Math.round( pctProb );
+					var pctProb = calcProb( setSize, numDraws ) * 100;
 					$pctProb.val( pctProb ).addClass( "calculated" );
 				}
 
-				function calcPctProb( setSize, numDraws ) {
+				function calcProb( setSize, numDraws ) {
 					var probNoCollision = 1;
 
 					// technically we should start at i=0, but that will always be a noop because
@@ -106,9 +125,28 @@
 						probNoCollision *= (setSize - i) / setSize;
 					}
 
-					var probCollision = 1 - probNoCollision;
-					var pctProbCollision = 100 * probCollision;
-					return pctProbCollision;
+					return 1 - probNoCollision;
+				}
+
+				function binarySearchIndices(minIndex, maxIndex, map, target) {
+					var curVal;
+					while( maxIndex > minIndex ) {
+						var middleIndex = Math.floor( (minIndex + maxIndex) / 2 );
+						curVal = map( middleIndex );
+
+						if( middleIndex == minIndex || curVal == target ) {
+							return middleIndex;
+						}
+
+						// Note comparison is backwards here because mapped values (probabilities)
+						// vary inversely with index (prob goes down as index goes up)
+						if( target > curVal ) {
+							maxIndex = middleIndex;
+						}
+						else {
+							minIndex = middleIndex;
+						}
+					}
 				}
 			});
 		</script>
@@ -120,7 +158,13 @@
 			<a href="https://en.wikipedia.org/wiki/Birthday_problem">Wikipedia</a>
 		</p>
 		<p>
-			Leave any field blank to calculate that value!
+			Leave any field blank to calculate that value! Note that Percent Probability will
+			usually update itself after a calculation (even if you filled it in). This is because
+			exact probabilities are hard to find given that Set Size and Num Draws must be exact
+			integers. For example, if you select Set Size = 365 and Percent Probability = 50% and
+			then ask for Num Draws to be calculated it will calculate Num Draws = 23 and then
+			recalculate Percent Probability &asymp; 50.7% because there is no value
+			of Num Draws that will give you exactly a 50% Percent Probability.
 		</p>
 		<form id="birthday-form">
 			<table>
@@ -135,10 +179,11 @@
 				<tr>
 					<th><label>Percent Probability:</label></th>
 					<td>
-						<input type="number" id="pct-prob" min="1" max="100" value="50" />%
-						chance of at least
-						<input type="number" id="min-collisions" min="1" value="1" disabled />
-						collision(s).
+						<input type="number" id="pct-prob"
+							min="0" max="100" step="any"
+							value="50.729723432398565"
+						/>%
+						chance of at least 1 collision.
 					</td>
 				</tr>
 			</table>
