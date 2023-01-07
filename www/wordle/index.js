@@ -178,6 +178,7 @@ function solveWordle(solution) {
         el.classList.remove('cursor');
     });
     document.querySelector('#inputs').classList.add('hide');
+    winMsgEl.innerHTML = winMsgEl.innerHTML.replace('{solution}', solution);
     winMsgEl.classList.remove('hide');
 }
 

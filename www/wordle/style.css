@@ -27,6 +27,10 @@ p {
     display: none !important;
 }
 
+.uppercase {
+    text-transform: uppercase !important;
+}
+
 #guesses-scroll-ctr {
     text-align: center;
 }
