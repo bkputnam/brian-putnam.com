@@ -7,6 +7,14 @@ handlers:
   static_files: www/index.html
   upload: www/index.html
 
+- url: /wordle
+  static_files: www/redirectAddSlash.html
+  upload: www/redirectAddSlash.html
+
+- url: /(.*)/
+  static_files: www/\1/index.html
+  upload: www/(.*)/index.html
+
 - url: /(.*)
   static_files: www/\1
   upload: www/(.*)
