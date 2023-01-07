@@ -1,0 +1,77 @@
+:root {
+    --square-side: 50px;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+}
+
+body {
+    display: inline-block;
+}
+
+#guesses-scroll-ctr {
+    height: 80px;
+    overflow: auto;
+}
+
+#guesses {
+    border-spacing: 10px;
+    margin: auto;
+    display: inline-block;
+}
+
+#guesses td, #inputs button {
+    width: var(--square-side);
+    height: var(--square-side);
+    border: 2px solid #d3d6da;
+    background-color: white;
+    text-align: center;
+    font-weight: bold;
+}
+
+#guesses td.char-not-used, #inputs #char-not-used,
+#guesses td.char-used-elsewhere, #inputs #char-used-elsewhere,
+#guesses td.char-used-here, #inputs #char-used-here {
+    border: 0px solid white;
+    color: white;
+}
+
+#guesses td.char-not-used, button#char-not-used {
+    background-color: #787c7e;
+}
+
+#guesses td.char-used-elsewhere, button#char-used-elsewhere {
+    background-color: #c9b458;
+}
+
+#guesses td.char-used-here, button#char-used-here {
+    background-color: #6aaa64;
+}
+
+.cursor {
+    outline: 2px solid black;
+}
+
+#inputs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+#inputs button {
+    cursor: pointer;
+    position: relative;
+}
+
+#inputs button:hover::after,
+#inputs button:focus::after {
+    content: ' ';
+    display: block;
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.25);
+}
+

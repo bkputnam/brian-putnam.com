@@ -1,1 +1,27 @@
-wordle
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Wordle Solver</title>
+		<link href="./style.css" rel="stylesheet">
+	</head>
+	<body>
+        <div id="guesses-scroll-ctr">
+            <table id="guesses">
+                <tr id="row1">
+                    <td>H</td>
+                    <td>E</td>
+                    <td>L</td>
+                    <td>L</td>
+                    <td>O</td>
+                </tr>
+            </table>
+        </div>
+        <div id="inputs">
+            <button id="char-not-used">_</button>
+            <button id="char-used-elsewhere">?</button>
+            <button id="char-used-here">.</button>
+        </div>
+	</body>
+    <script src="./wordle.js"></script>
+    <script src="./index.js"></script>
+</html>
