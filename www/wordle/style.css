@@ -23,6 +23,10 @@ p {
     font-weight: lighter;
 }
 
+.hide {
+    display: none !important;
+}
+
 #guesses-scroll-ctr {
     text-align: center;
 }
@@ -76,6 +80,7 @@ p {
     cursor: pointer;
     position: relative;
     border-radius: var(--button-radius);
+    box-shadow: 3px 3px 7px grey;
 }
 
 #inputs button:hover::after,
@@ -88,3 +93,13 @@ p {
     background-color: rgba(0, 0, 0, 0.25);
 }
 
+#err-msg {
+    background-color: pink;
+    color: red;
+    font-weight: bold;
+}
+
+#win-msg {
+    background-color: lightgrey;
+    text-align: center;
+}

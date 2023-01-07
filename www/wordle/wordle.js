@@ -22,8 +22,16 @@ function getExpectedRemainingWords(wordlist, word) {
 }
 
 export function getNextGuess(wordlist) {
+    if (wordlist.length === 0) {
+        throw new Error(`Cannot create a guess with an empty word list.`);
+    } else if (wordlist.length === 1) {
+        // Maybe we should throw here? If we wind up in this situation we
+        // missed a check somewhere earlier on.
+        return wordlist[0];
+    }
     let minExpectedRemainingWords = Number.POSITIVE_INFINITY;
     let nextGuess = '---';
+    let foundSomething = false;
 
     const startMs = performance.now();
 
@@ -34,7 +42,12 @@ export function getNextGuess(wordlist) {
         if (expectedRemainingWords < minExpectedRemainingWords) {
             minExpectedRemainingWords = expectedRemainingWords;
             nextGuess = word;
+            foundSomething = true;
         }
+    }
+
+    if (!foundSomething) {
+        debugger;
     }
 
     const endMs = performance.now();

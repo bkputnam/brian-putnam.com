@@ -13,6 +13,8 @@ const inputCharUsedElsewhere =
     document.getElementById('char-used-elsewhere');
 const inputCharUsedHere =
     document.getElementById('char-used-here');
+const errMsgEl = document.getElementById('err-msg');
+const winMsgEl = document.getElementById('win-msg');
 
 // Event listeners
 inputCharNotUsed.addEventListener('click', markNotUsed);
@@ -162,6 +164,23 @@ function acceptFeedback(feedbackStr) {
     }
 }
 
+function solveWordle(solution) {
+    const tr = createGuessRow(solution);
+    for (let i=0; i<tr.children.length; i++) {
+        const td = tr.children[i];
+        td.innerHTML = solution.charAt(i);
+        td.classList.add('char-used-here');
+    }
+    document.querySelectorAll('.hint').forEach((el) => {
+        el.classList.add('hide');
+    });
+    document.querySelectorAll('.cursor').forEach((el) => {
+        el.classList.remove('cursor');
+    });
+    document.querySelector('#inputs').classList.add('hide');
+    winMsgEl.classList.remove('hide');
+}
+
 let currentGuess = 'lares'
 async function main() {
     let remainingWords = wordlist;
@@ -173,9 +192,24 @@ async function main() {
         stateFilters.addCompareResult(compareResult);
         remainingWords = remainingWords.filter(
             (word) => stateFilters.matches(word));
+        if (remainingWords.length === 0) {
+            errMsgEl.innerHTML = `ERROR: there are no remaining words to pick from. ` +
+                `Are all of the statuses correct? Please refresh to try again.`;
+            return;
+        }
+        if (remainingWords.length === 1) {
+            console.log(`Only one word left: "${remainingWords[0]}"`);
+            solveWordle(remainingWords[0]);
+            return;
+        }
         console.log(`${remainingWords.length} remaining words`);
 
-        currentGuess = getNextGuess(remainingWords);
+        try {
+            currentGuess = getNextGuess(remainingWords);
+        } catch (e) {
+            errMsgEl.innerHTML = e.message;
+            return;
+        }
         
         createGuessRow(currentGuess);
         cursorLastRow();
@@ -183,5 +217,7 @@ async function main() {
         console.log(`---`);
     }
     console.log('Done.');
+    // It should be impossible to get here. However, not clear that it's an error?
+    errMsgEl.innerHTML = 'The bot is very confused.';
 }
 main();
