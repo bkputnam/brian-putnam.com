@@ -193,6 +193,7 @@ async function main() {
         stateFilters.addCompareResult(compareResult);
         remainingWords = remainingWords.filter(
             (word) => stateFilters.matches(word));
+        console.log(remainingWords);
         if (remainingWords.length === 0) {
             errMsgEl.innerHTML = `ERROR: there are no remaining words to pick from. ` +
                 `Are all of the statuses correct? Please refresh to try again.`;

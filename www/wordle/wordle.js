@@ -1,4 +1,5 @@
-import {compare} from './compare.js';
+import { compare } from './compare.js';
+import { wordlist } from './wordlist.js';
 
 const groups = new Array(Math.pow(3, 5));
 
@@ -21,33 +22,32 @@ function getExpectedRemainingWords(wordlist, word) {
     return sum / numWords;
 }
 
-export function getNextGuess(wordlist) {
-    if (wordlist.length === 0) {
+export function getNextGuess(remainingWords) {
+    if (remainingWords.length === 0) {
         throw new Error(`Cannot create a guess with an empty word list.`);
-    } else if (wordlist.length === 1) {
+    } else if (remainingWords.length === 1) {
         // Maybe we should throw here? If we wind up in this situation we
         // missed a check somewhere earlier on.
-        return wordlist[0];
+        return remainingWords[0];
     }
     let minExpectedRemainingWords = Number.POSITIVE_INFINITY;
     let nextGuess = '---';
     let foundSomething = false;
+    const remainingWordsSet = new Set(remainingWords);
 
     const startMs = performance.now();
 
     const len = wordlist.length;
     for (let i=0; i<len; i++) {
         const word = wordlist[i];
-        const expectedRemainingWords = getExpectedRemainingWords(wordlist, word);
-        if (expectedRemainingWords < minExpectedRemainingWords) {
+        const isPlausibleWord = remainingWordsSet.has(word);
+        const expectedRemainingWords = getExpectedRemainingWords(remainingWords, word);
+        if (expectedRemainingWords < minExpectedRemainingWords
+            || (expectedRemainingWords === minExpectedRemainingWords && isPlausibleWord)) {
             minExpectedRemainingWords = expectedRemainingWords;
             nextGuess = word;
             foundSomething = true;
         }
-    }
-
-    if (!foundSomething) {
-        debugger;
     }
 
     const endMs = performance.now();
