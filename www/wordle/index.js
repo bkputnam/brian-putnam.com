@@ -123,20 +123,29 @@ function onClickGuesses(e) {
     setCursor(e.target);
 }
 
+function clearCharState(el) {
+    el.classList.remove('char-not-used');
+    el.classList.remove('char-used-elsewhere');
+    el.classList.remove('char-used-here');
+}
+
 function markNotUsed() {
     const cursor = getCursoredElement();
+    clearCharState(cursor);
     cursor.classList.add('char-not-used');
     advanceCursor();
 }
 
 function markUsedElsewhere() {
     const cursor = getCursoredElement();
+    clearCharState(cursor);
     cursor.classList.add('char-used-elsewhere');
     advanceCursor();
 }
 
 function markUsedHere() {
     const cursor = getCursoredElement();
+    clearCharState(cursor);
     cursor.classList.add('char-used-here');
     advanceCursor();
 }
