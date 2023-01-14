@@ -15,6 +15,7 @@ const inputCharUsedHere =
     document.getElementById('char-used-here');
 const errMsgEl = document.getElementById('err-msg');
 const winMsgEl = document.getElementById('win-msg');
+const wordsRemainingEl = document.getElementById('words-remaining');
 
 // Event listeners
 inputCharNotUsed.addEventListener('click', markNotUsed);
@@ -189,6 +190,7 @@ function solveWordle(solution, createNewRow = true) {
         el.classList.remove('cursor');
     });
     document.querySelector('#inputs').classList.add('hide');
+    wordsRemainingEl.classList.add('hide');
     winMsgEl.innerHTML = winMsgEl.innerHTML.replace('{solution}', solution);
     winMsgEl.classList.remove('hide');
 }
@@ -200,9 +202,11 @@ async function main() {
     getCursoredElement();
     const stateFilters = new StateFilters();
     while (remainingWords.length > 1) {
+        wordsRemainingEl.innerText = `${remainingWords.length} words remaining`;
         const compareResult = await waitForFeedback();
         if (compareResult.isAllCorrect()) {
-            solveWordle(currentGuess);
+            solveWordle(currentGuess, /* createNewRow= */ false);
+            return;
         }
         stateFilters.addCompareResult(compareResult);
         remainingWords = remainingWords.filter(

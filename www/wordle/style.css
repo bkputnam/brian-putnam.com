@@ -107,3 +107,8 @@ p {
     background-color: lightgrey;
     text-align: center;
 }
+
+#words-remaining {
+    margin-top: 0;
+    text-align: center;
+}
