@@ -50,6 +50,11 @@ export class CompareResult {
         return result;
     }
 
+    isAllCorrect() {
+        return this.values.every(
+            (value) => value === CompareValue.RIGHT_LOCATION);
+    }
+
     toString() {
         return `${this.guess}|${this.valueStr()}`;
     }

@@ -173,12 +173,14 @@ function acceptFeedback(feedbackStr) {
     }
 }
 
-function solveWordle(solution) {
-    const tr = createGuessRow(solution);
-    for (let i=0; i<tr.children.length; i++) {
-        const td = tr.children[i];
-        td.innerHTML = solution.charAt(i);
-        td.classList.add('char-used-here');
+function solveWordle(solution, createNewRow = true) {
+    if (createNewRow) {
+        const tr = createGuessRow(solution);
+        for (let i=0; i<tr.children.length; i++) {
+            const td = tr.children[i];
+            td.innerHTML = solution.charAt(i);
+            td.classList.add('char-used-here');
+        }
     }
     document.querySelectorAll('.hint').forEach((el) => {
         el.classList.add('hide');
@@ -199,6 +201,9 @@ async function main() {
     const stateFilters = new StateFilters();
     while (remainingWords.length > 1) {
         const compareResult = await waitForFeedback();
+        if (compareResult.isAllCorrect()) {
+            solveWordle(currentGuess);
+        }
         stateFilters.addCompareResult(compareResult);
         remainingWords = remainingWords.filter(
             (word) => stateFilters.matches(word));
