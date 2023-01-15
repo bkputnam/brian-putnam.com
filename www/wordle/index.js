@@ -1,7 +1,7 @@
 import { CompareResult } from "./compare.js";
-import { getNextGuess } from "./wordle.js";
+import { getNextGuess } from "./next_guess.js";
 import { wordlist } from './wordlist.js';
-import { StateFilters } from "./statefilters.js";
+import { StateFilters } from "./state_filters.js";
 
 // Named element references
 const guessesScrollContainer =
@@ -201,8 +201,8 @@ async function main() {
     createGuessRow(currentGuess);
     getCursoredElement();
     const stateFilters = new StateFilters();
+    wordsRemainingEl.innerText = `${remainingWords.length} words remaining`;
     while (remainingWords.length > 1) {
-        wordsRemainingEl.innerText = `${remainingWords.length} words remaining`;
         const compareResult = await waitForFeedback();
         if (compareResult.isAllCorrect()) {
             solveWordle(currentGuess, /* createNewRow= */ false);
@@ -211,6 +211,7 @@ async function main() {
         stateFilters.addCompareResult(compareResult);
         remainingWords = remainingWords.filter(
             (word) => stateFilters.matches(word));
+        wordsRemainingEl.innerText = `${remainingWords.length} words remaining`;
         console.log(remainingWords);
         if (remainingWords.length === 0) {
             errMsgEl.innerHTML = `ERROR: there are no remaining words to pick from. ` +

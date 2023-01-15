@@ -14853,5 +14853,6 @@ export const wordlist = [
     "stalk",
     "flack",
     "widow",
-    "augur"]
-  
+    "augur"
+];
+//# sourceMappingURL=wordlist.js.map
