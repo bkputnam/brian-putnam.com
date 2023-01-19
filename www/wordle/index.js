@@ -210,7 +210,12 @@ async function main() {
         }
         stateFilters.addCompareResult(compareResult);
         remainingWords = remainingWords.filter(
-            (word) => stateFilters.matches(word));
+            (word) => {
+                if (word === 'water') {
+                    debugger;
+                }
+                return stateFilters.matches(word);
+            });
         wordsRemainingEl.innerText = `${remainingWords.length} words remaining`;
         console.log(remainingWords);
         if (remainingWords.length === 0) {
