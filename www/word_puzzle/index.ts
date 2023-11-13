@@ -1,5 +1,7 @@
 import { Board } from "./board.js";
+import { EXAMPLE_SOLUTIONS } from "./example_solutions.js";
 import { Piece } from "./piece.js";
+import { pick1 } from "./random.js";
 import { Solution } from "./solution.js";
 import { I_1, T_1 } from "./tetrominoes.js";
 
@@ -14,14 +16,7 @@ import { I_1, T_1 } from "./tetrominoes.js";
 // console.log(`success1: ${success1}`);
 // console.log(`board:\n${board.toString()}`);
 
-const solution = new Solution([
-    'SPRAT',
-    'WAIVE',
-    'ANVIL',
-    'IDEAL',
-    'NANNY',
-].join('\n'));
-
+const solution = pick1(EXAMPLE_SOLUTIONS);
 for (const thing of solution.toRandomPieces()) {
     console.log(thing.piece.toString());
 }

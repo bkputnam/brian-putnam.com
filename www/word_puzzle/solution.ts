@@ -8,7 +8,10 @@ export class Solution {
     private readonly grid: string[][];
 
     constructor(str: string) {
-        this.grid = str.split('\n').map((rowStr: string) => rowStr.split(''));
+        this.grid = str
+            .split('\n')
+            .map((rowStr: string) =>
+                rowStr.split('').map((char: string) => char.toUpperCase()));
         const sideLen = this.grid.length;
         for (const row of this.grid) {
             if (row.length !== sideLen) {

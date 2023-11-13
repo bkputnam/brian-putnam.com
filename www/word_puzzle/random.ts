@@ -16,3 +16,7 @@ export function shuffleInPlace<T>(array: T[]): T[] {
     }
     return array;
 }
+
+export function pick1<T>(arr: T[]): T {
+    return arr[Math.floor(Math.random() * (arr.length))];
+}
