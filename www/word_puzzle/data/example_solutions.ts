@@ -1,4 +1,4 @@
-import { Solution } from "./solution.js";
+import { Solution } from "../data_structures/solution.js";
 
 export const EXAMPLE_SOLUTIONS = [
     new Solution([
@@ -64,4 +64,55 @@ export const EXAMPLE_SOLUTIONS = [
         'stair',
         'early',
     ].join('\n')),
+
+    new Solution([
+        'SCUBA',
+        'NASAL',
+        'ABASE',
+        'CIGAR',
+        'KNELT',
+    ].join('\n')),
+
+    // STAMP
+    // CIGAR
+    // OBESE
+    // RINSE
+    // EATEN
+
+    // ALLOT
+    // BELCH
+    // AGATE
+    // TAMER
+    // ELATE
+
+    // SCORE
+    // TIBIA
+    // AGENT
+    // MASSE
+    // PREEN
+
+    // ABATE
+    // LEGAL
+    // LLAMA
+    // OCTET
+    // WHERE
+
+    // ALLOW
+    // BELCH
+    // AGATE
+    // TAMER
+    // ELATE
+
+    // SCALP
+    // MOLAR
+    // ALIBI
+    // COVEN
+    // KNELT
+
+    // SMACK
+    // COLON
+    // ALIVE
+    // LABEL
+    // PRINT
+
 ];

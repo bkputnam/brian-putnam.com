@@ -1,4 +1,4 @@
-import { Piece } from "./piece.js";
+import { Piece } from "../data_structures/piece.js";
 
 export const J_1 = Piece.fromString('_J\n_\J\nJJ');
 export const J_2 = Piece.fromString('JJJ\n__J');

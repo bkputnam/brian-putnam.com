@@ -1,8 +1,8 @@
 import { Board } from "./board.js";
 import { Coord, LetterCoord } from "./coord.js";
 import { Piece } from "./piece.js";
-import { shuffleInPlace } from "./random.js";
-import { TETROMINOES } from "./tetrominoes.js";
+import { shuffleInPlace } from "../util/random.js";
+import { TETROMINOES } from "../data/tetrominoes.js";
 
 export class Solution {
     private readonly grid: string[][];
