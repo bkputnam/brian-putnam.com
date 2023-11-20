@@ -1,8 +1,8 @@
-import { Coord, LetterCoord } from "./coord.js";
+import { BoardCoord, LetterCoord } from "./coord.js";
 import { Piece } from "./piece.js";
 
 class OutOfBoundsError extends Error {
-    constructor(coord: Coord) {
+    constructor(coord: BoardCoord) {
         super(`Piece out of bounds: coord = ` +
             `[${coord.row}, ${coord.col}]`);
     }
@@ -10,7 +10,7 @@ class OutOfBoundsError extends Error {
 
 export class Board {
     private readonly gridPieces: Array<Array<Piece | null>>;
-    private readonly pieceLocations = new Map<Piece, Coord>();
+    private readonly pieceLocations = new Map<Piece, BoardCoord>();
 
     constructor(readonly size: number) {
         const grid: typeof this.gridPieces = [];
@@ -31,7 +31,7 @@ export class Board {
         return result;
     }
 
-    private *iterPieceLetters(piece: Piece, coord?: Coord):
+    private *iterPieceLetters(piece: Piece, coord?: BoardCoord):
         Iterable<LetterCoord> {
         coord = coord ?? this.pieceLocations.get(piece);
         if (!coord) {
@@ -46,12 +46,12 @@ export class Board {
         }
     }
 
-    private isCoordInBounds(coord: Coord): boolean {
+    private isCoordInBounds(coord: BoardCoord): boolean {
         return coord.row >= 0 && coord.row < this.gridPieces.length
             && coord.col >= 0 && coord.col < this.gridPieces[0].length;
     }
 
-    private isPieceInBoards(piece: Piece, coord: Coord): boolean {
+    private isPieceInBoards(piece: Piece, coord: BoardCoord): boolean {
         if (!this.isCoordInBounds(coord)) {
             return false;
         }
@@ -62,7 +62,7 @@ export class Board {
         return this.isCoordInBounds(maxCoord);
     }
 
-    tryPlacePiece(piece: Piece, coord: Coord): boolean {
+    tryPlacePiece(piece: Piece, coord: BoardCoord): boolean {
         if (!this.isPieceInBoards(piece, coord)) {
             return false;
         }
@@ -84,7 +84,7 @@ export class Board {
         return true;
     }
 
-    clearPiece(piece: Piece, coord: Coord) {
+    clearPiece(piece: Piece, coord: BoardCoord) {
         for (const { coord: pieceCoord } of this.iterPieceLetters(piece, coord)) {
             const pieceAtCoord =
                 this.gridPieces[pieceCoord.row][pieceCoord.col]!;

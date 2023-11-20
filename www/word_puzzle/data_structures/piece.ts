@@ -1,4 +1,4 @@
-import { Coord, LetterCoord } from "./coord.js";
+import { BoardCoord, LetterCoord } from "./coord.js";
 
 export class Piece {
     readonly width: number;
@@ -53,7 +53,7 @@ export class Piece {
         return new Piece(this.letterGrid.map((row) => [...row]));
     }
 
-    setLetter(letter: string, coord: Coord): void {
+    setLetter(letter: string, coord: BoardCoord): void {
         this.letterGrid[coord.row][coord.col] = letter;
     }
 

@@ -1,9 +1,14 @@
-export interface Coord {
+export interface BoardCoord {
     row: number;
     col: number;
 }
 
 export interface LetterCoord {
     letter: string,
-    coord: Coord,
+    coord: BoardCoord,
+}
+
+export interface ScreenCoord {
+    x: number;
+    y: number;
 }

@@ -1,3 +1,5 @@
+export const WORD_SIZE = 5;
+
 export const SOLUTIONS = [
     "ABATE\nLEGAL\nLLAMA\nOCTET\nTHERE",
     "ABATE\nLEGAL\nLLAMA\nOCTET\nWHERE",

@@ -1,5 +1,5 @@
 import { Board } from "./board.js";
-import { Coord, LetterCoord } from "./coord.js";
+import { BoardCoord, LetterCoord } from "./coord.js";
 import { Piece } from "./piece.js";
 import { shuffleInPlace } from "../util/random.js";
 import { TETROMINOES } from "../data/tetrominoes.js";
@@ -20,7 +20,7 @@ export class Solution {
         }
     }
 
-    private *iterCoords(): Iterable<Coord> {
+    private *iterCoords(): Iterable<BoardCoord> {
         for (let row = 0; row < this.grid.length; row++) {
             for (let col = 0; col < this.grid.length; col++) {
                 yield { row, col };
@@ -28,10 +28,10 @@ export class Solution {
         }
     }
 
-    makePieceFromTemplate(template: Piece, coord: Coord): Piece {
+    private makePieceFromTemplate(template: Piece, coord: BoardCoord): Piece {
         const result = Piece.emptyFromTemplate(template);
         for (const { coord: pieceCoord } of template.iterCoords()) {
-            const boardCoord: Coord = {
+            const boardCoord: BoardCoord = {
                 row: coord.row + pieceCoord.row,
                 col: coord.col + pieceCoord.col,
             };
@@ -41,7 +41,7 @@ export class Solution {
         return result;
     }
 
-    toRandomPieces(): Array<{ piece: Piece, coord: Coord; }> {
+    toRandomPieces(): Array<{ piece: Piece, coord: BoardCoord; }> {
         // Used when trying to place random tetrominoes to tell whether or not
         // we've already placed on that spot.
         const placementBoard = new Board(this.grid.length);
@@ -49,7 +49,7 @@ export class Solution {
         // Starts full and is progressively cleared. Represents the player's
         // starting board.
         const startingBoard = Board.fromStringArray(this.grid);
-        const result: Array<{ piece: Piece, coord: Coord; }> = [];
+        const result: Array<{ piece: Piece, coord: BoardCoord; }> = [];
 
         const tetrominoes = [...TETROMINOES];
         const coords = [...this.iterCoords()];
