@@ -21,10 +21,17 @@ export class BoardController extends Controller {
 
     protected override decorate(el: HTMLElement): void {
         const table = document.createElement('table');
-        for (let rowIndex = 0; rowIndex < WORD_SIZE; rowIndex++) {
+        for (let rowIndex = 0; rowIndex < this.board.size; rowIndex++) {
             const rowEl = document.createElement('tr');
-            for (let colIndex = 0; colIndex < WORD_SIZE; colIndex++) {
+            for (let colIndex = 0; colIndex < this.board.size; colIndex++) {
                 const cellEl = document.createElement('td');
+                const letter = this.board.getLetterAtCoord({
+                    row: rowIndex,
+                    col: colIndex,
+                });
+                if (letter) {
+                    cellEl.innerText = letter;
+                }
                 rowEl.append(cellEl);
             }
             table.appendChild(rowEl);

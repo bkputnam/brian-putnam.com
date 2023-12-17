@@ -69,7 +69,8 @@ table.piece {
     position: absolute;
 }
 
-table.piece td.letter {
+table.piece td.letter,
+.board table td {
     font-size: calc(var(--letter-side-len) * 0.75);
     font-family: 'Courier New', 'Lucida Console', 'Monaco', monospace;
     border: 1px solid black;

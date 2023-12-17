@@ -41,7 +41,10 @@ export class Solution {
         return result;
     }
 
-    toRandomPieces(): Array<{ piece: Piece, coord: BoardCoord; }> {
+    toRandomPieces(): {
+        startingBoard: Board,
+        pieces: Array<{ piece: Piece, coord: BoardCoord; }>;
+    } {
         // Used when trying to place random tetrominoes to tell whether or not
         // we've already placed on that spot.
         const placementBoard = new Board(this.grid.length);
@@ -49,7 +52,7 @@ export class Solution {
         // Starts full and is progressively cleared. Represents the player's
         // starting board.
         const startingBoard = Board.fromStringArray(this.grid);
-        const result: Array<{ piece: Piece, coord: BoardCoord; }> = [];
+        const pieces: Array<{ piece: Piece, coord: BoardCoord; }> = [];
 
         const tetrominoes = [...TETROMINOES];
         const coords = [...this.iterCoords()];
@@ -58,7 +61,7 @@ export class Solution {
             for (const tetromino of shuffleInPlace(tetrominoes)) {
                 for (const coord of shuffleInPlace(coords)) {
                     if (placementBoard.tryPlacePiece(tetromino, coord)) {
-                        result.push({
+                        pieces.push({
                             piece: this.makePieceFromTemplate(tetromino, coord),
                             coord,
                         });
@@ -72,6 +75,6 @@ export class Solution {
 
         while (placeRandomPiece()) { }
         console.log(startingBoard.toString());
-        return result;
+        return { startingBoard, pieces };
     }
 }

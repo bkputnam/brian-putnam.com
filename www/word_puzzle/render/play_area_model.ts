@@ -15,10 +15,10 @@ export class PlayAreaModel {
     constructor(
         readonly playAreaController: PlayAreaController,
         readonly solution: Solution) {
-        this.board = new Board(WORD_SIZE);
-
         let x = 0, y = 0;
-        for (const { piece, coord: solutionCoord } of solution.toRandomPieces()) {
+        const { startingBoard, pieces } = solution.toRandomPieces();
+        this.board = startingBoard;
+        for (const { piece, coord: solutionCoord } of pieces) {
             const startingCoord: ScreenCoord = { x, y };
             const pieceController = new PieceController(piece);
             this.unplacedPieces.set(pieceController, startingCoord);

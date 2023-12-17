@@ -1,6 +1,6 @@
 import { Piece } from "../data_structures/piece.js";
 import { Controller } from "./controller.js";
-import { Z_INDICES } from "./z_indexes.js";
+import { Z_INDICES } from "./z_indices.js";
 
 export class PieceController extends Controller {
     constructor(readonly piece: Piece) {

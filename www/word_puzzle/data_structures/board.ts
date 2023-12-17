@@ -31,6 +31,25 @@ export class Board {
         return result;
     }
 
+    getPieceAtCoord(coord: BoardCoord): Piece | null {
+        return this.gridPieces[coord.row][coord.col];
+    }
+
+    getLetterAtCoord(coord: BoardCoord): string | null {
+        const piece = this.getPieceAtCoord(coord);
+        if (!piece) {
+            return null;
+        }
+        for (const { letter, coord: pieceCoord } of this.iterPieceLetters(piece)) {
+            const coordEquals = pieceCoord.row === coord.row &&
+                pieceCoord.col === coord.col;
+            if (coordEquals) {
+                return letter;
+            }
+        }
+        throw new Error('This should be impossible');
+    }
+
     private *iterPieceLetters(piece: Piece, coord?: BoardCoord):
         Iterable<LetterCoord> {
         coord = coord ?? this.pieceLocations.get(piece);
@@ -51,7 +70,7 @@ export class Board {
             && coord.col >= 0 && coord.col < this.gridPieces[0].length;
     }
 
-    private isPieceInBoards(piece: Piece, coord: BoardCoord): boolean {
+    private isPieceInBounds(piece: Piece, coord: BoardCoord): boolean {
         if (!this.isCoordInBounds(coord)) {
             return false;
         }
@@ -63,7 +82,7 @@ export class Board {
     }
 
     tryPlacePiece(piece: Piece, coord: BoardCoord): boolean {
-        if (!this.isPieceInBoards(piece, coord)) {
+        if (!this.isPieceInBounds(piece, coord)) {
             return false;
         }
         const letterCoords = [...this.iterPieceLetters(piece, coord)];
