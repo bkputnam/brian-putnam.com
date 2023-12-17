@@ -1,5 +1,5 @@
 :root {
-    --letter-side-len: 25px;
+    --letter-side-len: 40px;
 }
 
 html,
@@ -12,36 +12,62 @@ body {
 }
 
 h1 {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 300px;
-    margin-left: -150px;
     text-align: center;
+    margin: 10px 0 25px 0;
 }
 
-#play-area,
 .play-area {
     width: 100%;
     height: 100%;
+    text-align: center;
+    position: relative;
+}
+
+table {
+    border-collapse: collapse;
 }
 
 .board {
-    width: 300px;
-    height: 300px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    top: 50px;
+}
+
+.board table {
     border: 2px solid black;
-    position: absolute;
-    top: 80px;
-    left: 50%;
-    margin-left: -150px;
+    display: inline-block;
+}
+
+.board table td {
+    width: var(--letter-side-len);
+    height: var(--letter-side-len);
+    border: 1px solid rgba(0, 0, 0, 0.5);
+}
+
+.board table td:first-child {
+    border-left-width: 0;
+}
+
+.board table tr:first-child td {
+    border-top-width: 0;
+}
+
+.board table td:last-child {
+    border-right-width: 0;
+}
+
+.board table tr:last-child td {
+    border-bottom-width: 0;
 }
 
 table.piece {
     position: absolute;
-    border-collapse: collapse;
 }
 
 table.piece td.letter {
+    font-size: calc(var(--letter-side-len) * 0.75);
+    font-family: 'Courier New', 'Lucida Console', 'Monaco', monospace;
     border: 1px solid black;
     width: var(--letter-side-len);
     height: var(--letter-side-len);
