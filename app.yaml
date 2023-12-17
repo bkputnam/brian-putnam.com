@@ -11,6 +11,10 @@ handlers:
   static_files: www/redirectAddSlash.html
   upload: www/redirectAddSlash.html
 
+- url: /word_puzzle
+  static_files: www/redirectAddSlash.html
+  upload: www/redirectAddSlash.html
+
 - url: /(.*)/
   static_files: www/\1/index.html
   upload: www/(.*)/index.html
