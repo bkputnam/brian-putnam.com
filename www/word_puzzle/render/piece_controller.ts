@@ -1,5 +1,6 @@
 import { Piece } from "../data_structures/piece.js";
 import { Controller } from "./controller.js";
+import { Z_INDICES } from "./z_indexes.js";
 
 export class PieceController extends Controller {
     constructor(readonly piece: Piece) {
@@ -13,6 +14,10 @@ export class PieceController extends Controller {
     }
 
     protected override decorate(el: HTMLElement): void {
+        el.draggable = true;
+        el.addEventListener('dragstart', (e: DragEvent) => this.dragstart(e));
+        el.addEventListener('dragend', (e: DragEvent) => this.dragend(e));
+
         const letterGrid = this.piece.getLetterGrid();
         for (let rowIndex = 0; rowIndex < letterGrid.length; rowIndex++) {
             const row = letterGrid[rowIndex];
@@ -30,5 +35,22 @@ export class PieceController extends Controller {
             }
             el.appendChild(rowEl);
         }
+    }
+
+    private dragstart(e: DragEvent): void {
+        console.log('dragstart');
+        const el = this.getElStrict();
+        el.style.zIndex = Z_INDICES.PIECE_DRAG;
+        el.classList.add('dragging');
+        e.dataTransfer?.setData(
+            'text/dragstartcoords',
+            JSON.stringify({ x: e.clientX, y: e.clientY }));
+    }
+
+    private dragend(e: DragEvent): void {
+        console.log('dragend');
+        const el = this.getElStrict();
+        el.style.zIndex = Z_INDICES.PIECE_DEFAULT;
+        el.classList.remove('dragging');
     }
 }

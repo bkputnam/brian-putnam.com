@@ -11,6 +11,13 @@ export abstract class Controller {
         return this.el;
     }
 
+    getElStrict(): HTMLElement {
+        if (!this.el) {
+            throw new Error(`this.el hasn't been created yet`);
+        }
+        return this.el;
+    }
+
     protected abstract createEl(): HTMLElement;
     protected abstract decorate(el: HTMLElement): void;
 }

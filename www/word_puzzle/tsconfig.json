@@ -1,8 +1,7 @@
 {
   "compilerOptions": {
     "noImplicitAny": true,
-    "sourceMap": true,
-    "sourceRoot": ".",
+    "inlineSourceMap": true,
     "strictNullChecks": true,
     "target": "es2022",
     "module": "es2022",

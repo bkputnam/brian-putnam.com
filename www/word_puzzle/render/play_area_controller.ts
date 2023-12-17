@@ -23,6 +23,9 @@ export class PlayAreaController extends Controller {
     }
 
     protected override decorate(el: HTMLElement): void {
+        el.addEventListener('dragover', (e: DragEvent) => this.onDragover(e));
+        el.addEventListener('drop', (e: DragEvent) => this.onDrop(e));
+
         el.appendChild(this.boardController.render());
         const unplacedPieces = this.model.unplacedPieces;
         for (const [pieceController, screenCoord] of unplacedPieces.entries()) {
@@ -31,5 +34,25 @@ export class PlayAreaController extends Controller {
             pieceEl.style.left = `${screenCoord.x}px`;
             el.appendChild(pieceEl);
         }
+    }
+
+    onDragover(e: DragEvent): void {
+        e.preventDefault();
+        console.log('dragover');
+    }
+
+    onDrop(e: DragEvent): void {
+        debugger;
+        console.log('drop');
+        const startCoords = JSON.parse(
+            e.dataTransfer!.getData('text/dragstartcoords'));
+        const endCoords = { x: e.clientX, y: e.clientY };
+        const delta = {
+            x: endCoords.x - startCoords.x,
+            y: endCoords.y - startCoords.y,
+        };
+        const pieceEl = document.querySelector('.dragging') as HTMLElement;
+        pieceEl.style.top = parseInt(pieceEl.style.top) + delta.y + 'px';
+        pieceEl.style.left = parseInt(pieceEl.style.left) + delta.x + 'px';
     }
 }
