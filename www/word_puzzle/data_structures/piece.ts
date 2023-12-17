@@ -65,6 +65,13 @@ export class Piece {
             .join('\n');
     }
 
+    /** Returns all letters in a 4x4 grid */
+    getLetterGrid(): Array<Array<string | null>> {
+        // Defensive copy
+        return JSON.parse(
+            JSON.stringify(this.letterGrid)) as Array<Array<string | null>>;
+    }
+
     *iterCoords(): Iterable<LetterCoord> {
         for (let row = 0; row < this.letterGrid.length; row++) {
             for (let col = 0; col < this.letterGrid[0].length; col++) {

@@ -1,3 +1,7 @@
+:root {
+    --letter-side-len: 25px;
+}
+
 html,
 body {
     width: 100%;
@@ -32,6 +36,22 @@ h1 {
     margin-left: -150px;
 }
 
-.piece {
+table.piece {
     position: absolute;
+    border-collapse: collapse;
+}
+
+table.piece td.letter {
+    border: 1px solid black;
+    width: var(--letter-side-len);
+    height: var(--letter-side-len);
+    text-align: center;
+    line-height: var(--letter-side-len);
+    background-color: rgba(255, 255, 255, 1);
+}
+
+table.piece td.empty {
+    visibility: hidden;
+    border: 0;
+    background-color: rgba(0, 0, 0, 0);
 }
