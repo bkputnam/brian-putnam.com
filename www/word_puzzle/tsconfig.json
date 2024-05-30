@@ -4,9 +4,9 @@
     "inlineSourceMap": true,
     "strictNullChecks": true,
     "target": "es2022",
-    "module": "es2022",
+    "module": "ESNext",
     "jsx": "react",
-    "moduleResolution": "nodenext",
+    "moduleResolution": "Bundler",
     "esModuleInterop": true,
   },
 }
