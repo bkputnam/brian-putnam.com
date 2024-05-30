@@ -22,7 +22,6 @@ export class PieceController extends Controller {
         el.setAttribute(BKP_DRAGGABLE_ATTR, 'true');
         el.addEventListener(BKP_DRAG_START,
             (e: DragEvent) => {
-                debugger;
                 this.dragstart({ x: e.clientX, y: e.clientY });
             });
         el.addEventListener(BKP_DRAG, (e: BkpDragEvent) => {
@@ -61,7 +60,6 @@ export class PieceController extends Controller {
             left: parseInt(el.style.left),
         };
 
-        console.log('dragstart');
         el.style.zIndex = Z_INDICES.PIECE_DRAG;
         el.classList.add('dragging');
     }
@@ -87,5 +85,15 @@ export class PieceController extends Controller {
         // hurt)
         this.drag(detail);
         this.dragStartCoords = undefined;
+
+        const el = this.getElStrict();
+        el.style.zIndex = 'auto';
+        el.classList.remove('dragging');
+
+        // Make el the last child inside of parentEl, so that it stays on top
+        // when it's dropped.
+        const parentEl = el.parentElement;
+        el.remove();
+        parentEl?.appendChild(el);
     }
 }
