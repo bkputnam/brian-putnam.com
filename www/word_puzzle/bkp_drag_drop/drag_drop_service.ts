@@ -19,20 +19,25 @@ class DragDropService implements DragDropServiceApi {
         initGlobalTouchListeners();
     }
 
-    startDrag(id: number, targetEl: HTMLElement, startPos: ScreenCoord) {
+    /**
+     * Starts a drag operation. Returns true if a drag was successfully started,
+     * or false if a drag wasn't started, e.g. because the event happened to a
+     * non-draggable element.
+     */
+    startDrag(
+        id: number, targetEl: HTMLElement, startPos: ScreenCoord): boolean {
         const el =
             targetEl.closest(`[${BKP_DRAGGABLE_ATTR}="true"]`) as HTMLElement;
         if (!el) {
-            console.warn(
-                `[BKP] Attempting to start drag on Element without ` +
-                `[${BKP_DRAGGABLE_ATTR}="true"]`);
-            return;
+            // It's pretty common to hit this check and exit early. Happens any
+            // time you click or touch something that isn't [draggable="true"].
+            return false;
         }
         if (this.claimedEls.has(el)) {
             console.warn(
                 `[BKP] Attempting to drag an Element already being dragged`,
                 el);
-            return;
+            return false;
         }
         this.claimedEls.add(el);
         this.drags.set(id, {
@@ -45,6 +50,7 @@ class DragDropService implements DragDropServiceApi {
             startPos,
             curPos: startPos,
         }));
+        return true;
     }
 
     moveDrag(id: number, curPos: ScreenCoord) {
@@ -91,19 +97,25 @@ class DragDropService implements DragDropServiceApi {
 function initGlobalMouseListeners() {
     const mouseDownListener = (e: MouseEvent) => {
         const targetEl = e.target as HTMLElement;
-        const draggableEl = targetEl.closest(`[${BKP_DRAGGABLE_ATTR}="true"]`);
-        if (!draggableEl) {
-            return;
-        }
-        ddService.startDrag(
+        const dragStarted = ddService.startDrag(
             MOUSE_TOUCH_ID,
             targetEl,
             { x: e.clientX, y: e.clientY });
 
-        document.body.addEventListener('mousemove', mouseMoveListener);
+        if (dragStarted) {
+            // Don't add mousemove listener until we need it, so that we're not
+            // sending lots of unnecessary mousemove events outside of drag-n-drop
+            // sequences.
+            document.body.addEventListener('mousemove', mouseMoveListener);
+            document.body.addEventListener('mouseup', mouseUpListener);
+        }
     };
 
     const mouseMoveListener = (e: MouseEvent) => {
+        // We may not see a mouseup event if the user drags something outside
+        // of the browser viewport, and un-presses the mouse button before
+        // coming back to the viewport. This check causes the drag operation to
+        // end as soon as we become aware of this situation.
         if (e.buttons == 0) {
             return mouseUpListener(e);
         }
@@ -116,11 +128,54 @@ function initGlobalMouseListeners() {
         ddService.endDrag(MOUSE_TOUCH_ID, { x: e.clientX, y: e.clientY });
     };
 
+    // Don't add mousemove listener until we need it, so that we're not
+    // sending lots of unnecessary mousemove events outside of drag-n-drop
+    // sequences.
     document.body.addEventListener('mousedown', mouseDownListener);
 }
 
 function initGlobalTouchListeners() {
-    // TODO
+    const dragTouches = new Set<number>();
+
+    const touchStartListener = (e: TouchEvent) => {
+        for (const touch of e.changedTouches) {
+            const dragStarted = ddService.startDrag(
+                touch.identifier,
+                touch.target as HTMLElement,
+                { x: touch.clientX, y: touch.clientY });
+            if (dragStarted) {
+                dragTouches.add(touch.identifier);
+            }
+        }
+    };
+
+    const touchMoveListener = (e: TouchEvent) => {
+        for (const touch of e.changedTouches) {
+            if (!dragTouches.has(touch.identifier)) {
+                continue;
+            }
+            ddService.moveDrag(
+                touch.identifier,
+                { x: touch.clientX, y: touch.clientY });
+        }
+    };
+
+    const touchEndListener = (e: TouchEvent) => {
+        for (const touch of e.changedTouches) {
+            if (!dragTouches.has(touch.identifier)) {
+                continue;
+            }
+            ddService.endDrag(
+                touch.identifier,
+                { x: touch.clientX, y: touch.clientY });
+            dragTouches.delete(touch.identifier);
+        }
+    };
+
+    // OK to register all events always, because 
+    document.body.addEventListener('touchstart', touchStartListener);
+    document.body.addEventListener('touchmove', touchMoveListener);
+    document.body.addEventListener('touchend', touchEndListener);
 }
 
 // A fake "touch ID" for mouse events. Since there can only be one mouse-drag at
