@@ -1,8 +1,13 @@
+import { BKP_DRAGGABLE_ATTR } from "../bkp_drag_drop/drag_drop_service.js";
+import { BKP_DRAG, BKP_DRAG_END, BKP_DRAG_START, BkpDragEvent, DragDetail } from "../bkp_drag_drop/events.js";
+import { CssCoord, ScreenCoord } from "../data_structures/coord.js";
 import { Piece } from "../data_structures/piece.js";
 import { Controller } from "./controller.js";
 import { Z_INDICES } from "./z_indices.js";
 
 export class PieceController extends Controller {
+    private dragStartCoords: CssCoord | undefined = undefined;
+
     constructor(readonly piece: Piece) {
         super();
     }
@@ -14,9 +19,18 @@ export class PieceController extends Controller {
     }
 
     protected override decorate(el: HTMLElement): void {
-        el.draggable = true;
-        el.addEventListener('dragstart', (e: DragEvent) => this.dragstart(e));
-        el.addEventListener('dragend', (e: DragEvent) => this.dragend(e));
+        el.setAttribute(BKP_DRAGGABLE_ATTR, 'true');
+        el.addEventListener(BKP_DRAG_START,
+            (e: DragEvent) => {
+                debugger;
+                this.dragstart({ x: e.clientX, y: e.clientY });
+            });
+        el.addEventListener(BKP_DRAG, (e: BkpDragEvent) => {
+            this.drag(e.detail);
+        });
+        el.addEventListener(BKP_DRAG_END, (e: BkpDragEvent) => {
+            this.dragend(e.detail);
+        });
 
         const letterGrid = this.piece.getLetterGrid();
         for (let rowIndex = 0; rowIndex < letterGrid.length; rowIndex++) {
@@ -37,20 +51,41 @@ export class PieceController extends Controller {
         }
     }
 
-    private dragstart(e: DragEvent): void {
-        console.log('dragstart');
+    private dragstart(clientPos: ScreenCoord): void {
+        if (this.dragStartCoords !== undefined) {
+            return;
+        }
         const el = this.getElStrict();
+        this.dragStartCoords = {
+            top: parseInt(el.style.top),
+            left: parseInt(el.style.left),
+        };
+
+        console.log('dragstart');
         el.style.zIndex = Z_INDICES.PIECE_DRAG;
         el.classList.add('dragging');
-        e.dataTransfer?.setData(
-            'text/dragstartcoords',
-            JSON.stringify({ x: e.clientX, y: e.clientY }));
     }
 
-    private dragend(e: DragEvent): void {
-        console.log('dragend');
+    private drag(detail: DragDetail): void {
+        if (!this.dragStartCoords) {
+            return;
+        }
+        const deltaX = detail.curPos.x - detail.startPos.x;
+        const deltaY = detail.curPos.y - detail.startPos.y;
+
         const el = this.getElStrict();
-        el.style.zIndex = Z_INDICES.PIECE_DEFAULT;
-        el.classList.remove('dragging');
+        el.style.top = this.dragStartCoords!.top + deltaY + 'px';
+        el.style.left = this.dragStartCoords!.left + deltaX + 'px';
+    }
+
+    private dragend(detail: DragDetail): void {
+        if (!this.dragStartCoords) {
+            return;
+        }
+        // Reuse drag() to make sure top & left are set to their final
+        // coordinates. (Not sure if this is actually necessary, but it can't
+        // hurt)
+        this.drag(detail);
+        this.dragStartCoords = undefined;
     }
 }

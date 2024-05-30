@@ -12,3 +12,8 @@ export interface ScreenCoord {
     x: number;
     y: number;
 }
+
+export interface CssCoord {
+    top: number;
+    left: number;
+}

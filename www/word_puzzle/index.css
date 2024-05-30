@@ -16,8 +16,9 @@ h1 {
     margin: 10px 0 25px 0;
 }
 
-[draggable] {
+[bkp-draggable] {
     cursor: move;
+    user-select: none;
 }
 
 .play-area {

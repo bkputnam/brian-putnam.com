@@ -42,7 +42,6 @@ export class PlayAreaController extends Controller {
     }
 
     onDrop(e: DragEvent): void {
-        debugger;
         console.log('drop');
         const startCoords = JSON.parse(
             e.dataTransfer!.getData('text/dragstartcoords'));
