@@ -2,6 +2,7 @@ import { BKP_DRAGGABLE_ATTR } from "../bkp_drag_drop/drag_drop_service.js";
 import { BKP_DRAG, BKP_DRAG_END, BKP_DRAG_START, BkpDragEvent, DragDetail } from "../bkp_drag_drop/events.js";
 import { CssCoord, ScreenCoord } from "../data_structures/coord.js";
 import { Piece } from "../data_structures/piece.js";
+import { CELL_WIDTH_PX } from "./consts.js";
 import { Controller } from "./controller.js";
 import { Z_INDICES } from "./z_indices.js";
 
@@ -13,29 +14,18 @@ export class PieceController extends Controller {
     }
 
     protected override createEl(): HTMLElement {
-        const el = document.createElement('div');
+        const el = document.createElement('table');
         el.classList.add('piece');
         return el;
     }
 
     protected override decorate(el: HTMLElement): void {
-        const table = document.createElement('table');
-        this.decorateTable(table);
-        el.appendChild(table);
-    }
-
-    private decorateTable(el: HTMLElement): void {
-        el.setAttribute(BKP_DRAGGABLE_ATTR, 'true');
-        el.addEventListener(BKP_DRAG_START,
-            (e: DragEvent) => {
-                this.dragstart({ x: e.clientX, y: e.clientY });
-            });
-        el.addEventListener(BKP_DRAG, (e: BkpDragEvent) => {
-            this.drag(e.detail);
-        });
-        el.addEventListener(BKP_DRAG_END, (e: BkpDragEvent) => {
-            this.dragend(e.detail);
-        });
+        // Units for width, height are cells (e.g. 1 cell by 4 cells), not px
+        const { width, height } = this.piece;
+        // Give the <table> the exact width that it needs. This prevents the
+        // browser from squishing it when it's outside of its parent element.
+        el.style.width = `calc(var(--letter-side-len) * ${width})`;
+        el.style.height = `calc(var(--letter-side-len) * ${height})`;
 
         const letterGrid = this.piece.getLetterGrid();
         for (let rowIndex = 0; rowIndex < letterGrid.length; rowIndex++) {
@@ -49,6 +39,20 @@ export class PieceController extends Controller {
                 } else {
                     cellEl.classList.add('letter');
                     cellEl.innerText = letter;
+
+                    // Only populated cells should be draggable. Empty cells
+                    // should allow clicking through to whatever is underneath
+                    cellEl.setAttribute(BKP_DRAGGABLE_ATTR, 'true');
+                    cellEl.addEventListener(BKP_DRAG_START,
+                        (e: DragEvent) => {
+                            this.dragstart({ x: e.clientX, y: e.clientY });
+                        });
+                    cellEl.addEventListener(BKP_DRAG, (e: BkpDragEvent) => {
+                        this.drag(e.detail);
+                    });
+                    cellEl.addEventListener(BKP_DRAG_END, (e: BkpDragEvent) => {
+                        this.dragend(e.detail);
+                    });
                 }
                 rowEl.appendChild(cellEl);
             }

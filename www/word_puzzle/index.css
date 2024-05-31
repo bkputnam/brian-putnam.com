@@ -12,6 +12,7 @@ body {
     margin: 0;
     padding: 0;
     overscroll-behavior: none;
+    user-select: none;
 }
 
 h1 {
@@ -33,6 +34,7 @@ h1 {
 
 table {
     border-collapse: collapse;
+    table-layout: fixed;
 }
 
 .board {
@@ -46,8 +48,9 @@ table {
 }
 
 .board table {
-    border: 2px solid black;
     display: inline-block;
+    width: calc(var(--letter-side-len) * 5 + 8px);
+    height: calc(var(--letter-side-len) * 5 + 8px);
 }
 
 .board table td {
@@ -56,27 +59,8 @@ table {
     border: 1px solid rgba(0, 0, 0, 0.5);
 }
 
-.board table td:first-child {
-    border-left-width: 0;
-}
-
-.board table tr:first-child td {
-    border-top-width: 0;
-}
-
-.board table td:last-child {
-    border-right-width: 0;
-}
-
-.board table tr:last-child td {
-    border-bottom-width: 0;
-}
-
 .piece {
     position: absolute;
-    /* Must be wider than the widest possible piece. This prevents tables from
-    getting squished when live outside of their parent */
-    width: calc(var(--letter-side-len) * 4 + 50px);
 }
 
 .piece td.letter,
@@ -87,12 +71,16 @@ table {
     width: var(--letter-side-len);
     height: var(--letter-side-len);
     text-align: center;
-    line-height: var(--letter-side-len);
     background-color: rgba(255, 255, 255, 1);
+
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
 }
 
 .piece td.empty {
     visibility: hidden;
     border: 0;
     background-color: rgba(0, 0, 0, 0);
+    pointer-events: none;
 }
