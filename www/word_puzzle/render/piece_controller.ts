@@ -13,12 +13,18 @@ export class PieceController extends Controller {
     }
 
     protected override createEl(): HTMLElement {
-        const el = document.createElement('table');
+        const el = document.createElement('div');
         el.classList.add('piece');
         return el;
     }
 
     protected override decorate(el: HTMLElement): void {
+        const table = document.createElement('table');
+        this.decorateTable(table);
+        el.appendChild(table);
+    }
+
+    private decorateTable(el: HTMLElement): void {
         el.setAttribute(BKP_DRAGGABLE_ATTR, 'true');
         el.addEventListener(BKP_DRAG_START,
             (e: DragEvent) => {

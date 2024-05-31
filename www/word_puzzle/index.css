@@ -25,9 +25,9 @@ h1 {
 }
 
 .play-area {
-    width: 100%;
-    height: 100%;
-    text-align: center;
+    width: 0;
+    height: 0;
+    margin-left: 50%;
     position: relative;
 }
 
@@ -36,10 +36,13 @@ table {
 }
 
 .board {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
+    /* The table is a little over 200px wide, this just needs to be wider than
+        that */
+    --boardWidth: 300px;
+    text-align: center;
     top: 50px;
+    width: var(--boardWidth);
+    margin-left: calc(var(--boardWidth) / -2);
 }
 
 .board table {
@@ -69,11 +72,14 @@ table {
     border-bottom-width: 0;
 }
 
-table.piece {
+.piece {
     position: absolute;
+    /* Must be wider than the widest possible piece. This prevents tables from
+    getting squished when live outside of their parent */
+    width: calc(var(--letter-side-len) * 4 + 50px);
 }
 
-table.piece td.letter,
+.piece td.letter,
 .board table td {
     font-size: calc(var(--letter-side-len) * 0.75);
     font-family: 'Courier New', 'Lucida Console', 'Monaco', monospace;
@@ -85,7 +91,7 @@ table.piece td.letter,
     background-color: rgba(255, 255, 255, 1);
 }
 
-table.piece td.empty {
+.piece td.empty {
     visibility: hidden;
     border: 0;
     background-color: rgba(0, 0, 0, 0);
