@@ -60,10 +60,28 @@ table {
 }
 
 .piece {
+    /* Absolutely position every letter at top-left corner, so that CSS
+    transforms work from a consistent starting point */
     position: absolute;
+    top: 0;
+    left: 0;
+
+    /* Give .piece no width or height so that you can't accidentally click on
+    it */
+    width: 0;
+    height: 0;
+    overflow: visible;
 }
 
-.piece td.letter,
+.letter {
+    /* Absolutely position every letter at top-left corner, so that CSS
+    transforms work from a consistent starting point */
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.piece .letter,
 .board table td {
     font-size: calc(var(--letter-side-len) * 0.75);
     font-family: 'Courier New', 'Lucida Console', 'Monaco', monospace;
@@ -72,15 +90,8 @@ table {
     height: var(--letter-side-len);
     text-align: center;
     background-color: rgba(255, 255, 255, 1);
+    line-height: var(--letter-side-len);
 
     padding: 0;
     margin: 0;
-    box-sizing: border-box;
-}
-
-.piece td.empty {
-    visibility: hidden;
-    border: 0;
-    background-color: rgba(0, 0, 0, 0);
-    pointer-events: none;
 }

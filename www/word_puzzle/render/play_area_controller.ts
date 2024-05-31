@@ -30,8 +30,8 @@ export class PlayAreaController extends Controller {
         const unplacedPieces = this.model.unplacedPieces;
         for (const [pieceController, screenCoord] of unplacedPieces.entries()) {
             const pieceEl = pieceController.render();
-            pieceEl.style.top = `${screenCoord.y}px`;
-            pieceEl.style.left = `${screenCoord.x}px`;
+            pieceEl.style.transform =
+                `translateX(${screenCoord.x}px) translateY(${screenCoord.y}px)`;
             el.appendChild(pieceEl);
         }
     }
