@@ -134,8 +134,8 @@ export function computeOutlinePath(letterGrid: Array<Array<string | null>>):
     do {
         if (exists(dir, counterClockwise(dir))) {
             pushCommands(
-                line(dir, smallSide),
-                corner(dir, counterClockwise(dir)));
+                line(dir, mediumSide),
+                line(counterClockwise(dir), BORDER_RADIUS));
             dir = counterClockwise(dir);
         } else if (exists(dir, 'same')) {
             pushCommands(line(dir, fullSide));
