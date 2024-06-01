@@ -32,8 +32,8 @@ svg {
     flex-grow: 1;
 }
 
-g#everything {
-    transform: translateX(50%);
+svg#centering-svg {
+    overflow: visible;
 }
 
 g#board {

@@ -17,9 +17,12 @@ import { TETROMINOES, T_2 } from './data/tetrominoes.js';
 // document.body.appendChild(playAreaController.render());
 
 const svgEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-const everythingGroup =
-    document.createElementNS('http://www.w3.org/2000/svg', 'g');
-everythingGroup.id = 'everything';
+// Use nested <svg> to shift everything right by 50% of page width
+// https://stackoverflow.com/questions/56364905/how-to-do-svg-transform-in-percentage#answer-56366560
+const centeringSvg =
+    document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+centeringSvg.id = 'centering-svg';
+centeringSvg.setAttribute('x', '50%');
 
 const board =
     document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -48,49 +51,19 @@ for (let i = 0; i < 6; i++) {
     board.appendChild(verticalLine);
     board.appendChild(horizontalLine);
 }
-everythingGroup.appendChild(board);
+centeringSvg.appendChild(board);
 
 const shape =
     document.createElementNS('http://www.w3.org/2000/svg', 'path');
 shape.classList.add('shape');
-// This is for a T_2 shape (per tetrominoes.ts)
-// T
-// TT
-// T
-// const commands = [
-//     // Start right of top-left corner curve
-//     `M ${BORDER_RADIUS} 0`,
-//     // Top-left corner curve
-//     corner(LEFT, DOWN),
-//     // Down the left side
-//     line(DOWN, mediumSide + fullSide + mediumSide),
-//     // Bottom-most edge and both corners
-//     corner(DOWN, RIGHT),
-//     line(RIGHT, smallSide),
-//     corner(RIGHT, UP),
-//     // Coming back up one cell
-//     line(UP, mediumSide),
-//     // Sticky-outy cell on right
-//     line(RIGHT, mediumSide),
-//     corner(RIGHT, UP),
-//     line(UP, smallSide),
-//     corner(UP, LEFT),
-//     line(LEFT, mediumSide),
-//     // Finish going back up to the top, and close the curve
-//     line(UP, mediumSide),
-//     corner(UP, LEFT),
-//     `z`,
-// ];
-// shape.setAttribute('d', commands.join(' '));
-debugger;
 shape.setAttribute('d', computeOutlinePath(T_2.getLetterGrid()));
 shape.setAttribute('stroke', 'black');
 shape.setAttribute('fill', 'blue');
 shape.setAttribute('fill-opacity', '0.7');
 shape.setAttribute('transform', 'translate(-21, 1)');
-everythingGroup.appendChild(shape);
+centeringSvg.appendChild(shape);
 
-svgEl.appendChild(everythingGroup);
+svgEl.appendChild(centeringSvg);
 document.body.appendChild(svgEl);
 
 let tetrominoIndex = 0;
