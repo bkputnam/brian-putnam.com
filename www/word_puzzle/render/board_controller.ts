@@ -102,14 +102,20 @@ export class BoardController extends Controller {
 
 function svgToBoardCoords(coord: CssTransformCoords): BoardCoord {
     return {
-        row: Math.round((coord.translateY - 1) / CELL_WIDTH_PX),
-        col: Math.round(coord.translateX / CELL_WIDTH_PX + 2.5),
+        row: Math.round(
+            (coord.translateY - 1) /
+            (CELL_WIDTH_PX + 1)
+        ),
+        col: Math.round(
+            (coord.translateX + 2.5 * CELL_WIDTH_PX) /
+            (CELL_WIDTH_PX + 1)
+        ),
     };
 }
 
 function boardToSvgCoords(coord: BoardCoord): CssTransformCoords {
     return {
-        translateX: (coord.col - 2.5) * CELL_WIDTH_PX,
-        translateY: coord.row * CELL_WIDTH_PX + 1,
+        translateX: (coord.col - 2.5) * CELL_WIDTH_PX + coord.col,
+        translateY: coord.row * CELL_WIDTH_PX + 1 + coord.row,
     };
 }
