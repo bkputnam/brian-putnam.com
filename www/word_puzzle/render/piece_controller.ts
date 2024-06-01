@@ -4,6 +4,7 @@ import { Piece } from "../data_structures/piece.js";
 import { Controller } from "./controller.js";
 import { Z_INDICES } from "./z_indices.js";
 import { computeOutlinePath } from "../svg/path_util.js";
+import { createLetterEl } from "./letter.js";
 
 interface CssTransformCoords {
     translateX: number;
@@ -19,28 +20,42 @@ export class PieceController extends Controller {
     }
 
     protected override createEl(): SVGGraphicsElement {
-        const shape =
-            document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        shape.classList.add('shape');
-        return shape;
+        const el =
+            document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        el.classList.add('piece');
+        return el;
     }
 
     protected override decorate(el: SVGGraphicsElement): void {
-        el.setAttribute('d', computeOutlinePath(this.piece.getLetterGrid()));
-        el.setAttribute('stroke', 'black');
-        el.setAttribute('fill', 'blue');
-        el.setAttribute('fill-opacity', '0.7');
+        const path =
+            document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', computeOutlinePath(this.piece.getLetterGrid()));
+        path.setAttribute('stroke', 'black');
+        path.setAttribute('fill', 'blue');
+        path.setAttribute('fill-opacity', '0.7');
 
-        el.setAttribute('bkp-draggable', 'true');
-        el.addEventListener(
+        path.setAttribute('bkp-draggable', 'true');
+        path.addEventListener(
             BKP_DRAG_START,
             (e: BkpDragEvent) => this.dragstart(e.detail.curPos));
-        el.addEventListener(
+        path.addEventListener(
             BKP_DRAG,
             (e: BkpDragEvent) => this.drag(e.detail));
-        el.addEventListener(
+        path.addEventListener(
             BKP_DRAG_END,
             (e: BkpDragEvent) => this.dragend(e.detail));
+        el.appendChild(path);
+
+        const letterGrid = this.piece.getLetterGrid();
+        for (let row = 0; row < this.piece.height; row++) {
+            for (let col = 0; col < this.piece.width; col++) {
+                const letter = letterGrid[row][col];
+                if (letter === null) {
+                    continue;
+                }
+                el.appendChild(createLetterEl(row, col, letter));
+            }
+        }
     }
 
     private dragstart(clientPos: ScreenCoord): void {

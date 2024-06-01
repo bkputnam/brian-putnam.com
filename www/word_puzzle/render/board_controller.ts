@@ -3,6 +3,7 @@ import { WORD_SIZE } from "../data/solutions.js";
 import { Board } from "../data_structures/board.js";
 import { BoardCoord } from '../data_structures/coord.js';
 import { Controller } from "./controller.js";
+import { createLetterEl } from "./letter.js";
 import { PieceController } from "./piece_controller.js";
 import { PlayAreaModel } from "./play_area_model.js";
 
@@ -44,6 +45,16 @@ export class BoardController extends Controller {
 
             el.appendChild(verticalLine);
             el.appendChild(horizontalLine);
+        }
+
+        for (let row = 0; row < WORD_SIZE; row++) {
+            for (let col = 0; col < WORD_SIZE; col++) {
+                const letter = this.board.getLetterAtCoord({ row, col });
+                if (letter === null) {
+                    continue;
+                }
+                el.appendChild(createLetterEl(row, col, letter));
+            }
         }
     }
 
