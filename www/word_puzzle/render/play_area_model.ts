@@ -5,7 +5,7 @@ import { Solution } from "../data_structures/solution.js";
 import { BoardCoord, ScreenCoord } from '../data_structures/coord.js';
 import { PlayAreaController } from "./play_area_controller.js";
 import { PieceController } from "./piece_controller.js";
-import { CELL_WIDTH_PX } from "./consts.js";
+import { CELL_WIDTH_PX } from "../consts.js";
 
 export class PlayAreaModel {
     readonly board: Board;

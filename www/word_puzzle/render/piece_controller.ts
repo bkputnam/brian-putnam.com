@@ -2,7 +2,7 @@ import { BKP_DRAGGABLE_ATTR } from "../bkp_drag_drop/drag_drop_service.js";
 import { BKP_DRAG, BKP_DRAG_END, BKP_DRAG_START, BkpDragEvent, DragDetail } from "../bkp_drag_drop/events.js";
 import { CssCoord, ScreenCoord } from "../data_structures/coord.js";
 import { Piece } from "../data_structures/piece.js";
-import { CELL_WIDTH_PX } from "./consts.js";
+import { CELL_WIDTH_PX } from "../consts.js";
 import { Controller } from "./controller.js";
 import { Z_INDICES } from "./z_indices.js";
 

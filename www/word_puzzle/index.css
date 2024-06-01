@@ -15,9 +15,33 @@ body {
     user-select: none;
 }
 
+body {
+    display: flex;
+    flex-direction: column;
+}
+
 h1 {
     text-align: center;
     margin: 10px 0 25px 0;
+}
+
+svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    flex-grow: 1;
+}
+
+g#everything {
+    transform: translateX(50%);
+}
+
+g#board {
+    transform: translateX(-103px) translateY(1px);
+}
+
+.shape {
+    cursor: grab;
 }
 
 [bkp-draggable] {
