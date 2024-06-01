@@ -25,7 +25,7 @@ h1 {
     margin: 10px 0 25px 0;
 }
 
-svg {
+svg#play-area {
     display: block;
     width: 100%;
     height: auto;
@@ -47,13 +47,6 @@ g#board {
 [bkp-draggable] {
     cursor: move;
     user-select: none;
-}
-
-.play-area {
-    width: 0;
-    height: 0;
-    margin-left: 50%;
-    position: relative;
 }
 
 table {

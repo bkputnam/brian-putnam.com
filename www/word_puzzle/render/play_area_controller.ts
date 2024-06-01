@@ -1,9 +1,6 @@
-import { WORD_SIZE } from "../data/solutions.js";
-import { Board } from "../data_structures/board.js";
 import { Solution } from "../data_structures/solution.js";
 import { BoardController } from "./board_controller.js";
 import { Controller } from "./controller.js";
-import { PieceController } from "./piece_controller.js";
 import { PlayAreaModel } from "./play_area_model.js";
 
 export class PlayAreaController extends Controller {
@@ -16,29 +13,30 @@ export class PlayAreaController extends Controller {
         this.boardController = new BoardController(this.model);
     }
 
-    protected override createEl(): HTMLElement {
-        const el = document.createElement('div');
-        el.classList.add('play-area');
+    protected override createEl(): SVGGraphicsElement {
+        const el =
+            document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        el.id = 'play-area';
         return el;
     }
 
-    protected override decorate(el: HTMLElement): void {
-        el.addEventListener('dragover', (e: DragEvent) => this.onDragover(e));
-        el.addEventListener('drop', (e: DragEvent) => this.onDrop(e));
+    protected override decorate(el: SVGGraphicsElement): void {
+        // Use nested <svg> to shift everything right by 50% of page width
+        // https://stackoverflow.com/questions/56364905/how-to-do-svg-transform-in-percentage#answer-56366560
+        const centeringSvg =
+            document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        centeringSvg.id = 'centering-svg';
+        centeringSvg.setAttribute('x', '50%');
 
-        el.appendChild(this.boardController.render());
+        centeringSvg.appendChild(this.boardController.render());
         const unplacedPieces = this.model.unplacedPieces;
         for (const [pieceController, screenCoord] of unplacedPieces.entries()) {
             const pieceEl = pieceController.render();
-            pieceEl.style.transform =
-                `translateX(${screenCoord.x}px) translateY(${screenCoord.y}px)`;
-            el.appendChild(pieceEl);
+            pieceEl.setAttribute('transform',
+                `translate(${screenCoord.x} ${screenCoord.y})`);
+            centeringSvg.appendChild(pieceEl);
         }
-    }
-
-    onDragover(e: DragEvent): void {
-        e.preventDefault();
-        console.log('dragover');
+        el.appendChild(centeringSvg);
     }
 
     onDrop(e: DragEvent): void {
