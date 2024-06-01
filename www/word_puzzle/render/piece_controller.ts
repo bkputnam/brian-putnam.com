@@ -11,6 +11,7 @@ interface CssTransformCoords {
     translateY: number;
 }
 
+
 export class PieceController extends Controller {
     private dragStartCoords: CssTransformCoords | undefined = undefined;
 

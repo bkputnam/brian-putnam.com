@@ -6,6 +6,8 @@ import { pick1 } from './util/random.js';
 import { Solution } from './data_structures/solution.js';
 import { PlayAreaController } from './render/play_area_controller.js';
 import { CELL_WIDTH_PX } from './consts.js';
+import { computeOutlinePath } from './svg/path_util.js';
+import { TETROMINOES, T_2 } from './data/tetrominoes.js';
 
 // const solutionText = pick1(SOLUTIONS);
 // console.log(solutionText);
@@ -48,58 +50,6 @@ for (let i = 0; i < 6; i++) {
 }
 everythingGroup.appendChild(board);
 
-enum Direction {
-    UP, DOWN, LEFT, RIGHT
-}
-const UP = Direction.UP;
-const DOWN = Direction.DOWN;
-const LEFT = Direction.LEFT;
-const RIGHT = Direction.RIGHT;
-
-function isUpOrDown(dir: Direction): boolean {
-    return dir === Direction.UP || dir === Direction.DOWN;
-}
-
-function corner(dir1: Direction, dir2: Direction): string {
-    if (isUpOrDown(dir1) === isUpOrDown(dir2)) {
-        throw new Error(`Invalid directions: ${dir1} ${dir2}`);
-    }
-    const leftRightAmount = (dir: Direction): number =>
-        dir === Direction.LEFT ? -BORDER_RADIUS :
-            dir === Direction.RIGHT ? BORDER_RADIUS :
-                0;
-    const upDownAmount = (dir: Direction): number =>
-        dir === Direction.UP ? -BORDER_RADIUS :
-            dir === Direction.DOWN ? BORDER_RADIUS :
-                0;
-    const dx1 = leftRightAmount(dir1);
-    const dy1 = upDownAmount(dir1);
-    const dx = dx1 + leftRightAmount(dir2);
-    const dy = dy1 + upDownAmount(dir2);
-    // https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d#quadratic_b%C3%A9zier_curve
-    return `q ${dx1} ${dy1} ${dx} ${dy}`;
-}
-
-function line(dir: Direction, dist: number): string {
-    // https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d#lineto_path_commands
-    switch (dir) {
-        case Direction.UP:
-            return `v -${dist}`;
-        case Direction.DOWN:
-            return `v ${dist}`;
-        case Direction.LEFT:
-            return `h -${dist}`;
-        case Direction.RIGHT:
-            return `h ${dist}`;
-    }
-}
-
-const BORDER_RADIUS = 13;
-const BORDER_WIDTH = 1;
-// const abridgedSide = CELL_WIDTH_PX - BORDER_RADIUS;
-const fullSide = CELL_WIDTH_PX + BORDER_WIDTH;
-const mediumSide = CELL_WIDTH_PX - BORDER_RADIUS + BORDER_WIDTH;
-const smallSide = CELL_WIDTH_PX - BORDER_RADIUS * 2 + BORDER_WIDTH;
 const shape =
     document.createElementNS('http://www.w3.org/2000/svg', 'path');
 shape.classList.add('shape');
@@ -107,31 +57,33 @@ shape.classList.add('shape');
 // T
 // TT
 // T
-const commands = [
-    // Start right of top-left corner curve
-    `M ${BORDER_RADIUS} 0`,
-    // Top-left corner curve
-    corner(LEFT, DOWN),
-    // Down the left side
-    line(DOWN, mediumSide + fullSide + mediumSide),
-    // Bottom-most edge and both corners
-    corner(DOWN, RIGHT),
-    line(RIGHT, smallSide),
-    corner(RIGHT, UP),
-    // Coming back up one cell
-    line(UP, mediumSide),
-    // Sticky-outy cell on right
-    line(RIGHT, mediumSide),
-    corner(RIGHT, UP),
-    line(UP, smallSide),
-    corner(UP, LEFT),
-    line(LEFT, mediumSide),
-    // Finish going back up to the top, and close the curve
-    line(UP, mediumSide),
-    corner(UP, LEFT),
-    `z`,
-];
-shape.setAttribute('d', commands.join(' '));
+// const commands = [
+//     // Start right of top-left corner curve
+//     `M ${BORDER_RADIUS} 0`,
+//     // Top-left corner curve
+//     corner(LEFT, DOWN),
+//     // Down the left side
+//     line(DOWN, mediumSide + fullSide + mediumSide),
+//     // Bottom-most edge and both corners
+//     corner(DOWN, RIGHT),
+//     line(RIGHT, smallSide),
+//     corner(RIGHT, UP),
+//     // Coming back up one cell
+//     line(UP, mediumSide),
+//     // Sticky-outy cell on right
+//     line(RIGHT, mediumSide),
+//     corner(RIGHT, UP),
+//     line(UP, smallSide),
+//     corner(UP, LEFT),
+//     line(LEFT, mediumSide),
+//     // Finish going back up to the top, and close the curve
+//     line(UP, mediumSide),
+//     corner(UP, LEFT),
+//     `z`,
+// ];
+// shape.setAttribute('d', commands.join(' '));
+debugger;
+shape.setAttribute('d', computeOutlinePath(T_2.getLetterGrid()));
 shape.setAttribute('stroke', 'black');
 shape.setAttribute('fill', 'blue');
 shape.setAttribute('fill-opacity', '0.7');
@@ -140,3 +92,11 @@ everythingGroup.appendChild(shape);
 
 svgEl.appendChild(everythingGroup);
 document.body.appendChild(svgEl);
+
+let tetrominoIndex = 0;
+document.body.addEventListener('click', () => {
+    const nextTetromino = TETROMINOES[tetrominoIndex];
+    console.log(nextTetromino.toString());
+    shape.setAttribute('d', computeOutlinePath(nextTetromino.getLetterGrid()));
+    tetrominoIndex = (tetrominoIndex + 1) % TETROMINOES.length;
+});
