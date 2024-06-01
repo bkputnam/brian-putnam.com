@@ -37,7 +37,7 @@ svg#centering-svg {
 }
 
 g#board {
-    transform: translateX(-103px) translateY(1px);
+    transform: translateX(calc(var(--letter-side-len) * -2.5)) translateY(1px);
 }
 
 [bkp-draggable] {

@@ -1,16 +1,11 @@
 import { BKP_DRAG, BKP_DRAG_END, BKP_DRAG_START, BkpDragEvent, DragDetail } from "../bkp_drag_drop/events.js";
-import { ScreenCoord } from "../data_structures/coord.js";
+import { CssTransformCoords, ScreenCoord } from "../data_structures/coord.js";
 import { Piece } from "../data_structures/piece.js";
 import { Controller } from "./controller.js";
 import { Z_INDICES } from "./z_indices.js";
-import { computeOutlinePath } from "../svg/path_util.js";
+import { computeOutlinePath } from "../util/svg_path_util.js";
 import { createLetterEl } from "./letter.js";
-
-interface CssTransformCoords {
-    translateX: number;
-    translateY: number;
-}
-
+import { getTranslateXY } from "../util/svg_util.js";
 
 export class PieceController extends Controller {
     private dragStartCoords: CssTransformCoords | undefined = undefined;
@@ -26,6 +21,16 @@ export class PieceController extends Controller {
         return el;
     }
 
+    getTranslateXY(): CssTransformCoords {
+        return getTranslateXY(this.getElStrict());
+    }
+
+    setTranslateXY(coords: CssTransformCoords): void {
+        this.getElStrict().setAttribute(
+            'transform',
+            `translate(${coords.translateX} ${coords.translateY})`);
+    }
+
     protected override decorate(el: SVGGraphicsElement): void {
         const path =
             document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -37,7 +42,7 @@ export class PieceController extends Controller {
         path.setAttribute('bkp-draggable', 'true');
         path.addEventListener(
             BKP_DRAG_START,
-            (e: BkpDragEvent) => this.dragstart(e.detail.curPos));
+            (e: BkpDragEvent) => this.dragstart(e));
         path.addEventListener(
             BKP_DRAG,
             (e: BkpDragEvent) => this.drag(e.detail));
@@ -58,12 +63,14 @@ export class PieceController extends Controller {
         }
     }
 
-    private dragstart(clientPos: ScreenCoord): void {
+    private dragstart(e: BkpDragEvent): void {
+        e.detail.dropController = this;
+
         if (this.dragStartCoords !== undefined) {
             return;
         }
         const el = this.getElStrict();
-        this.dragStartCoords = getTranslateXY(el);
+        this.dragStartCoords = this.getTranslateXY();
 
         el.style.zIndex = Z_INDICES.PIECE_DRAG;
         el.classList.add('dragging');
@@ -79,17 +86,13 @@ export class PieceController extends Controller {
         const el = this.getElStrict();
         const translateX = this.dragStartCoords.translateX + deltaX;
         const translateY = this.dragStartCoords.translateY + deltaY;
-        el.setAttribute('transform', `translate(${translateX} ${translateY})`);
+        this.setTranslateXY({ translateX, translateY });
     }
 
     private dragend(detail: DragDetail): void {
         if (!this.dragStartCoords) {
             return;
         }
-        // Reuse drag() to make sure top & left are set to their final
-        // coordinates. (Not sure if this is actually necessary, but it can't
-        // hurt)
-        this.drag(detail);
         this.dragStartCoords = undefined;
 
         const el = this.getElStrict();
@@ -102,22 +105,4 @@ export class PieceController extends Controller {
         el.remove();
         parentEl?.appendChild(el);
     }
-}
-
-function getTranslateXY(element: SVGGraphicsElement): CssTransformCoords {
-    // https://stackoverflow.com/questions/46434687/get-the-current-matrix-transformation-of-an-svg-element#answer-46448918
-    const matrix = element.transform.baseVal.consolidate()?.matrix;
-
-    if (!matrix) {
-        // Not sure why matrix could be null, my best guess is that it means
-        // there are no transforms applied and so this would be the correct
-        // return val.
-        return { translateX: 0, translateY: 0 };
-    }
-
-    // https://stackoverflow.com/questions/8851023/how-to-get-the-actual-x-y-position-of-an-element-in-svg-with-transformations-and#answer-9190682
-    return {
-        translateX: matrix.e,
-        translateY: matrix.f
-    };
 }

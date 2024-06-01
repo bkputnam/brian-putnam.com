@@ -1,16 +1,15 @@
 import { ScreenCoord } from "../data_structures/coord.js";
-import { BKP_DRAG, BKP_DRAG_END, BKP_DRAG_START, BKP_DROP, BkpDragEvent } from "./events.js";
-
-interface DragDropServiceApi {
-}
+import { boxContainsPoint } from "../util/geometry.js";
+import { BKP_DRAG, BKP_DRAG_END, BKP_DRAG_START, BKP_DROP, BkpDragEvent, DragDetail } from "./events.js";
 
 interface DragInfo {
     identifier: number;
     el: HTMLElement;
     startPos: ScreenCoord;
+    dropController?: unknown;
 }
 
-class DragDropService implements DragDropServiceApi {
+class DragDropService {
     private readonly claimedEls = new Set<HTMLElement>();
     private readonly drags = new Map<number, DragInfo>();
 
@@ -40,16 +39,19 @@ class DragDropService implements DragDropServiceApi {
             return false;
         }
         this.claimedEls.add(el);
-        this.drags.set(id, {
+        const dragInfo: DragInfo = {
             identifier: id,
             el,
             startPos,
-        });
-        el.dispatchEvent(new BkpDragEvent({
+        };
+        const detail: DragDetail = {
             eventType: BKP_DRAG_START,
             startPos,
             curPos: startPos,
-        }));
+        };
+        el.dispatchEvent(new BkpDragEvent(detail));
+        dragInfo.dropController = detail.dropController;
+        this.drags.set(id, dragInfo);
         return true;
     }
 
@@ -75,15 +77,42 @@ class DragDropService implements DragDropServiceApi {
         this.drags.delete(id);
         this.claimedEls.delete(dragInfo.el);
 
+        const dropTargetSelector = `[${BKP_DROP_TARGET_ATTR}="true"]`;
         const dropTargets = document.elementsFromPoint(endPos.x, endPos.y)
-            .filter((el: Element) => !dragInfo.el.contains(el));
+            .filter((el: Element) =>
+                el.matches(dropTargetSelector) || el instanceof SVGSVGElement);
         for (const dropTarget of dropTargets) {
             dropTarget.dispatchEvent(
                 new BkpDragEvent({
                     eventType: BKP_DROP,
                     startPos: dragInfo.startPos,
                     curPos: endPos,
+                    dropController: dragInfo.dropController,
                 }));
+            // Children of <svg> elements won't be returned by elementsFromPoint
+            // (only the top-level <svg> will be) and so we have to recurse
+            // manually.
+            if (dropTarget instanceof SVGSVGElement) {
+                const innerDropTargets =
+                    dropTarget.querySelectorAll(dropTargetSelector);
+                for (const innerDropTarget of innerDropTargets) {
+                    const containsDropPoint =
+                        boxContainsPoint(
+                            innerDropTarget.getBoundingClientRect(),
+                            endPos);
+                    if (!containsDropPoint) {
+                        continue;
+                    }
+
+                    innerDropTarget.dispatchEvent(
+                        new BkpDragEvent({
+                            eventType: BKP_DROP,
+                            startPos: dragInfo.startPos,
+                            curPos: endPos,
+                            dropController: dragInfo.dropController,
+                        }));
+                }
+            }
         }
         dragInfo.el.dispatchEvent(
             new BkpDragEvent({
@@ -185,5 +214,5 @@ function initGlobalTouchListeners() {
 // [1] https://developer.mozilla.org/en-US/docs/Web/API/Touch/identifier
 const MOUSE_TOUCH_ID = -12345;
 export const BKP_DRAGGABLE_ATTR = 'bkp-draggable';
+export const BKP_DROP_TARGET_ATTR = 'bkp-drop-target';
 const ddService = new DragDropService();
-export const dragDropService: DragDropServiceApi = ddService;

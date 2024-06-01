@@ -15,6 +15,7 @@ export interface DragDetail {
     eventType: BkpDragEventType,
     startPos: ScreenCoord;
     curPos: ScreenCoord;
+    dropController?: unknown;
 }
 
 export class BkpDragEvent extends CustomEvent<DragDetail> {

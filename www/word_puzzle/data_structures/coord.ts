@@ -17,3 +17,8 @@ export interface CssCoord {
     top: number;
     left: number;
 }
+
+export interface CssTransformCoords {
+    translateX: number;
+    translateY: number;
+}
