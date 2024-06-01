@@ -64,26 +64,24 @@ function corner(dir1: Direction, dir2: Direction): string {
     if (isUpOrDown(dir1) === isUpOrDown(dir2)) {
         throw new Error(`Invalid directions: ${dir1} ${dir2}`);
     }
-    const dx1 =
-        dir1 === Direction.LEFT ? -BORDER_RADIUS :
-            dir1 === Direction.RIGHT ? BORDER_RADIUS :
+    const leftRightAmount = (dir: Direction): number =>
+        dir === Direction.LEFT ? -BORDER_RADIUS :
+            dir === Direction.RIGHT ? BORDER_RADIUS :
                 0;
-    const dy1 =
-        dir1 === Direction.UP ? -BORDER_RADIUS :
-            dir1 === Direction.DOWN ? BORDER_RADIUS :
+    const upDownAmount = (dir: Direction): number =>
+        dir === Direction.UP ? -BORDER_RADIUS :
+            dir === Direction.DOWN ? BORDER_RADIUS :
                 0;
-    const dx = dx1 + (
-        dir2 === Direction.LEFT ? -BORDER_RADIUS :
-            dir2 === Direction.RIGHT ? BORDER_RADIUS :
-                0);
-    const dy = dy1 + (
-        dir2 === Direction.UP ? -BORDER_RADIUS :
-            dir2 === Direction.DOWN ? BORDER_RADIUS :
-                0);
+    const dx1 = leftRightAmount(dir1);
+    const dy1 = upDownAmount(dir1);
+    const dx = dx1 + leftRightAmount(dir2);
+    const dy = dy1 + upDownAmount(dir2);
+    // https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d#quadratic_b%C3%A9zier_curve
     return `q ${dx1} ${dy1} ${dx} ${dy}`;
 }
 
 function line(dir: Direction, dist: number): string {
+    // https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d#lineto_path_commands
     switch (dir) {
         case Direction.UP:
             return `v -${dist}`;
@@ -106,6 +104,9 @@ const shape =
     document.createElementNS('http://www.w3.org/2000/svg', 'path');
 shape.classList.add('shape');
 // This is for a T_2 shape (per tetrominoes.ts)
+// T
+// TT
+// T
 const commands = [
     // Start right of top-left corner curve
     `M ${BORDER_RADIUS} 0`,
@@ -133,7 +134,7 @@ const commands = [
 shape.setAttribute('d', commands.join(' '));
 shape.setAttribute('stroke', 'black');
 shape.setAttribute('fill', 'blue');
-shape.setAttribute('fill-opacity', '0.5');
+shape.setAttribute('fill-opacity', '0.7');
 shape.setAttribute('transform', 'translate(-21, 1)');
 everythingGroup.appendChild(shape);
 
