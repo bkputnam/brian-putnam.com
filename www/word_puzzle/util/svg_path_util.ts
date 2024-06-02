@@ -100,7 +100,7 @@ export function computeOutlinePath(letterGrid: Array<Array<string | null>>):
     let col = startingCol;
     let dir = startingDir;
     const commands: string[] = [
-        `M ${startingCol * (CELL_WIDTH_PX + 1) + BORDER_RADIUS} 0`,
+        `M ${startingCol * (CELL_WIDTH_PX + BORDER_WIDTH) + BORDER_RADIUS} 0`,
         corner(LEFT, DOWN),
     ];
 

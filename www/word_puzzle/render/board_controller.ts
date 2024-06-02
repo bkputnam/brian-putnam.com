@@ -1,6 +1,6 @@
 import { BKP_DROP_TARGET_ATTR } from "../bkp_drag_drop/drag_drop_service.js";
 import { BKP_DROP, BkpDragEvent, DragDetail } from "../bkp_drag_drop/events.js";
-import { CELL_WIDTH_PX } from "../consts.js";
+import { BORDER_WIDTH, CELL_WIDTH_PX } from "../consts.js";
 import { WORD_SIZE } from "../data/solutions.js";
 import { Board } from "../data_structures/board.js";
 import { BoardCoord, CssTransformCoords, ScreenCoord } from '../data_structures/coord.js';
@@ -30,25 +30,27 @@ export class BoardController extends Controller {
             BKP_DROP,
             (e: BkpDragEvent) => this.onDrop(e.detail));
 
-        const maxOffset = WORD_SIZE * (CELL_WIDTH_PX + 1);
+        const maxOffset = WORD_SIZE * (CELL_WIDTH_PX + BORDER_WIDTH);
         for (let i = 0; i < (WORD_SIZE + 1); i++) {
-            const offset = i * (CELL_WIDTH_PX + 1);
+            const offset = i * (CELL_WIDTH_PX + BORDER_WIDTH);
 
             const verticalLine =
                 document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            verticalLine.setAttribute('x1', '' + offset);
+            verticalLine.setAttribute('x1', offset + '');
             verticalLine.setAttribute('y1', '0');
-            verticalLine.setAttribute('x2', '' + offset);
-            verticalLine.setAttribute('y2', '' + maxOffset);
+            verticalLine.setAttribute('x2', offset + '');
+            verticalLine.setAttribute('y2', maxOffset + '');
             verticalLine.setAttribute('stroke', 'black');
+            verticalLine.setAttribute('stroke-width', BORDER_WIDTH + '');
 
             const horizontalLine =
                 document.createElementNS('http://www.w3.org/2000/svg', 'line');
             horizontalLine.setAttribute('x1', '0');
-            horizontalLine.setAttribute('y1', '' + offset);
-            horizontalLine.setAttribute('x2', '' + maxOffset);
-            horizontalLine.setAttribute('y2', '' + offset);
+            horizontalLine.setAttribute('y1', offset + '');
+            horizontalLine.setAttribute('x2', maxOffset + '');
+            horizontalLine.setAttribute('y2', offset + '');
             horizontalLine.setAttribute('stroke', 'black');
+            horizontalLine.setAttribute('stroke-width', BORDER_WIDTH + '');
 
             el.appendChild(verticalLine);
             el.appendChild(horizontalLine);
@@ -115,7 +117,7 @@ function svgToBoardCoords(coord: CssTransformCoords): BoardCoord {
 
 function boardToSvgCoords(coord: BoardCoord): CssTransformCoords {
     return {
-        translateX: (coord.col - 2.5) * CELL_WIDTH_PX + coord.col,
-        translateY: coord.row * CELL_WIDTH_PX + 1 + coord.row,
+        translateX: (coord.col - 2.5) * CELL_WIDTH_PX + coord.col * BORDER_WIDTH,
+        translateY: coord.row * CELL_WIDTH_PX + 1 + coord.row * BORDER_WIDTH,
     };
 }

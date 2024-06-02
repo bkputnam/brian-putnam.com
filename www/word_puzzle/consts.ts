@@ -5,4 +5,4 @@ export const CELL_WIDTH_PX = 40;
 export const FONT_SIZE = CELL_WIDTH_PX * 0.75;
 
 export const BORDER_RADIUS = 13;
-export const BORDER_WIDTH = 1;
+export const BORDER_WIDTH = 3;

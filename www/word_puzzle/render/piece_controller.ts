@@ -6,6 +6,7 @@ import { Z_INDICES } from "./z_indices.js";
 import { computeOutlinePath } from "../util/svg_path_util.js";
 import { createLetterEl } from "./letter.js";
 import { getTranslateXY } from "../util/svg_util.js";
+import { BORDER_WIDTH } from "../consts.js";
 
 export class PieceController extends Controller {
     private dragStartCoords: CssTransformCoords | undefined = undefined;
@@ -36,6 +37,7 @@ export class PieceController extends Controller {
             document.createElementNS('http://www.w3.org/2000/svg', 'path');
         path.setAttribute('d', computeOutlinePath(this.piece.getLetterGrid()));
         path.setAttribute('stroke', 'black');
+        path.setAttribute('stroke-width', BORDER_WIDTH + '');
         path.setAttribute('fill', 'blue');
         path.setAttribute('fill-opacity', '0.7');
 
