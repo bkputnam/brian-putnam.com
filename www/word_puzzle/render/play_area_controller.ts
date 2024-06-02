@@ -1,4 +1,6 @@
 import { Solution } from "../data_structures/solution.js";
+import { boxesIntersect } from "../util/geometry.js";
+import { randBetween } from "../util/random.js";
 import { BoardController } from "./board_controller.js";
 import { Controller } from "./controller.js";
 import { PlayAreaModel } from "./play_area_model.js";
@@ -27,16 +29,58 @@ export class PlayAreaController extends Controller {
             document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         centeringSvg.id = 'centering-svg';
         centeringSvg.setAttribute('x', '50%');
-
-        centeringSvg.appendChild(this.boardController.render());
-        const unplacedPieces = this.model.unplacedPieces;
-        for (const [pieceController, screenCoord] of unplacedPieces.entries()) {
-            const pieceEl = pieceController.render();
-            pieceEl.setAttribute('transform',
-                `translate(${screenCoord.x} ${screenCoord.y})`);
-            centeringSvg.appendChild(pieceEl);
-        }
         el.appendChild(centeringSvg);
+
+        const boardEl = this.boardController.render();
+        centeringSvg.appendChild(boardEl);
+    }
+
+    renderPieces(): void {
+        const topSvgClientRect = this.getElStrict().getBoundingClientRect();
+        const centeringSvg = document
+            .getElementById('centering-svg') as unknown as SVGSVGElement;
+        const boardClientRect = document
+            .getElementById('board')!
+            .getBoundingClientRect();
+
+        const minX = Math.max(
+            -(topSvgClientRect.width / 2),
+            -200);
+        const maxX = Math.min(
+            topSvgClientRect.width / 2,
+            200);
+        const minY = 1;
+        const maxY = Math.min(
+            topSvgClientRect.height - 1,
+            400);
+
+        for (const pieceController of this.model.pieces) {
+            const pieceEl = pieceController.render();
+            centeringSvg.appendChild(pieceEl);
+
+            const pieceClientRect = pieceEl.getBoundingClientRect();
+            const pieceHeight = pieceClientRect.height;
+            const pieceWidth = pieceClientRect.width;
+
+            for (let i = 0; i < 20; i++) {
+                const randomX =
+                    Math.round(randBetween(minX, maxX - pieceWidth));
+                const randomY =
+                    Math.round(randBetween(minY, maxY - pieceHeight));
+                pieceEl.setAttribute(
+                    'transform',
+                    `translate(${randomX} ${randomY})`);
+
+                const intersectsBoard =
+                    boxesIntersect(
+                        pieceEl.getBoundingClientRect(),
+                        boardClientRect);
+                if (!intersectsBoard) {
+                    break;
+                }
+            }
+        }
+
     }
 
     onDrop(e: DragEvent): void {

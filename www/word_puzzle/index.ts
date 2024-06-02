@@ -12,3 +12,4 @@ const solution = new Solution(solutionText);
 
 const playAreaController = new PlayAreaController(solution);
 document.body.appendChild(playAreaController.render());
+playAreaController.renderPieces();

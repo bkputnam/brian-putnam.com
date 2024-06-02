@@ -9,3 +9,30 @@ export function boxContainsPoint(box: DOMRect, coord: ScreenCoord):
         coord.y <= (box.y + box.height)
     );
 }
+
+interface DomRectLike {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+
+export function boxesIntersect(box1: DomRectLike, box2: DomRectLike): boolean {
+    if (box1.x >= box2.x + box2.width) {
+        // box1 is entirely right of box2
+        return false;
+    }
+    if (box2.x >= box1.x + box1.width) {
+        // box1 is entirely left of box2
+        return false;
+    }
+    if (box1.y >= box2.y + box2.height) {
+        // box1 is entirely below box2
+        return false;
+    }
+    if (box2.y >= box1.y + box1.height) {
+        // box1 is entirely above box2
+        return false;
+    }
+    return true;
+}
