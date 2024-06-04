@@ -7,11 +7,12 @@ import { computeOutlinePath } from "../util/svg_path_util.js";
 import { createLetterEl } from "./letter.js";
 import { getTranslateXY } from "../util/svg_util.js";
 import { BORDER_WIDTH } from "../consts.js";
+import { Board } from "../data_structures/board.js";
 
 export class PieceController extends Controller {
     private dragStartCoords: CssTransformCoords | undefined = undefined;
 
-    constructor(readonly piece: Piece) {
+    constructor(readonly board: Board, readonly piece: Piece) {
         super();
     }
 
@@ -76,6 +77,8 @@ export class PieceController extends Controller {
 
         el.style.zIndex = Z_INDICES.PIECE_DRAG;
         el.classList.add('dragging');
+
+        this.board.clearPiece(this.piece);
     }
 
     private drag(detail: DragDetail): void {

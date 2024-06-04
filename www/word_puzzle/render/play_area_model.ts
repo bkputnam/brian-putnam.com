@@ -16,7 +16,7 @@ export class PlayAreaModel {
         this.board = startingBoard;
 
         for (const { piece, coord: solutionCoord } of pieces) {
-            const pieceController = new PieceController(piece);
+            const pieceController = new PieceController(this.board, piece);
             this.pieces.add(pieceController);
             this.solutionCoords.set(pieceController, solutionCoord);
         }

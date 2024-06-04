@@ -1,12 +1,9 @@
+import { WORD_SIZE } from "../data/solutions.js";
+import { WORD_LIST } from "../data/word_list.js";
 import { BoardCoord, LetterCoord } from "./coord.js";
 import { Piece } from "./piece.js";
 
-class OutOfBoundsError extends Error {
-    constructor(coord: BoardCoord) {
-        super(`Piece out of bounds: coord = ` +
-            `[${coord.row}, ${coord.col}]`);
-    }
-}
+const wordSet = new Set(WORD_LIST);
 
 export class Board {
     private readonly gridPieces: Array<Array<Piece | null>>;
@@ -54,7 +51,7 @@ export class Board {
         Iterable<LetterCoord> {
         coord = coord ?? this.pieceLocations.get(piece);
         if (!coord) {
-            throw new Error(`Failed to find piece in this.pieceLocations`);
+            return;
         }
         for (const { letter, coord: pieceCoord } of piece.iterCoords()) {
             const resultCoord = {
@@ -103,19 +100,53 @@ export class Board {
         return true;
     }
 
-    clearPiece(piece: Piece, coord: BoardCoord) {
+    /**
+     * Removes a Piece from the board.
+     * 
+     * coord usually isn't needed, but can be passed in situations where the
+     * board doesn't know the location of the Piece, e.g. if the board
+     * represents a solution that hasn't yet been broken up into Pieces.
+     */
+    clearPiece(piece: Piece, coord?: BoardCoord) {
         for (const { coord: pieceCoord } of this.iterPieceLetters(piece, coord)) {
             const pieceAtCoord =
                 this.gridPieces[pieceCoord.row][pieceCoord.col]!;
-            if (pieceAtCoord.height !== 1 || pieceAtCoord?.width !== 1) {
-                throw new Error('clearPiece only works with 1x1 pieces');
-            }
             this.pieceLocations.delete(pieceAtCoord);
             this.gridPieces[pieceCoord.row][pieceCoord.col] = null;
         }
     }
 
-    toString(): string {
+    isComplete(): boolean {
+        const letterGrid = this.letterGrid();
+        for (let row = 0; row < WORD_SIZE; row++) {
+            const word =
+                letterGrid[row][0] +
+                letterGrid[row][1] +
+                letterGrid[row][2] +
+                letterGrid[row][3] +
+                letterGrid[row][4];
+
+            if (!wordSet.has(word.toLowerCase())) {
+                return false;
+            }
+        }
+
+        for (let col = 0; col < WORD_SIZE; col++) {
+            const word =
+                letterGrid[0][col] +
+                letterGrid[1][col] +
+                letterGrid[2][col] +
+                letterGrid[3][col] +
+                letterGrid[4][col];
+            if (!wordSet.has(word.toLowerCase())) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private letterGrid(): string[][] {
         const letterGrid: string[][] = this.gridPieces
             .map((row: Array<Piece | null>) => row.map((cell: Piece) => '_'));
         for (const [piece, pieceCoord] of this.pieceLocations.entries()) {
@@ -124,6 +155,12 @@ export class Board {
                 letterGrid[letterCoord.row][letterCoord.col] = letter;
             }
         }
-        return letterGrid.map((row: string[]) => row.join(' ')).join('\n');
+        return letterGrid;
+    }
+
+    toString(): string {
+
+        return this.letterGrid()
+            .map((row: string[]) => row.join(' ')).join('\n');
     }
 }

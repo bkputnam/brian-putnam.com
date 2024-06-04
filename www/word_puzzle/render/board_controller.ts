@@ -75,16 +75,15 @@ export class BoardController extends Controller {
         const pieceController = detail.dropController as PieceController;
         const transformCoords = pieceController.getTranslateXY();
         const { row, col } = svgToBoardCoords(transformCoords);
-        const isInBounds =
-            row >= 0 &&
-            row < WORD_SIZE &&
-            col >= 0 &&
-            col < WORD_SIZE;
-        if (!isInBounds) {
-            return;
+        if (this.board.tryPlacePiece(pieceController.piece, { row, col })) {
+            const snapToXY = boardToSvgCoords({ row, col });
+            pieceController.setTranslateXY(snapToXY);
+            if (this.board.isComplete()) {
+                setTimeout(() => {
+                    alert('You win!');
+                }, 10);
+            }
         }
-        const snapToXY = boardToSvgCoords({ row, col });
-        pieceController.setTranslateXY(snapToXY);
     }
 
     placePiece(pieceController: PieceController, coord: BoardCoord): boolean {
