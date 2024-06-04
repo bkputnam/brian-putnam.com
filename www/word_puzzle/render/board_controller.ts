@@ -30,7 +30,11 @@ export class BoardController extends Controller {
             BKP_DROP,
             (e: BkpDragEvent) => this.onDrop(e.detail));
 
-        const maxOffset = WORD_SIZE * (CELL_WIDTH_PX + BORDER_WIDTH);
+        // Shift most y-coordinates down to account for thicker borders
+        const shiftY =
+            BORDER_WIDTH / 2;
+        const maxOffset =
+            WORD_SIZE * (CELL_WIDTH_PX + BORDER_WIDTH) + shiftY;
         for (let i = 0; i < (WORD_SIZE + 1); i++) {
             const offset = i * (CELL_WIDTH_PX + BORDER_WIDTH);
 
@@ -39,16 +43,16 @@ export class BoardController extends Controller {
             verticalLine.setAttribute('x1', offset + '');
             verticalLine.setAttribute('y1', '0');
             verticalLine.setAttribute('x2', offset + '');
-            verticalLine.setAttribute('y2', maxOffset + '');
+            verticalLine.setAttribute('y2', maxOffset + shiftY + '');
             verticalLine.setAttribute('stroke', 'black');
             verticalLine.setAttribute('stroke-width', BORDER_WIDTH + '');
 
             const horizontalLine =
                 document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            horizontalLine.setAttribute('x1', '0');
-            horizontalLine.setAttribute('y1', offset + '');
+            horizontalLine.setAttribute('x1', - BORDER_WIDTH / 2 + '');
+            horizontalLine.setAttribute('y1', offset + shiftY + '');
             horizontalLine.setAttribute('x2', maxOffset + '');
-            horizontalLine.setAttribute('y2', offset + '');
+            horizontalLine.setAttribute('y2', offset + shiftY + '');
             horizontalLine.setAttribute('stroke', 'black');
             horizontalLine.setAttribute('stroke-width', BORDER_WIDTH + '');
 
@@ -103,21 +107,21 @@ export class BoardController extends Controller {
 }
 
 function svgToBoardCoords(coord: CssTransformCoords): BoardCoord {
+    const cb = CELL_WIDTH_PX + BORDER_WIDTH;
     return {
         row: Math.round(
-            (coord.translateY - 1) /
-            (CELL_WIDTH_PX + 1)
+            (coord.translateY - 0.5 * BORDER_WIDTH) / cb
         ),
         col: Math.round(
-            (coord.translateX + 2.5 * CELL_WIDTH_PX) /
-            (CELL_WIDTH_PX + 1)
+            (coord.translateX + 2.5 * cb) / cb
         ),
     };
 }
 
 function boardToSvgCoords(coord: BoardCoord): CssTransformCoords {
+    const cb = CELL_WIDTH_PX + BORDER_WIDTH;
     return {
-        translateX: (coord.col - 2.5) * CELL_WIDTH_PX + coord.col * BORDER_WIDTH,
-        translateY: coord.row * CELL_WIDTH_PX + 1 + coord.row * BORDER_WIDTH,
+        translateX: (coord.col - 2.5) * cb,
+        translateY: coord.row * cb + BORDER_WIDTH / 2,
     };
 }

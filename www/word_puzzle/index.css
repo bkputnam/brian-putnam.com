@@ -1,6 +1,7 @@
 :root {
     /* See also: CELL_WIDTH_PX in consts.ts */
-    --letter-side-len: 40px;
+    --letter-side-len: 60px;
+    --border-width: 2px
 }
 
 html,
@@ -37,7 +38,8 @@ svg#centering-svg {
 }
 
 g#board {
-    transform: translateX(calc(var(--letter-side-len) * -2.5)) translateY(1px);
+    transform:
+        translateX(calc((var(--letter-side-len) + var(--border-width)) * -2.5));
 }
 
 [bkp-draggable] {

@@ -1,8 +1,10 @@
-// See also: --letter-side-len in index.css
-export const CELL_WIDTH_PX = 40;
+const bodyStyle = getComputedStyle(document.body);
 
-// See also: font-size for .letter in index.css
-export const FONT_SIZE = CELL_WIDTH_PX * 0.75;
+export const CELL_WIDTH_PX =
+    parseInt(bodyStyle.getPropertyValue('--letter-side-len'));
+export const BORDER_WIDTH =
+    parseInt(bodyStyle.getPropertyValue('--border-width'));
 
+// This radius is used for computing SVG paths, not for CSS border-radius
+// styles, and so we just define it here instead of reading it from CSS styles.
 export const BORDER_RADIUS = 13;
-export const BORDER_WIDTH = 3;
