@@ -47,6 +47,12 @@ g#board {
     user-select: none;
 }
 
+.piece {
+    stroke-width: calc(var(--border-width));
+    stroke: black;
+    fill: #00e8e8;
+}
+
 .letter {
     /* See also: FONT_SIZE in consts.ts */
     font-size: calc(var(--letter-side-len) * 0.75);

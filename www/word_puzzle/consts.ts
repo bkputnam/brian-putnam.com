@@ -7,4 +7,4 @@ export const BORDER_WIDTH =
 
 // This radius is used for computing SVG paths, not for CSS border-radius
 // styles, and so we just define it here instead of reading it from CSS styles.
-export const BORDER_RADIUS = 13;
+export const BORDER_RADIUS = CELL_WIDTH_PX / 2;

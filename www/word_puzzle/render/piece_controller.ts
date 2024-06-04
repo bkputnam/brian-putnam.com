@@ -37,11 +37,6 @@ export class PieceController extends Controller {
         const path =
             document.createElementNS('http://www.w3.org/2000/svg', 'path');
         path.setAttribute('d', computeOutlinePath(this.piece.getLetterGrid()));
-        path.setAttribute('stroke', 'black');
-        path.setAttribute('stroke-width', BORDER_WIDTH + '');
-        path.setAttribute('fill', 'blue');
-        path.setAttribute('fill-opacity', '0.7');
-
         path.setAttribute('bkp-draggable', 'true');
         path.addEventListener(
             BKP_DRAG_START,
