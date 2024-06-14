@@ -45,14 +45,14 @@ export class PlayAreaController extends Controller {
 
         const minX = Math.max(
             -(topSvgClientRect.width / 2),
-            -200);
+            -(boardClientRect.width * 1.5));
         const maxX = Math.min(
             topSvgClientRect.width / 2,
-            200);
+            (boardClientRect.width * 1.5));
         const minY = 1;
         const maxY = Math.min(
             topSvgClientRect.height - 1,
-            400);
+            boardClientRect.height * 3);
 
         for (const pieceController of this.model.pieces) {
             const pieceEl = pieceController.render();
