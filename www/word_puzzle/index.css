@@ -60,4 +60,10 @@ g#board {
 
     /* Don't allow clicking on letters, which would prevent drag-n-drop */
     pointer-events: none;
+
+    /* Set these explicitly so that we don't accidentally inherit them from
+        .piece */
+    fill: black;
+    stroke: black;
+    stroke-width: 1px;
 }
