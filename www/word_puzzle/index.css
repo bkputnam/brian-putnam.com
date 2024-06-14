@@ -45,14 +45,14 @@ svg#centering-svg {
         translateX(calc((var(--letter-side-len) + var(--border-width)) * -2.5));
 }
 
-#board rect,
-#board line {
+#board .cell {
+    fill: rgb(255, 255, 255);
     stroke-width: calc(var(--border-width));
     stroke: black;
 }
 
-g#board rect {
-    fill: rgb(255, 255, 255);
+#board .cell.hint {
+    fill: rgb(200, 200, 200);
 }
 
 [bkp-draggable] {

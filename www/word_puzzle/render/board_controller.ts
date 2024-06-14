@@ -36,48 +36,28 @@ export class BoardController extends Controller {
         const maxOffset =
             WORD_SIZE * (CELL_WIDTH_PX + BORDER_WIDTH) + shiftY;
 
-        // Create one big <rect> for the outer border, so that we can have
-        // a fill
-        const borderRect = document
-            .createElementNS('http://www.w3.org/2000/svg', 'rect');
-        borderRect.setAttribute('x', '0');
-        borderRect.setAttribute('y', shiftY + '');
-        borderRect.setAttribute('width', maxOffset + '');
-        borderRect.setAttribute('height', maxOffset + shiftY + '');
-        el.appendChild(borderRect);
-
-        for (let i = 1; i < WORD_SIZE; i++) {
-            const offset = i * (CELL_WIDTH_PX + BORDER_WIDTH);
-
-            const verticalLine =
-                document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            verticalLine.setAttribute('x1', offset + '');
-            verticalLine.setAttribute('y1', '0');
-            verticalLine.setAttribute('x2', offset + '');
-            verticalLine.setAttribute('y2', maxOffset + shiftY + '');
-            verticalLine.setAttribute('stroke', 'black');
-            verticalLine.setAttribute('stroke-width', BORDER_WIDTH + '');
-
-            const horizontalLine =
-                document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            horizontalLine.setAttribute('x1', - BORDER_WIDTH / 2 + '');
-            horizontalLine.setAttribute('y1', offset + shiftY + '');
-            horizontalLine.setAttribute('x2', maxOffset + '');
-            horizontalLine.setAttribute('y2', offset + shiftY + '');
-            horizontalLine.setAttribute('stroke', 'black');
-            horizontalLine.setAttribute('stroke-width', BORDER_WIDTH + '');
-
-            el.appendChild(verticalLine);
-            el.appendChild(horizontalLine);
-        }
-
         for (let row = 0; row < WORD_SIZE; row++) {
             for (let col = 0; col < WORD_SIZE; col++) {
+                const xOffset = col * (CELL_WIDTH_PX + BORDER_WIDTH);
+                const yOffset = row * (CELL_WIDTH_PX + BORDER_WIDTH);
+
+                const cell = document
+                    .createElementNS('http://www.w3.org/2000/svg', 'rect');
+                cell.setAttribute('x', xOffset + '');
+                cell.setAttribute('y', yOffset + shiftY + '');
+                cell.setAttribute('width', CELL_WIDTH_PX + BORDER_WIDTH + '');
+                cell.setAttribute('height', CELL_WIDTH_PX + BORDER_WIDTH + '');
+                cell.setAttribute('stroke', 'black');
+                cell.setAttribute('stroke-width', BORDER_WIDTH + '');
+                cell.classList.add('cell');
+                el.appendChild(cell);
+
                 const letter = this.board.getLetterAtCoord({ row, col });
                 if (letter === null) {
                     continue;
                 }
                 el.appendChild(createLetterEl(row, col, letter));
+                cell.classList.add('hint');
             }
         }
     }
