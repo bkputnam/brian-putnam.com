@@ -10,7 +10,7 @@ export function boxContainsPoint(box: DOMRect, coord: ScreenCoord):
     );
 }
 
-interface DomRectLike {
+export interface DomRectLike {
     x: number;
     y: number;
     width: number;

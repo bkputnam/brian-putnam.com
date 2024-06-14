@@ -1,5 +1,5 @@
 import { Solution } from "../data_structures/solution.js";
-import { boxesIntersect } from "../util/geometry.js";
+import { DomRectLike, boxesIntersect } from "../util/geometry.js";
 import { randBetween } from "../util/random.js";
 import { BoardController } from "./board_controller.js";
 import { Controller } from "./controller.js";
@@ -54,6 +54,21 @@ export class PlayAreaController extends Controller {
             topSvgClientRect.height - 1,
             boardClientRect.height * 3);
 
+        const intersectsAny = (pieceEl: SVGGraphicsElement): boolean => {
+            const pieceBB = pieceEl.getBoundingClientRect();
+            if (boxesIntersect(pieceBB, boardClientRect)) {
+                return true;
+            }
+
+            for (const placedBB of placedBBs) {
+                if (boxesIntersect(pieceBB, placedBB)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        const placedBBs: DomRectLike[] = [];
         for (const pieceController of this.model.pieces) {
             const pieceEl = pieceController.render();
             centeringSvg.appendChild(pieceEl);
@@ -62,7 +77,7 @@ export class PlayAreaController extends Controller {
             const pieceHeight = pieceClientRect.height;
             const pieceWidth = pieceClientRect.width;
 
-            for (let i = 0; i < 20; i++) {
+            for (let i = 0; i < 100; i++) {
                 const randomX =
                     Math.round(randBetween(minX, maxX - pieceWidth));
                 const randomY =
@@ -71,16 +86,13 @@ export class PlayAreaController extends Controller {
                     'transform',
                     `translate(${randomX} ${randomY})`);
 
-                const intersectsBoard =
-                    boxesIntersect(
-                        pieceEl.getBoundingClientRect(),
-                        boardClientRect);
-                if (!intersectsBoard) {
+                if (!intersectsAny(pieceEl)) {
                     break;
                 }
             }
+            // Recompute getBoundingClientRect in final position
+            placedBBs.push(pieceEl.getBoundingClientRect());
         }
-
     }
 
     onDrop(e: DragEvent): void {
