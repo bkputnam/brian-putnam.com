@@ -1,7 +1,8 @@
 :root {
     /* See also: CELL_WIDTH_PX in consts.ts */
     --letter-side-len: 60px;
-    --border-width: 2px
+    --border-width: 2px;
+    --font-family: 'Courier New', 'Lucida Console', 'Monaco', monospace;
 }
 
 html,
@@ -19,11 +20,13 @@ body {
 body {
     display: flex;
     flex-direction: column;
+    background-color: rgb(245, 245, 245);
 }
 
 h1 {
     text-align: center;
     margin: 10px 0 25px 0;
+    font-family: var(--font-family);
 }
 
 svg#play-area {
@@ -37,9 +40,19 @@ svg#centering-svg {
     overflow: visible;
 }
 
-g#board {
+#board {
     transform:
         translateX(calc((var(--letter-side-len) + var(--border-width)) * -2.5));
+}
+
+#board rect,
+#board line {
+    stroke-width: calc(var(--border-width));
+    stroke: black;
+}
+
+g#board rect {
+    fill: rgb(255, 255, 255);
 }
 
 [bkp-draggable] {
@@ -56,7 +69,7 @@ g#board {
 .letter {
     /* See also: FONT_SIZE in consts.ts */
     font-size: calc(var(--letter-side-len) * 0.75);
-    font-family: 'Courier New', 'Lucida Console', 'Monaco', monospace;
+    font-family: var(--font-family);
 
     /* Don't allow clicking on letters, which would prevent drag-n-drop */
     pointer-events: none;

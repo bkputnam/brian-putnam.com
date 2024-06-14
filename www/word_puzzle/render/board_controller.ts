@@ -35,7 +35,18 @@ export class BoardController extends Controller {
             BORDER_WIDTH / 2;
         const maxOffset =
             WORD_SIZE * (CELL_WIDTH_PX + BORDER_WIDTH) + shiftY;
-        for (let i = 0; i < (WORD_SIZE + 1); i++) {
+
+        // Create one big <rect> for the outer border, so that we can have
+        // a fill
+        const borderRect = document
+            .createElementNS('http://www.w3.org/2000/svg', 'rect');
+        borderRect.setAttribute('x', '0');
+        borderRect.setAttribute('y', shiftY + '');
+        borderRect.setAttribute('width', maxOffset + '');
+        borderRect.setAttribute('height', maxOffset + shiftY + '');
+        el.appendChild(borderRect);
+
+        for (let i = 1; i < WORD_SIZE; i++) {
             const offset = i * (CELL_WIDTH_PX + BORDER_WIDTH);
 
             const verticalLine =
