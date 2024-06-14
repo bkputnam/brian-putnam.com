@@ -69,9 +69,12 @@ export class PlayAreaController extends Controller {
         };
 
         const placedBBs: DomRectLike[] = [];
+        let pieceNumber = 1;
         for (const pieceController of this.model.pieces) {
             const pieceEl = pieceController.render();
             centeringSvg.appendChild(pieceEl);
+            pieceEl.classList.add('p' + pieceNumber % 6);
+            pieceNumber++;
 
             const pieceClientRect = pieceEl.getBoundingClientRect();
             const pieceHeight = pieceClientRect.height;
