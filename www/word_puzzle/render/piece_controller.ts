@@ -74,6 +74,11 @@ export class PieceController extends Controller {
         el.classList.add('dragging');
 
         this.board.clearPiece(this.piece);
+
+        // Make el the last child inside of parentEl, so that it stays on top
+        const parentEl = el.parentElement;
+        el.remove();
+        parentEl?.appendChild(el);
     }
 
     private drag(detail: DragDetail): void {
@@ -98,11 +103,5 @@ export class PieceController extends Controller {
         const el = this.getElStrict();
         el.style.zIndex = 'auto';
         el.classList.remove('dragging');
-
-        // Make el the last child inside of parentEl, so that it stays on top
-        // when it's dropped.
-        const parentEl = el.parentElement;
-        el.remove();
-        parentEl?.appendChild(el);
     }
 }
