@@ -21,8 +21,12 @@ playAreaController.onBoardComplete().then((board: Board) => {
     timer.stop();
     if (!isComplete) {
         isComplete = true;
-        const winMsg = `You win!\n\n${globalGameState.numHints} hints ` +
-            `covering ${globalGameState.numHintCells} cells`;
+        const winMsg = [
+            'You win!',
+            `Time: ${msToHumanReadable(timer.getElapsedMs())}`,
+            `Hints: ${globalGameState.numHintCells} cells ` +
+            `(${globalGameState.numHints} hints)`
+        ].join('\n');
         // Use setTimeout to give the page a moment to render the final move
         setTimeout(
             () => alert(winMsg),
