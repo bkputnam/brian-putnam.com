@@ -82,6 +82,10 @@ svg#centering-svg {
     user-select: none;
 }
 
+.solved [bkp-draggable] {
+    cursor: auto;
+}
+
 .piece {
     stroke-width: calc(var(--border-width));
     stroke: black;

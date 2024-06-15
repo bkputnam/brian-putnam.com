@@ -121,6 +121,7 @@ export class PlayAreaController extends Controller {
     }
 
     notifyBoardComplete(board: Board): void {
+        this.getElStrict().classList.add('solved');
         this.boardCompleteResolver.resolve(board);
     }
 }
