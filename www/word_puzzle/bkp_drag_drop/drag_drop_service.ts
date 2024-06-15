@@ -38,7 +38,6 @@ class DragDropService {
                 el);
             return false;
         }
-        this.claimedEls.add(el);
         const dragInfo: DragInfo = {
             identifier: id,
             el,
@@ -49,9 +48,12 @@ class DragDropService {
             startPos,
             curPos: startPos,
         };
-        el.dispatchEvent(new BkpDragEvent(detail));
-        dragInfo.dropController = detail.dropController;
-        this.drags.set(id, dragInfo);
+        const doDrag = el.dispatchEvent(new BkpDragEvent(detail));
+        if (doDrag) {
+            this.claimedEls.add(el);
+            dragInfo.dropController = detail.dropController;
+            this.drags.set(id, dragInfo);
+        }
         return true;
     }
 

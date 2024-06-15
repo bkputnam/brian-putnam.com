@@ -70,9 +70,7 @@ export class BoardController extends Controller {
             const snapToXY = boardToSvgCoords({ row, col });
             pieceController.setTranslateXY(snapToXY);
             if (this.board.isComplete()) {
-                setTimeout(() => {
-                    alert('You win!');
-                }, 10);
+                this.model.notifyBoardComplete(this.board);
             }
         }
     }

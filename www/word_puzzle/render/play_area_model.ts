@@ -21,4 +21,8 @@ export class PlayAreaModel {
             this.solutionCoords.set(pieceController, solutionCoord);
         }
     }
+
+    notifyBoardComplete(board: Board): void {
+        this.playAreaController.notifyBoardComplete(board);
+    }
 }

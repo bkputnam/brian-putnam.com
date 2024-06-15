@@ -1,6 +1,8 @@
+import { Board } from "../data_structures/board.js";
 import { Solution } from "../data_structures/solution.js";
 import { DomRectLike, boxesIntersect } from "../util/geometry.js";
 import { randBetween } from "../util/random.js";
+import { Resolver } from "../util/resolver.js";
 import { BoardController } from "./board_controller.js";
 import { Controller } from "./controller.js";
 import { PlayAreaModel } from "./play_area_model.js";
@@ -8,6 +10,8 @@ import { PlayAreaModel } from "./play_area_model.js";
 export class PlayAreaController extends Controller {
     readonly model: PlayAreaModel;
     readonly boardController: BoardController;
+
+    private boardCompleteResolver = new Resolver<Board>();
 
     constructor(private readonly solution: Solution) {
         super();
@@ -110,5 +114,13 @@ export class PlayAreaController extends Controller {
         const pieceEl = document.querySelector('.dragging') as HTMLElement;
         pieceEl.style.top = parseInt(pieceEl.style.top) + delta.y + 'px';
         pieceEl.style.left = parseInt(pieceEl.style.left) + delta.x + 'px';
+    }
+
+    onBoardComplete(): Promise<Board> {
+        return this.boardCompleteResolver.promise;
+    }
+
+    notifyBoardComplete(board: Board): void {
+        this.boardCompleteResolver.resolve(board);
     }
 }

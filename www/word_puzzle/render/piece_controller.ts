@@ -62,6 +62,10 @@ export class PieceController extends Controller {
     }
 
     private dragstart(e: BkpDragEvent): void {
+        if (this.board.isComplete()) {
+            e.preventDefault();
+            return;
+        }
         e.detail.dropController = this;
 
         if (this.dragStartCoords !== undefined) {

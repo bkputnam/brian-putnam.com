@@ -29,6 +29,28 @@ h1 {
     font-family: var(--font-family);
 }
 
+form {
+    width: calc(var(--letter-side-len) * 5 + var(--border-width) * 6);
+    margin: 0 auto 15px auto;
+    text-align: center;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+form>* {
+    flex-basis: 1;
+}
+
+#timer {
+    width: 120px;
+    text-align: center;
+}
+
+#hint-btn {
+    width: 80px;
+}
+
 svg#play-area {
     display: block;
     width: 100%;
