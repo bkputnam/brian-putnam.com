@@ -41,10 +41,8 @@ export class PlayAreaController extends Controller {
         centeringSvg.appendChild(boardEl);
     }
 
-    renderPieces(): void {
+    private getPositioningInfo(): PositioningInfo {
         const topSvgClientRect = this.getElStrict().getBoundingClientRect();
-        const centeringSvg = document
-            .getElementById('centering-svg') as unknown as SVGSVGElement;
         const boardClientRect = document
             .getElementById('board')!
             .getBoundingClientRect();
@@ -60,21 +58,65 @@ export class PlayAreaController extends Controller {
             topSvgClientRect.height - 1,
             boardClientRect.height * 3);
 
+        return {
+            boardClientRect,
+            minX, maxX,
+            minY, maxY,
+        };
+    }
+
+    private placePieceRandomlyHelper(
+        piece: PieceController,
+        positioningInfo: PositioningInfo): void {
+        const { boardClientRect, minX, maxX, minY, maxY } = positioningInfo;
         const intersectsAny = (pieceEl: SVGGraphicsElement): boolean => {
             const pieceBB = pieceEl.getBoundingClientRect();
-            if (boxesIntersect(pieceBB, boardClientRect)) {
+            if (boxesIntersect(pieceBB, positioningInfo.boardClientRect)) {
                 return true;
             }
 
-            for (const placedBB of placedBBs) {
-                if (boxesIntersect(pieceBB, placedBB)) {
+            for (const otherPieceController of this.model.pieces) {
+                if (otherPieceController == piece) {
+                    continue;
+                }
+                const otherBB = otherPieceController
+                    .getElStrict().getBoundingClientRect();
+                if (boxesIntersect(pieceBB, otherBB)) {
                     return true;
                 }
             }
             return false;
         };
 
-        const placedBBs: DomRectLike[] = [];
+        const pieceEl = piece.getElStrict();
+        const pieceClientRect = pieceEl.getBoundingClientRect();
+        const pieceHeight = pieceClientRect.height;
+        const pieceWidth = pieceClientRect.width;
+
+        for (let i = 0; i < 100; i++) {
+            const randomX =
+                Math.round(randBetween(minX, maxX - pieceWidth));
+            const randomY =
+                Math.round(randBetween(minY, maxY - pieceHeight));
+            pieceEl.setAttribute(
+                'transform',
+                `translate(${randomX} ${randomY})`);
+
+            if (!intersectsAny(pieceEl)) {
+                break;
+            }
+        }
+    }
+
+    placePieceRandomly(piece: PieceController) {
+        this.placePieceRandomlyHelper(piece, this.getPositioningInfo());
+    }
+
+    renderPieces(): void {
+        const positioningInfo = this.getPositioningInfo();
+        const centeringSvg = document
+            .getElementById('centering-svg') as unknown as SVGSVGElement;
+
         let pieceNumber = 1;
         for (const pieceController of this.model.pieces) {
             const pieceEl = pieceController.render();
@@ -82,25 +124,7 @@ export class PlayAreaController extends Controller {
             pieceEl.classList.add('p' + pieceNumber % 6);
             pieceNumber++;
 
-            const pieceClientRect = pieceEl.getBoundingClientRect();
-            const pieceHeight = pieceClientRect.height;
-            const pieceWidth = pieceClientRect.width;
-
-            for (let i = 0; i < 100; i++) {
-                const randomX =
-                    Math.round(randBetween(minX, maxX - pieceWidth));
-                const randomY =
-                    Math.round(randBetween(minY, maxY - pieceHeight));
-                pieceEl.setAttribute(
-                    'transform',
-                    `translate(${randomX} ${randomY})`);
-
-                if (!intersectsAny(pieceEl)) {
-                    break;
-                }
-            }
-            // Recompute getBoundingClientRect in final position
-            placedBBs.push(pieceEl.getBoundingClientRect());
+            this.placePieceRandomlyHelper(pieceController, positioningInfo);
         }
     }
 
@@ -160,4 +184,12 @@ export class PlayAreaController extends Controller {
         this.model.removePiece(piece);
         this.boardController.pieceToHint(piece, pieceCoord);
     }
+}
+
+interface PositioningInfo {
+    boardClientRect: DomRectLike,
+    minX: number,
+    maxX: number,
+    minY: number,
+    maxY: number,
 }

@@ -101,6 +101,46 @@ export class Board {
     }
 
     /**
+     * Turns a piece into a hint.
+     * 
+     * From the board's point of view, there really isn't a difference between
+     * a Piece placed by the user and a Piece placed as a Hint. As such, this
+     * method is very similar in structure to tryPlacePiece. The main difference
+     * is that this method will *replace* anything that currently exists in the
+     * destination location, whereas tryPlacePiece will simply return false
+     * indicating that the Piece couldn't be placed there.
+     * 
+     * The return value of this function is a set of Pieces that were replaced
+     * and should probably be moved. From the board's point of view everything
+     * is already fine: the offending pieces have been removed from the data
+     * structures inside this class. However in terms of screen real-estate,
+     * they're probably still sitting directly on top of the hint we just
+     * created, which is confusing for the user, and so they should probably be
+     * moved to some different pixels.
+     */
+    pieceToHint(piece: Piece, coord: BoardCoord): Iterable<Piece> {
+        if (!this.isPieceInBounds(piece, coord)) {
+            throw new Error('Trying to place hint at invalid coord');
+        }
+        const piecesToMove: Piece[] = [];
+        this.clearPiece(piece);
+        const letterCoords = [...this.iterPieceLetters(piece, coord)];
+        for (const { coord: pieceCoord } of letterCoords) {
+            const preexistingPiece =
+                this.gridPieces[pieceCoord.row][pieceCoord.col];
+            if (preexistingPiece !== null) {
+                piecesToMove.push(preexistingPiece);
+                this.clearPiece(preexistingPiece);
+            }
+        }
+        this.pieceLocations.set(piece, coord);
+        for (const { coord: pieceCoord } of letterCoords) {
+            this.gridPieces[pieceCoord.row][pieceCoord.col] = piece;
+        }
+        return piecesToMove;
+    }
+
+    /**
      * Removes a Piece from the board.
      * 
      * coord usually isn't needed, but can be passed in situations where the

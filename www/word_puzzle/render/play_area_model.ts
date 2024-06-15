@@ -30,4 +30,8 @@ export class PlayAreaModel {
         this.pieces.delete(piece);
         this.solutionCoords.delete(piece);
     }
+
+    placePieceRandomly(piece: PieceController) {
+        this.playAreaController.placePieceRandomly(piece);
+    }
 }

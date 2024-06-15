@@ -93,7 +93,12 @@ export class BoardController extends Controller {
             const cell = this.cells[row][col];
             cell.classList.add('hint');
         }
-        this.board.tryPlacePiece(piece.piece, coord);
+        // If something has already been placed in the destination slots, move
+        // it off the board to reduce confusion.
+        const piecesToMove = this.board.pieceToHint(piece.piece, coord);
+        for (const pieceToMove of piecesToMove) {
+            this.model.placePieceRandomly(pieceToMove.getController()!);
+        }
         if (this.board.isComplete()) {
             this.model.notifyBoardComplete(this.board);
         }

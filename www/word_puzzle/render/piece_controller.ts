@@ -14,6 +14,7 @@ export class PieceController extends Controller {
 
     constructor(readonly board: Board, readonly piece: Piece) {
         super();
+        piece.setController(this);
     }
 
     protected override createEl(): SVGGraphicsElement {

@@ -1,8 +1,11 @@
+import { PieceController } from "../render/piece_controller.js";
 import { BoardCoord, LetterCoord } from "./coord.js";
 
 export class Piece {
     readonly width: number;
     readonly height: number;
+
+    private controller: PieceController | null = null;
 
     constructor(private readonly letterGrid: Array<Array<string | null>>) {
         this.height = this.letterGrid.length;
@@ -57,6 +60,14 @@ export class Piece {
             nullGrid[row] = rowArr;
         }
         return new Piece(nullGrid);
+    }
+
+    setController(controller: PieceController): void {
+        this.controller = controller;
+    }
+
+    getController(): PieceController | null {
+        return this.controller;
     }
 
     clone(): Piece {
