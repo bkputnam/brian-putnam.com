@@ -25,4 +25,9 @@ export class PlayAreaModel {
     notifyBoardComplete(board: Board): void {
         this.playAreaController.notifyBoardComplete(board);
     }
+
+    removePiece(piece: PieceController): void {
+        this.pieces.delete(piece);
+        this.solutionCoords.delete(piece);
+    }
 }

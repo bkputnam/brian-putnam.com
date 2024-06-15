@@ -7,6 +7,7 @@ import { Solution } from './data_structures/solution.js';
 import { PlayAreaController } from './render/play_area_controller.js';
 import { Timer, msToHumanReadable } from './util/time.js';
 import { Board } from './data_structures/board.js';
+import { globalGameState } from './data_structures/game.js';
 
 const solutionText = pick1(SOLUTIONS);
 console.log(solutionText);
@@ -20,7 +21,12 @@ playAreaController.onBoardComplete().then((board: Board) => {
     timer.stop();
     if (!isComplete) {
         isComplete = true;
-        alert("You win!");
+        const winMsg = `You win!\n\n${globalGameState.numHints} hints ` +
+            `covering ${globalGameState.numHintCells} cells`;
+        // Use setTimeout to give the page a moment to render the final move
+        setTimeout(
+            () => alert(winMsg),
+            50);
     }
 });
 
@@ -28,6 +34,7 @@ document.getElementById('hint-btn')
     ?.addEventListener('click', (e: MouseEvent) => {
         // Prevent page refresh, since this lives in a <form>
         e.preventDefault();
+        playAreaController.applyHint();
     });
 
 const timerEl = document.getElementById('timer')!;

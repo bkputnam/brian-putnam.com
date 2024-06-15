@@ -33,6 +33,14 @@ export class PieceController extends Controller {
             `translate(${coords.translateX} ${coords.translateY})`);
     }
 
+    countLetters(): number {
+        return this.piece.countLetters();
+    }
+
+    delete(): void {
+        this.getElStrict().remove();
+    }
+
     protected override decorate(el: SVGGraphicsElement): void {
         const path =
             document.createElementNS('http://www.w3.org/2000/svg', 'path');

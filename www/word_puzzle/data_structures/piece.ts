@@ -82,6 +82,18 @@ export class Piece {
             JSON.stringify(this.letterGrid)) as Array<Array<string | null>>;
     }
 
+    countLetters(): number {
+        let letterCount = 0;
+        for (const row of this.letterGrid) {
+            for (const letter of row) {
+                if (letter !== null) {
+                    letterCount++;
+                }
+            }
+        }
+        return letterCount;
+    }
+
     *iterCoords(): Iterable<LetterCoord> {
         for (let row = 0; row < this.letterGrid.length; row++) {
             for (let col = 0; col < this.letterGrid[0].length; col++) {

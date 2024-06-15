@@ -11,6 +11,7 @@ import { PlayAreaModel } from "./play_area_model.js";
 
 export class BoardController extends Controller {
     private readonly board: Board;
+    private readonly cells: Array<Array<SVGGraphicsElement>> = [];
 
     constructor(private readonly model: PlayAreaModel) {
         super();
@@ -37,6 +38,8 @@ export class BoardController extends Controller {
             WORD_SIZE * (CELL_WIDTH_PX + BORDER_WIDTH) + shiftY;
 
         for (let row = 0; row < WORD_SIZE; row++) {
+            const rowCells: SVGGraphicsElement[] = [];
+            this.cells.push(rowCells);
             for (let col = 0; col < WORD_SIZE; col++) {
                 const xOffset = col * (CELL_WIDTH_PX + BORDER_WIDTH);
                 const yOffset = row * (CELL_WIDTH_PX + BORDER_WIDTH);
@@ -50,6 +53,7 @@ export class BoardController extends Controller {
                 cell.setAttribute('stroke', 'black');
                 cell.setAttribute('stroke-width', BORDER_WIDTH + '');
                 cell.classList.add('cell');
+                rowCells.push(cell);
                 el.appendChild(cell);
 
                 const letter = this.board.getLetterAtCoord({ row, col });
@@ -77,6 +81,22 @@ export class BoardController extends Controller {
 
     placePiece(pieceController: PieceController, coord: BoardCoord): boolean {
         return this.board.tryPlacePiece(pieceController.piece, coord);
+    }
+
+    pieceToHint(piece: PieceController, coord: BoardCoord): void {
+        for (const pieceCoord of piece.piece.iterCoords()) {
+            const row = pieceCoord.coord.row + coord.row;
+            const col = pieceCoord.coord.col + coord.col;
+            const letterEl = createLetterEl(row, col, pieceCoord.letter);
+            this.getElStrict().appendChild(letterEl);
+
+            const cell = this.cells[row][col];
+            cell.classList.add('hint');
+        }
+        this.board.tryPlacePiece(piece.piece, coord);
+        if (this.board.isComplete()) {
+            this.model.notifyBoardComplete(this.board);
+        }
     }
 
     private screenToSVGCoords(coord: ScreenCoord): ScreenCoord {

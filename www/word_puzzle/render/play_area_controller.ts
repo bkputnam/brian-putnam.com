@@ -1,10 +1,12 @@
 import { Board } from "../data_structures/board.js";
+import { globalGameState } from "../data_structures/game.js";
 import { Solution } from "../data_structures/solution.js";
 import { DomRectLike, boxesIntersect } from "../util/geometry.js";
 import { randBetween } from "../util/random.js";
 import { Resolver } from "../util/resolver.js";
 import { BoardController } from "./board_controller.js";
 import { Controller } from "./controller.js";
+import { PieceController } from "./piece_controller.js";
 import { PlayAreaModel } from "./play_area_model.js";
 
 export class PlayAreaController extends Controller {
@@ -123,5 +125,39 @@ export class PlayAreaController extends Controller {
     notifyBoardComplete(board: Board): void {
         this.getElStrict().classList.add('solved');
         this.boardCompleteResolver.resolve(board);
+    }
+
+    applyHint() {
+        globalGameState.numHints++;
+
+        let smallestPieces: PieceController[] | null = null;
+        let smallestSize = Number.POSITIVE_INFINITY;
+        for (const piece of this.model.pieces) {
+            const size = piece.countLetters();
+            if (size === smallestSize) {
+                smallestPieces!.push(piece);
+                continue;
+            }
+            if (size < smallestSize) {
+                smallestSize = size;
+                smallestPieces = [piece];
+            }
+        }
+        if (smallestPieces === null) {
+            return;
+        }
+
+        const pieceIndex = Math.floor(randBetween(0, smallestPieces.length));
+        const piece = smallestPieces[pieceIndex];
+        const pieceCoord = this.model.solutionCoords.get(piece);
+        if (!pieceCoord) {
+            throw new Error(
+                `Unable to find solution coord for piece\n\n` +
+                piece.toString());
+        }
+        globalGameState.numHintCells += smallestSize;
+        piece.delete();
+        this.model.removePiece(piece);
+        this.boardController.pieceToHint(piece, pieceCoord);
     }
 }
