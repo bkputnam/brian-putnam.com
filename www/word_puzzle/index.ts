@@ -27,6 +27,7 @@ playAreaController.onBoardComplete().then((board: Board) => {
             `Hints: ${globalGameState.numHintCells} cells ` +
             `(${globalGameState.numHints} hints)`
         ].join('\n');
+        hintBtn.disabled = true;
         // Use setTimeout to give the page a moment to render the final move
         setTimeout(
             () => alert(winMsg),
@@ -34,14 +35,14 @@ playAreaController.onBoardComplete().then((board: Board) => {
     }
 });
 
-document.getElementById('hint-btn')
-    ?.addEventListener('click', (e: MouseEvent) => {
-        // Prevent page refresh, since this lives in a <form>
-        e.preventDefault();
-        if (!isComplete) {
-            playAreaController.applyHint();
-        }
-    });
+const hintBtn = document.getElementById('hint-btn') as HTMLButtonElement;
+hintBtn.addEventListener('click', (e: MouseEvent) => {
+    // Prevent page refresh, since this lives in a <form>
+    e.preventDefault();
+    if (!isComplete) {
+        playAreaController.applyHint();
+    }
+});
 
 const timerEl = document.getElementById('timer')!;
 const timer = Timer.newStarted();
