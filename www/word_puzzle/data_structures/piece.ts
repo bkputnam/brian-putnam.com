@@ -49,6 +49,16 @@ export class Piece {
         return new Piece(nullGrid);
     }
 
+    static emptyWithSize(width: number, height: number): Piece {
+        const nullGrid = new Array<Array<string | null>>(height);
+        for (let row = 0; row < height; row++) {
+            const rowArr = new Array<string | null>(width);
+            rowArr.fill(null);
+            nullGrid[row] = rowArr;
+        }
+        return new Piece(nullGrid);
+    }
+
     clone(): Piece {
         return new Piece(this.letterGrid.map((row) => [...row]));
     }
