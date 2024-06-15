@@ -38,7 +38,9 @@ document.getElementById('hint-btn')
     ?.addEventListener('click', (e: MouseEvent) => {
         // Prevent page refresh, since this lives in a <form>
         e.preventDefault();
-        playAreaController.applyHint();
+        if (!isComplete) {
+            playAreaController.applyHint();
+        }
     });
 
 const timerEl = document.getElementById('timer')!;
