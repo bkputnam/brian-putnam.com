@@ -3,47 +3,28 @@ mod consts;
 mod coord;
 mod tetromino;
 
-use std::io::stdin;
+use std::collections::HashSet;
 
-use board::Board;
-use coord::BoardCoord;
-use tetromino::Tetromino;
-
-const ALL_TETROMINOS: [Tetromino; 19] = [
-    Tetromino::J_1,
-    Tetromino::J_2,
-    Tetromino::J_3,
-    Tetromino::J_4,
-    Tetromino::S_1,
-    Tetromino::S_2,
-    Tetromino::T_1,
-    Tetromino::T_2,
-    Tetromino::T_3,
-    Tetromino::T_4,
-    Tetromino::I_1,
-    Tetromino::I_2,
-    Tetromino::O_1,
-    Tetromino::L_1,
-    Tetromino::L_2,
-    Tetromino::L_3,
-    Tetromino::L_4,
-    Tetromino::Z_1,
-    Tetromino::Z_2,
-];
+use board::{Board, BoardHash};
 
 fn main() {
-    // let mut board = Board::new_empty();
-    // board.place_piece(Tetromino::T_1, BoardCoord { row: 0, col: 0 });
-    // board.place_piece(Tetromino::L_1, BoardCoord { row: 0, col: 3 });
-    // println!("{}", board);
+    let mut visited_boards: HashSet<BoardHash> = HashSet::new();
 
-    for piece in ALL_TETROMINOS.into_iter() {
-        let mut board = Board::new_empty();
-        board.place_piece(piece, BoardCoord { row: 0, col: 0 });
-        println!("{}", board);
-        println!("{:?}", piece);
-
-        let mut buf = String::new();
-        stdin().read_line(&mut buf);
+    fn visit_children(board: Board, visited_boards: &mut HashSet<BoardHash>) {
+        visited_boards.insert(board.to_hash());
+        let mut could_add_any_pieces = false;
+        for child in board.iter_children() {
+            could_add_any_pieces = true;
+            let child_hash = child.to_hash();
+            if !visited_boards.contains(&child_hash) {
+                visit_children(child, visited_boards);
+            }
+        }
+        if !could_add_any_pieces {
+            println!("{}", board.to_string());
+        }
     }
+
+    visit_children(Board::new_empty(), &mut visited_boards);
+    println!("Done");
 }

@@ -10,7 +10,7 @@ fn to_coords(coords: [[u8; 2]; 4]) -> [BoardCoord; 4] {
 }
 
 #[allow(non_camel_case_types)]
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Tetromino {
     //  J
     //  J
@@ -97,6 +97,28 @@ pub enum Tetromino {
     // Z
     Z_2,
 }
+
+pub const ALL_TETROMINOS: [Tetromino; 19] = [
+    Tetromino::J_1,
+    Tetromino::J_2,
+    Tetromino::J_3,
+    Tetromino::J_4,
+    Tetromino::S_1,
+    Tetromino::S_2,
+    Tetromino::T_1,
+    Tetromino::T_2,
+    Tetromino::T_3,
+    Tetromino::T_4,
+    Tetromino::I_1,
+    Tetromino::I_2,
+    Tetromino::O_1,
+    Tetromino::L_1,
+    Tetromino::L_2,
+    Tetromino::L_3,
+    Tetromino::L_4,
+    Tetromino::Z_1,
+    Tetromino::Z_2,
+];
 
 impl Tetromino {
     pub fn filled_coords(&self) -> [BoardCoord; 4] {
