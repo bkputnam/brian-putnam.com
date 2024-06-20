@@ -1,2 +1,4 @@
 devserver.sh
+deploy.sh
 node_modules
+misc
