@@ -1,11 +1,11 @@
 import * as yaml from 'js-yaml';
 import * as fs from 'fs';
-import express from 'express';
 import * as path from 'path';
 import mime from 'mime';
+import * as http from 'http';
 
 import { AppConfig } from './app-types.js';
-import { getProjectRoot, getWwwRoot } from './root-folder.js';
+import { getProjectRoot } from './root-folder.js';
 
 const PORT = 8080;
 const APP_CONFIG_FILE = path.join(getProjectRoot(), 'app.yaml');
@@ -28,9 +28,8 @@ function getOrCreateRegex(regexStr: string, options: string): RegExp {
     return optionsMap.get(regexStr)!;
 }
 
-const app = express();
-app.use('/:path', (req, res, next) => {
-    let requestedPath = req.originalUrl;
+const server = http.createServer((req, res) => {
+    let requestedPath = req.url!;
     let fsPath: string | null = null;
 
     for (const handler of appConfig.handlers) {
@@ -48,14 +47,14 @@ app.use('/:path', (req, res, next) => {
     }
 
     if (fsPath === null) {
-        res.status(404)
-        res.send('Failed to find handler');
+        res.writeHead(404);
+        res.end('Failed to find handler');
         return;
     }
 
     if (fsPath.includes('/../') || fsPath.includes('/./')) {
-        res.status(403);
-        res.send('Using `..` and `.` is forbidden.');
+        res.writeHead(403);
+        res.end('Using `..` and `.` is forbidden.');
         return;
     }
 
@@ -66,17 +65,17 @@ app.use('/:path', (req, res, next) => {
     try {
         fileText = fs.readFileSync(fullFsPath, encoding);
     } catch (reason: unknown) {
-        res.status(404);
-        res.send('Failed to find file');
+        res.writeHead(404);
+        res.end('Failed to find file');
         return;
     }
 
     if (mimeType) {
         res.setHeader('Content-Type', mimeType);
     }
-    res.send(Buffer.from(fileText, encoding));
+    res.end(Buffer.from(fileText, encoding));
 });
-app.listen(PORT, () => {
+server.listen(PORT, 'localhost', () => {
     const thisFile = path.basename(import.meta.filename);
     console.log(`${thisFile} serving on :${PORT}`);
 });
