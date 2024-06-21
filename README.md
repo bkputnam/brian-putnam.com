@@ -42,3 +42,12 @@ supported.
 Regardless, I tried to get the official Python devserver working and couldn't
 because it has a dependency on Python2.7 and my flavor of linux (Debian) doesn't
 even provide Python2.7 anymore.
+
+## Folder Structure
+
+- `/local`: Contains scripts and utilities that are meant to be run locally
+- `/www`: Contains static client-side files. Often contains `.ts` and the
+    generated `.js` side-by-side for easier sourcemap serving
+
+If we ever have a server, it'll probably live in `/server` or something like
+that.
