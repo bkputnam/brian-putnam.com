@@ -1,39 +1,41 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Wordle Solver</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-		<link href="./style.css" rel="stylesheet">
-	</head>
-	<body>
-        <p>
-            The bot will print the next guess in the boxes.
-            Use the buttons at the bottom to tell the bot
-            how its guess fared.
-        </p>
-        <div id="guesses-scroll-ctr">
-            <table id="guesses"></table>
-        </div>
-        <p id="words-remaining"></p>
-        <div id="inputs">
-            <button id="char-not-used">_</button>
-            <button id="char-used-elsewhere">?</button>
-            <button id="char-used-here">.</button>
-        </div>
-        <p class="hint">
-            <strong>Tip:</strong> You can type "_", "?", and "." instead of clicking
-            the buttons.
-        </p>
-        <p class="hint">
-            <strong>Tip:</strong> You can move the cursor manually by clicking on
-            a square
-        </p>
-        <p id="err-msg"></p>
-        <p id="win-msg" class="hide">
-            &#127881;&#127881; Congrats! &#127881;&#127881;<br><br>
-            <span class="uppercase">"{solution}"</span> is the solution to today's Wordle.
-        </p>
-	</body>
-    <script type="module" src="./wordle.js"></script>
-    <script type="module" src="./index.js"></script>
+
+<head>
+    <title>Wordle Solver</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="./style.css" rel="stylesheet">
+</head>
+
+<body>
+    <p>
+        The bot will print the next guess in the boxes.
+        Use the buttons at the bottom to tell the bot
+        how its guess fared.
+    </p>
+    <div id="guesses-scroll-ctr">
+        <table id="guesses"></table>
+    </div>
+    <p id="words-remaining"></p>
+    <div id="inputs">
+        <button id="char-not-used">_</button>
+        <button id="char-used-elsewhere">?</button>
+        <button id="char-used-here">.</button>
+    </div>
+    <p class="hint">
+        <strong>Tip:</strong> You can type "_", "?", and "." instead of clicking
+        the buttons.
+    </p>
+    <p class="hint">
+        <strong>Tip:</strong> You can move the cursor manually by clicking on
+        a square
+    </p>
+    <p id="err-msg"></p>
+    <p id="win-msg" class="hide">
+        &#127881;&#127881; Congrats! &#127881;&#127881;<br><br>
+        <span class="uppercase">"{solution}"</span> is the solution to today's Wordle.
+    </p>
+</body>
+<script type="module" src="./index.js"></script>
+
 </html>

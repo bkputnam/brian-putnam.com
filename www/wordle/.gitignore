@@ -1,3 +1,6 @@
 # Ignore built files
 *.js
 *.js.map
+
+# Apparently I never wrote this file in TypeScript
+!index.js
