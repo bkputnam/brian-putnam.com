@@ -11,7 +11,12 @@ handlers:
   static_files: www/redirectAddSlash.html
   upload: www/redirectAddSlash.html
 
-- url: /word_puzzle
+- url: /word_puzzle(/(.*))?
+  secure: always
+  static_files: www/word_puzzle/redirect-to-fractograms.html
+  upload: www/word_puzzle/redirect-to-fractograms.html
+
+- url: /fractograms
   secure: always
   static_files: www/redirectAddSlash.html
   upload: www/redirectAddSlash.html
