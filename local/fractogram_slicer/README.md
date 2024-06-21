@@ -1,4 +1,4 @@
-# Fractogram Generator
+# Fractogram Slicer
 
 This script will attempt to enumerate all possible ways to split a 5x5 puzzle up
 into pieces. Most pieces will be
@@ -10,6 +10,6 @@ some leftover pieces that have < 4 letters.
 First, [install Rust](https://www.rust-lang.org/tools/install). Then:
 
 ```
-cd fractogram_generator
+cd fractogram_slicer
 cargo run
 ```

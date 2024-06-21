@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "fractogram_generator"
+name = "fractogram_slicer"
 version = "0.1.0"
