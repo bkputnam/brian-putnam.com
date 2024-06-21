@@ -2,22 +2,27 @@ runtime: python312
 
 handlers:
 - url: /
+  secure: always
   static_files: www/index.html
   upload: www/index.html
 
 - url: /wordle
+  secure: always
   static_files: www/redirectAddSlash.html
   upload: www/redirectAddSlash.html
 
 - url: /word_puzzle
+  secure: always
   static_files: www/redirectAddSlash.html
   upload: www/redirectAddSlash.html
 
 - url: /(.*)/
+  secure: always
   static_files: www/\1/index.html
   upload: www/(.*)/index.html
 
 - url: /(.*)
+  secure: always
   static_files: www/\1
   upload: www/(.*)
 
