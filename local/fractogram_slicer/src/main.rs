@@ -1,11 +1,13 @@
 mod board;
+mod board_hash;
 mod consts;
 mod coord;
 mod tetromino;
 
 use std::collections::HashSet;
 
-use board::{Board, BoardHash};
+use board::Board;
+use board_hash::BoardHash;
 
 fn main() {
     let mut visited_boards: HashSet<BoardHash> = HashSet::new();
@@ -21,7 +23,7 @@ fn main() {
             }
         }
         if !could_add_any_pieces {
-            println!("{}", board.to_string());
+            println!("{}", board.to_hash().serialize());
         }
     }
 

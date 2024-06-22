@@ -120,6 +120,8 @@ pub const ALL_TETROMINOS: [Tetromino; 19] = [
     Tetromino::Z_2,
 ];
 
+pub const NUM_TETROMINOS: usize = ALL_TETROMINOS.len();
+
 impl Tetromino {
     pub fn filled_coords(&self) -> [BoardCoord; 4] {
         match self {
@@ -184,36 +186,36 @@ impl fmt::Display for Tetromino {
     }
 }
 
-// impl From<i8> for Tetromino {
-//     fn from(i: i8) -> Self {
-//         match i {
-//             x if x == Tetromino::J_1 as i8 => Tetromino::J_1,
-//             x if x == Tetromino::J_2 as i8 => Tetromino::J_2,
-//             x if x == Tetromino::J_3 as i8 => Tetromino::J_3,
-//             x if x == Tetromino::J_4 as i8 => Tetromino::J_4,
+impl From<u8> for Tetromino {
+    fn from(i: u8) -> Self {
+        match i {
+            x if x == Tetromino::J_1 as u8 => Tetromino::J_1,
+            x if x == Tetromino::J_2 as u8 => Tetromino::J_2,
+            x if x == Tetromino::J_3 as u8 => Tetromino::J_3,
+            x if x == Tetromino::J_4 as u8 => Tetromino::J_4,
 
-//             x if x == Tetromino::S_1 as i8 => Tetromino::S_1,
-//             x if x == Tetromino::S_2 as i8 => Tetromino::S_2,
+            x if x == Tetromino::S_1 as u8 => Tetromino::S_1,
+            x if x == Tetromino::S_2 as u8 => Tetromino::S_2,
 
-//             x if x == Tetromino::T_1 as i8 => Tetromino::T_1,
-//             x if x == Tetromino::T_2 as i8 => Tetromino::T_2,
-//             x if x == Tetromino::T_3 as i8 => Tetromino::T_3,
-//             x if x == Tetromino::T_4 as i8 => Tetromino::T_4,
+            x if x == Tetromino::T_1 as u8 => Tetromino::T_1,
+            x if x == Tetromino::T_2 as u8 => Tetromino::T_2,
+            x if x == Tetromino::T_3 as u8 => Tetromino::T_3,
+            x if x == Tetromino::T_4 as u8 => Tetromino::T_4,
 
-//             x if x == Tetromino::I_1 as i8 => Tetromino::I_1,
-//             x if x == Tetromino::I_2 as i8 => Tetromino::I_2,
+            x if x == Tetromino::I_1 as u8 => Tetromino::I_1,
+            x if x == Tetromino::I_2 as u8 => Tetromino::I_2,
 
-//             x if x == Tetromino::O_1 as i8 => Tetromino::O_1,
+            x if x == Tetromino::O_1 as u8 => Tetromino::O_1,
 
-//             x if x == Tetromino::L_1 as i8 => Tetromino::L_1,
-//             x if x == Tetromino::L_2 as i8 => Tetromino::L_2,
-//             x if x == Tetromino::L_3 as i8 => Tetromino::L_3,
-//             x if x == Tetromino::L_4 as i8 => Tetromino::L_4,
+            x if x == Tetromino::L_1 as u8 => Tetromino::L_1,
+            x if x == Tetromino::L_2 as u8 => Tetromino::L_2,
+            x if x == Tetromino::L_3 as u8 => Tetromino::L_3,
+            x if x == Tetromino::L_4 as u8 => Tetromino::L_4,
 
-//             x if x == Tetromino::Z_1 as i8 => Tetromino::Z_1,
-//             x if x == Tetromino::Z_2 as i8 => Tetromino::Z_2,
+            x if x == Tetromino::Z_1 as u8 => Tetromino::Z_1,
+            x if x == Tetromino::Z_2 as u8 => Tetromino::Z_2,
 
-//             _ => panic!("Invalid call Tetromino::from({:?})", i),
-//         }
-//     }
-// }
+            _ => panic!("Invalid call Tetromino::from({:?})", i),
+        }
+    }
+}

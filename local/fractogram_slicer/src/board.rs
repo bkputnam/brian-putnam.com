@@ -1,16 +1,22 @@
 use std::fmt;
 
+use crate::board_hash::BoardHash;
 use crate::consts::WORD_SIZE;
 use crate::coord::{all_coords, BoardCoord};
 use crate::tetromino::{Tetromino, ALL_TETROMINOS};
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct PieceAtCoord {
-    piece: Tetromino,
-    coord: u8,
+    pub piece: Tetromino,
+    pub coord: u8,
 }
 
-pub type Pieces = [PieceAtCoord; 20];
+pub const FAKE_PIECE_AT_COORD: PieceAtCoord = PieceAtCoord {
+    piece: Tetromino::O_1,
+    coord: 255,
+};
+
+pub type Pieces = [PieceAtCoord; 6];
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Board {
@@ -19,20 +25,12 @@ pub struct Board {
     num_pieces: usize,
 }
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub struct BoardHash {
-    pieces: Pieces,
-}
-
 impl Board {
     pub fn new_empty() -> Self {
         {
             Board {
                 is_filled: [[false; WORD_SIZE]; WORD_SIZE],
-                pieces: [PieceAtCoord {
-                    piece: Tetromino::O_1,
-                    coord: 255,
-                }; 20],
+                pieces: [FAKE_PIECE_AT_COORD; 6],
                 num_pieces: 0,
             }
         }
@@ -100,13 +98,16 @@ impl Board {
     }
 
     pub fn to_hash(&self) -> BoardHash {
-        BoardHash {
-            pieces: self.pieces.clone(),
-        }
+        BoardHash::new(self.pieces.clone())
     }
 
     pub fn iter_children(&self) -> ChildIterator {
         ChildIterator::new(self)
+    }
+
+    #[allow(dead_code)] // Used for testing
+    pub fn get_num_pieces(&self) -> usize {
+        self.num_pieces
     }
 }
 
