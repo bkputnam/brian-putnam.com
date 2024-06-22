@@ -138,7 +138,11 @@ impl fmt::Display for Board {
                 pieces_str.push_str(", ");
             }
             let PieceAtCoord { piece, coord } = self.pieces[piece_index];
-            let foo: String = format!("{}: {}", piece.to_string(), BoardCoord::from_index(coord));
+            let foo: String = format!(
+                "{}: {}",
+                piece.to_string(),
+                BoardCoord::from_index(coord)
+            );
             pieces_str.push_str(&foo);
         }
 

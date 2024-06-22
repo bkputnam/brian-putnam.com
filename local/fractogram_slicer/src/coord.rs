@@ -29,7 +29,8 @@ impl fmt::Display for BoardCoord {
 }
 
 pub fn all_coords() -> &'static [BoardCoord; WORD_SIZE * WORD_SIZE] {
-    static ALL_COORDS: OnceLock<[BoardCoord; WORD_SIZE * WORD_SIZE]> = OnceLock::new();
+    static ALL_COORDS: OnceLock<[BoardCoord; WORD_SIZE * WORD_SIZE]> =
+        OnceLock::new();
     ALL_COORDS.get_or_init(|| {
         core::array::from_fn(|i| {
             let row: u8 = (i / WORD_SIZE).try_into().unwrap();
