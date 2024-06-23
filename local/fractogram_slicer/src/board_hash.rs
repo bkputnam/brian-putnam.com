@@ -8,6 +8,8 @@ pub struct BoardHash {
     pieces: Pieces,
 }
 
+pub type SerializedHash = u64;
+
 // There are 19 tetrominoes and 25 coordinates making 475 possibilities,
 // meaning that the result will be in the lowest 9 bits.
 const WORD_SIZE: usize = 9;
@@ -26,7 +28,7 @@ impl BoardHash {
         BoardHash { pieces }
     }
 
-    pub fn serialize(&self) -> u64 {
+    pub fn serialize(&self) -> SerializedHash {
         let mut result: u64 = 0;
         for (i, piece_at_coord) in self.pieces.into_iter().enumerate() {
             let serialized = BoardHash::piece_at_coord_to_num(piece_at_coord);
@@ -36,7 +38,7 @@ impl BoardHash {
     }
 
     #[allow(dead_code)] // Used for testing
-    pub fn deserialize(buf: u64) -> BoardHash {
+    pub fn deserialize(buf: SerializedHash) -> BoardHash {
         let mut result = BoardHash {
             pieces: [FAKE_PIECE_AT_COORD; 6],
         };
