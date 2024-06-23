@@ -18,14 +18,14 @@ export function shuffleInPlace<T>(array: T[]): T[] {
 }
 
 export function pick1<T>(arr: T[]): T {
-    return arr[Math.floor(Math.random() * (arr.length))];
+    return arr[randInt(0, arr.length)];
 }
 
-export function randBetween(low: number, high: number): number {
+export function randInt(low: number, high: number): number {
     if (low > high) {
         const temp = low;
         low = high;
         high = temp;
     }
-    return Math.random() * (high - low) + low;
+    return Math.floor(Math.random() * (high - low) + low);
 }

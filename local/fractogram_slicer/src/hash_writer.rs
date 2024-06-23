@@ -10,6 +10,7 @@ pub struct HashWriter {
     write_buffer:
         [u8; MAX_HASHES_PER_FILE * size_of::<u64>() / size_of::<u8>()],
     next_byte_index: usize,
+    num_hashes_written: u64,
 }
 
 impl HashWriter {
@@ -19,6 +20,7 @@ impl HashWriter {
             write_buffer: [0; MAX_HASHES_PER_FILE * size_of::<u64>()
                 / size_of::<u8>()],
             next_byte_index: 0,
+            num_hashes_written: 0,
         }
     }
 
@@ -42,13 +44,9 @@ impl HashWriter {
     }
 
     pub fn write_hash(&mut self, hash: BoardHash) {
-        let mut serialized_hash = hash.serialize();
-        let shift_amount = size_of::<u64>() - size_of::<u8>();
-        let byte_bitmask = u64::MAX << shift_amount;
-        for _ in 0..(size_of::<u64>() / size_of::<u8>()) {
-            let byte = ((serialized_hash & byte_bitmask) >> shift_amount) as u8;
-            serialized_hash = serialized_hash << size_of::<u8>();
-
+        self.num_hashes_written += 1;
+        let serialized_hash = hash.serialize();
+        for byte in serialized_hash.to_be_bytes() {
             self.write_buffer[self.next_byte_index] = byte;
             self.next_byte_index += 1;
         }
@@ -58,5 +56,9 @@ impl HashWriter {
         if self.next_byte_index == self.write_buffer.len() {
             self.flush();
         }
+    }
+
+    pub fn get_num_hashes_written(&self) -> u64 {
+        self.num_hashes_written
     }
 }

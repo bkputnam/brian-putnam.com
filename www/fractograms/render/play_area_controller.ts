@@ -2,7 +2,7 @@ import { Board } from "../data_structures/board.js";
 import { globalGameState } from "../data_structures/game.js";
 import { Solution } from "../data_structures/solution.js";
 import { DomRectLike, boxesIntersect } from "../util/geometry.js";
-import { randBetween } from "../util/random.js";
+import { randInt } from "../util/random.js";
 import { Resolver } from "../util/resolver.js";
 import { BoardController } from "./board_controller.js";
 import { Controller } from "./controller.js";
@@ -94,10 +94,8 @@ export class PlayAreaController extends Controller {
         const pieceWidth = pieceClientRect.width;
 
         for (let i = 0; i < 100; i++) {
-            const randomX =
-                Math.round(randBetween(minX, maxX - pieceWidth));
-            const randomY =
-                Math.round(randBetween(minY, maxY - pieceHeight));
+            const randomX = randInt(minX, maxX - pieceWidth);
+            const randomY = randInt(minY, maxY - pieceHeight);
             pieceEl.setAttribute(
                 'transform',
                 `translate(${randomX} ${randomY})`);
@@ -171,7 +169,7 @@ export class PlayAreaController extends Controller {
             return;
         }
 
-        const pieceIndex = Math.floor(randBetween(0, smallestPieces.length));
+        const pieceIndex = randInt(0, smallestPieces.length);
         const piece = smallestPieces[pieceIndex];
         const pieceCoord = this.model.solutionCoords.get(piece);
         if (!pieceCoord) {

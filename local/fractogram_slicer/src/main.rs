@@ -37,5 +37,8 @@ fn main() {
     let mut hash_writer = HashWriter::new();
     visit_children(Board::new_empty(), &mut visited_boards, &mut hash_writer);
     hash_writer.flush();
-    println!("Done");
+    println!(
+        "Done. {} hashes written",
+        hash_writer.get_num_hashes_written()
+    );
 }

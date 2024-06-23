@@ -1,7 +1,8 @@
 import { SOLUTIONS } from "../data/solutions.js";
 import { Board } from "../data_structures/board.js";
 import { Solution } from "../data_structures/solution.js";
-import { pick1 } from "../util/random.js";
+import { MAX_SLICE_INDEX, fetchSliceHash } from "../util/fetch_slices.js";
+import { pick1, randInt } from "../util/random.js";
 import { Timer } from "../util/time.js";
 import { PlayAreaController } from "./play_area_controller.js";
 
@@ -32,15 +33,15 @@ export class PageController {
         private readonly parent: HTMLElement,
         private readonly onWinCallback: () => void) { }
 
-    private getSolution(): Solution {
-        const solutionText = SOLUTIONS[0]; // pick1(SOLUTIONS);
+    private async getSolution(): Promise<Solution> {
+        const solutionText = pick1(SOLUTIONS);
         console.log(solutionText);
-        const pieces = 2686046508678144n;
+        const pieces = await fetchSliceHash(randInt(0, MAX_SLICE_INDEX));
         return new Solution(solutionText, pieces);
     }
 
-    private render(): SVGGraphicsElement {
-        const solution = this.getSolution();
+    private async render(): Promise<SVGGraphicsElement> {
+        const solution = await this.getSolution();
         const playAreaController = new PlayAreaController(solution);
         this.gameState = new GameState(
             this,
@@ -58,11 +59,11 @@ export class PageController {
         return this.element;
     }
 
-    clearAndRender() {
+    async clearAndRender(): Promise<void> {
         if (this.element) {
             this.element.remove();
         }
-        this.parent.appendChild(this.render());
+        this.parent.appendChild(await this.render());
         this.gameState!.playAreaController.renderPieces();
     }
 
