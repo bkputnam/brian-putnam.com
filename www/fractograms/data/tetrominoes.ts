@@ -61,3 +61,29 @@ export const TETROMINO_LOOKUP: { [key: string]: Piece } = {
 export const TETROMINO_REVERSE_LOOKUP = new Map<Piece, string>(
     Object.entries(TETROMINO_LOOKUP).map(([str, piece]) => [piece, str])
 );
+
+export function tetrominoFromRustEnum(rustEnum: number): Piece {
+    switch (rustEnum) {
+        case 0: return J_1;
+        case 1: return J_2;
+        case 2: return J_3;
+        case 3: return J_4;
+        case 4: return S_1;
+        case 5: return S_2;
+        case 6: return T_1;
+        case 7: return T_2;
+        case 8: return T_3;
+        case 9: return T_4;
+        case 10: return I_1;
+        case 11: return I_2;
+        case 12: return O_1;
+        case 13: return L_1;
+        case 14: return L_2;
+        case 15: return L_3;
+        case 16: return L_4;
+        case 17: return Z_1;
+        case 18: return Z_2;
+        default:
+            throw new Error(`Unrecognized rustEnum: ${rustEnum}`);
+    }
+}

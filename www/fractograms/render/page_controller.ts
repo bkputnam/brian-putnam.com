@@ -33,9 +33,10 @@ export class PageController {
         private readonly onWinCallback: () => void) { }
 
     private getSolution(): Solution {
-        const solutionText = pick1(SOLUTIONS);
+        const solutionText = SOLUTIONS[0]; // pick1(SOLUTIONS);
         console.log(solutionText);
-        return new Solution(solutionText);
+        const pieces = 2686046508678144n;
+        return new Solution(solutionText, pieces);
     }
 
     private render(): SVGGraphicsElement {

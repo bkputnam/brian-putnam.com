@@ -1,6 +1,9 @@
 import { PieceController } from "../render/piece_controller.js";
 import { BoardCoord, LetterCoord } from "./coord.js";
 
+export type PieceAtCoord = { piece: Piece, coord: BoardCoord; };
+export type PieceAtIndex = { piece: Piece, coord: number; };
+
 export class Piece {
     readonly width: number;
     readonly height: number;

@@ -1,14 +1,15 @@
 import { Board } from "./board.js";
 import { BoardCoord, LetterCoord } from "./coord.js";
-import { Piece } from "./piece.js";
+import { Piece, PieceAtCoord } from "./piece.js";
 import { shuffleInPlace } from "../util/random.js";
 import { TETROMINOES, TETROMINO_REVERSE_LOOKUP } from "../data/tetrominoes.js";
 import { WORD_SIZE } from "../data/solutions.js";
+import { deserialize, u64 } from "../util/deserializer.js";
 
 export class Solution {
     private readonly grid: string[][];
 
-    constructor(letterGrid: string) {
+    constructor(letterGrid: string, private readonly serializedSlices: u64) {
         this.grid = letterGrid
             .split('\n')
             .map((rowStr: string) =>
@@ -42,7 +43,7 @@ export class Solution {
         return result;
     }
 
-    private makeRandomPieces(): Array<{ piece: Piece, coord: BoardCoord; }> {
+    private makeRandomPieces(): PieceAtCoord[] {
         // Just a temp Board to keep track of where we've placed Pieces
         const placementBoard = new Board(this.grid.length);
         const pieces: Array<{ piece: Piece, coord: BoardCoord; }> = [];
@@ -66,25 +67,46 @@ export class Solution {
         };
 
         while (placeRandomPiece()) { }
-        for (const { piece, coord } of this.leftoversToPieces(placementBoard)) {
-            pieces.push({ piece, coord });
+        for (const pieceAtCoord of this.leftoversToPieces(placementBoard)) {
+            pieces.push(pieceAtCoord);
+        }
+        return pieces;
+    }
+
+    private getSerializedPieces(): PieceAtCoord[] {
+        // Just a temp Board to keep track of where we've placed Pieces
+        const placementBoard = new Board(this.grid.length);
+
+        const deserialized = deserialize(this.serializedSlices);
+        for (const { piece, coord } of deserialized) {
+            const placed = placementBoard.tryPlacePiece(piece, coord);
+            if (!placed) {
+                throw new Error('Bad serialized value: overlapping Pieces');
+            }
+        }
+        const pieces = deserialized.map(({ piece, coord }) => {
+            return {
+                piece: this.makePieceFromTemplate(piece, coord),
+                coord,
+            };
+        });
+        for (const pieceAtCoord of this.leftoversToPieces(placementBoard)) {
+            pieces.push(pieceAtCoord);
         }
         return pieces;
     }
 
     getStartingBoardAndPieces(): {
         startingBoard: Board,
-        pieces: Array<{ piece: Piece, coord: BoardCoord; }>;
+        pieces: PieceAtCoord[];
     } {
         const startingBoard = Board.fromStringArray(this.grid);
-        const pieces = this.makeRandomPieces();
+        // const pieces = this.makeRandomPieces();
+        const pieces = this.getSerializedPieces();
         for (const { piece, coord } of pieces) {
             startingBoard.clearPiece(piece, coord);
         }
-        return {
-            startingBoard: startingBoard,
-            pieces: this.makeRandomPieces(),
-        };
+        return { startingBoard, pieces };
     }
 
     private *leftoversToPieces(placementBoard: Board):
