@@ -35,3 +35,29 @@ export const TETROMINOES: readonly Piece[] = [
     L_1, L_2, L_3, L_4,
     Z_1, Z_2,
 ];
+
+export const TETROMINO_LOOKUP: { [key: string]: Piece } = {
+    'J_1': J_1,
+    'J_2': J_2,
+    'J_3': J_3,
+    'J_4': J_4,
+    'S_1': S_1,
+    'S_2': S_2,
+    'T_1': T_1,
+    'T_2': T_2,
+    'T_3': T_3,
+    'T_4': T_4,
+    'I_1': I_1,
+    'I_2': I_2,
+    'O_1': O_1,
+    'L_1': L_1,
+    'L_2': L_2,
+    'L_3': L_3,
+    'L_4': L_4,
+    'Z_1': Z_1,
+    'Z_2': Z_2,
+};
+
+export const TETROMINO_REVERSE_LOOKUP = new Map<Piece, string>(
+    Object.entries(TETROMINO_LOOKUP).map(([str, piece]) => [piece, str])
+);

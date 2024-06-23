@@ -12,7 +12,7 @@ export class PlayAreaModel {
     constructor(
         readonly playAreaController: PlayAreaController,
         readonly solution: Solution) {
-        const { startingBoard, pieces } = solution.toRandomPieces();
+        const { startingBoard, pieces } = solution.getStartingBoardAndPieces();
         this.board = startingBoard;
 
         for (const { piece, coord: solutionCoord } of pieces) {

@@ -2,14 +2,14 @@ import { Board } from "./board.js";
 import { BoardCoord, LetterCoord } from "./coord.js";
 import { Piece } from "./piece.js";
 import { shuffleInPlace } from "../util/random.js";
-import { TETROMINOES } from "../data/tetrominoes.js";
+import { TETROMINOES, TETROMINO_REVERSE_LOOKUP } from "../data/tetrominoes.js";
 import { WORD_SIZE } from "../data/solutions.js";
 
 export class Solution {
     private readonly grid: string[][];
 
-    constructor(str: string) {
-        this.grid = str
+    constructor(letterGrid: string) {
+        this.grid = letterGrid
             .split('\n')
             .map((rowStr: string) =>
                 rowStr.split('').map((char: string) => char.toUpperCase()));
@@ -42,17 +42,9 @@ export class Solution {
         return result;
     }
 
-    toRandomPieces(): {
-        startingBoard: Board,
-        pieces: Array<{ piece: Piece, coord: BoardCoord; }>;
-    } {
-        // Used when trying to place random tetrominoes to tell whether or not
-        // we've already placed on that spot.
+    private makeRandomPieces(): Array<{ piece: Piece, coord: BoardCoord; }> {
+        // Just a temp Board to keep track of where we've placed Pieces
         const placementBoard = new Board(this.grid.length);
-        // Used to keep track of which cells we haven't assigned by the end.
-        // Starts full and is progressively cleared. Represents the player's
-        // starting board.
-        const startingBoard = Board.fromStringArray(this.grid);
         const pieces: Array<{ piece: Piece, coord: BoardCoord; }> = [];
 
         const tetrominoes = [...TETROMINOES];
@@ -66,7 +58,6 @@ export class Solution {
                             piece: this.makePieceFromTemplate(tetromino, coord),
                             coord,
                         });
-                        startingBoard.clearPiece(tetromino, coord);
                         return true;
                     }
                 }
@@ -75,48 +66,62 @@ export class Solution {
         };
 
         while (placeRandomPiece()) { }
-        for (const { piece, coord } of this.leftoversToPieces(startingBoard)) {
+        for (const { piece, coord } of this.leftoversToPieces(placementBoard)) {
             pieces.push({ piece, coord });
+        }
+        return pieces;
+    }
+
+    getStartingBoardAndPieces(): {
+        startingBoard: Board,
+        pieces: Array<{ piece: Piece, coord: BoardCoord; }>;
+    } {
+        const startingBoard = Board.fromStringArray(this.grid);
+        const pieces = this.makeRandomPieces();
+        for (const { piece, coord } of pieces) {
             startingBoard.clearPiece(piece, coord);
         }
-        console.log(startingBoard.toString());
-        return { startingBoard, pieces };
+        return {
+            startingBoard: startingBoard,
+            pieces: this.makeRandomPieces(),
+        };
     }
 
-    private *leftoversToPieces(startingBoard: Board):
+    private *leftoversToPieces(placementBoard: Board):
         Iterable<{ piece: Piece, coord: BoardCoord }> {
-        for (let row = 0; row < WORD_SIZE; row++) {
-            for (let col = 0; col < WORD_SIZE; col++) {
-                const coord = { row, col };
-                if (startingBoard.getLetterAtCoord(coord) === null) {
-                    continue;
-                }
-                const pieceCoords =
-                    [...this.iterGroupCoords(startingBoard, coord)];
-                const boundingBox = this.getBoundingBox(pieceCoords);
-                const piece = Piece
-                    .emptyWithSize(boundingBox.width, boundingBox.height);
-                for (const pieceCoord of pieceCoords) {
-                    const letter = startingBoard.getLetterAtCoord(pieceCoord);
-                    if (letter != null) {
-                        piece.setLetter(letter, {
-                            row: pieceCoord.row - boundingBox.row,
-                            col: pieceCoord.col - boundingBox.col,
-                        });
-                    }
-                }
-                yield {
-                    piece,
-                    coord: {
-                        row: boundingBox.row,
-                        col: boundingBox.col,
-                    },
-                };
+        for (const coord of this.iterCoords()) {
+            if (placementBoard.getLetterAtCoord(coord) !== null) {
+                continue;
             }
+            const pieceCoords =
+                [...this.iterEmptySpaceCoords(placementBoard, coord)];
+            const boundingBox = this.getBoundingBox(pieceCoords);
+            const piece = Piece
+                .emptyWithSize(boundingBox.width, boundingBox.height);
+            for (const pieceCoord of pieceCoords) {
+                const letter = this.grid[pieceCoord.row][pieceCoord.col];
+                if (letter != null) {
+                    piece.setLetter(letter, {
+                        row: pieceCoord.row - boundingBox.row,
+                        col: pieceCoord.col - boundingBox.col,
+                    });
+                }
+            }
+            const placed = placementBoard.tryPlacePiece(piece, coord);
+            if (!placed) {
+                throw new Error('This should be impossible');
+            }
+            yield {
+                piece,
+                coord: {
+                    row: boundingBox.row,
+                    col: boundingBox.col,
+                },
+            };
         }
     }
 
-    private *iterGroupCoords(startingBoard: Board, startingCoord: BoardCoord):
+    private *iterEmptySpaceCoords(startingBoard: Board, startingCoord: BoardCoord):
         Iterable<BoardCoord> {
         const coordsToCheck = [startingCoord];
         const visitedCoords = new Array<Array<boolean>>(WORD_SIZE);
@@ -133,7 +138,7 @@ export class Solution {
 
             for (const neighbor of this.iterNeighbors(coord)) {
                 if (!visitedCoords[neighbor.row][neighbor.col]
-                    && startingBoard.getLetterAtCoord(neighbor) !== null) {
+                    && startingBoard.getLetterAtCoord(neighbor) === null) {
                     coordsToCheck.push(neighbor);
                 }
             }
