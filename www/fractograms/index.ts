@@ -23,6 +23,7 @@ const pageController = new PageController(
             () => {
                 alert(winMsg);
                 pageController.clearAndRender();
+                hintBtn.disabled = false;
             },
             50);
     },
