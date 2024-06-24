@@ -2,7 +2,8 @@ import { SOLUTIONS } from "../data/solutions.js";
 import { Board } from "../data_structures/board.js";
 import { Solution } from "../data_structures/solution.js";
 import { MAX_SLICE_INDEX, fetchSliceHash } from "../util/fetch_slices.js";
-import { pick1, randInt } from "../util/random.js";
+import { toFragment, fromFragment } from "../util/fragment_hash.js";
+import { randInt } from "../util/random.js";
 import { Timer } from "../util/time.js";
 import { PlayAreaController } from "./play_area_controller.js";
 
@@ -33,10 +34,34 @@ export class PageController {
         private readonly parent: HTMLElement,
         private readonly onWinCallback: () => void) { }
 
+    private getSolutionAndSliceIndices(): { solutionIndex: number, sliceIndex: number } {
+        if (location.hash) {
+            let hash = location.hash;
+            // I think hash will always start with '#' if it exists?
+            if (hash.startsWith('#')) {
+                hash = hash.substring(1);
+            }
+            try {
+                return fromFragment(hash);
+            } catch (e) {
+                // Invalid hash - ignore and fall back to default random
+                // behavior. Probably means someone typed their own hash into
+                // the url.
+            }
+        }
+        const randomIndices = {
+            solutionIndex: randInt(0, SOLUTIONS.length),
+            sliceIndex: randInt(0, MAX_SLICE_INDEX),
+        };
+        location.hash = toFragment(randomIndices);
+        return randomIndices;
+    }
+
     private async getSolution(): Promise<Solution> {
-        const solutionText = pick1(SOLUTIONS);
+        const { sliceIndex, solutionIndex } = this.getSolutionAndSliceIndices();
+        const solutionText = SOLUTIONS[solutionIndex];
         console.log(solutionText);
-        const pieces = await fetchSliceHash(randInt(0, MAX_SLICE_INDEX));
+        const pieces = await fetchSliceHash(sliceIndex);
         return new Solution(solutionText, pieces);
     }
 
