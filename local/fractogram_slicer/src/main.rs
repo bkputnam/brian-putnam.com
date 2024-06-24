@@ -5,11 +5,50 @@ mod coord;
 mod hash_writer;
 mod tetromino;
 
-use std::collections::HashSet;
+use std::{
+    collections::HashSet,
+    ffi::OsStr,
+    fs::{read_dir, remove_file},
+    path::Path,
+};
 
 use board::Board;
 use board_hash::BoardHash;
 use hash_writer::HashWriter;
+
+const DEST: &str = "../../www/fractograms/data/slices";
+
+fn delete_preexisting_slices() {
+    let dest = Path::new(DEST);
+    let dir_iter = match read_dir(dest) {
+        Err(reason) => panic!("Failed to read dest: {}", reason),
+        Ok(dir_iter) => dir_iter,
+    };
+    for result in dir_iter {
+        let dir_entry = match result {
+            Err(reason) => {
+                panic!("Failed to read dir_entry in dest: {}", reason)
+            }
+            Ok(dir_entry) => dir_entry,
+        };
+        let path = dir_entry.path();
+        match path.extension() {
+            None => { /* don't delete files without extensions */ }
+            Some(ext) => {
+                if ext == OsStr::new("slice") {
+                    match remove_file(path) {
+                        Err(reason) => panic!(
+                            "Failed to delete file {:?}: {}",
+                            dir_entry.file_name(),
+                            reason
+                        ),
+                        Ok(_) => {}
+                    };
+                }
+            }
+        }
+    }
+}
 
 fn main() {
     let mut visited_boards: HashSet<BoardHash> = HashSet::new();
@@ -34,7 +73,8 @@ fn main() {
         }
     }
 
-    let mut hash_writer = HashWriter::new();
+    delete_preexisting_slices();
+    let mut hash_writer = HashWriter::new(&DEST);
     visit_children(Board::new_empty(), &mut visited_boards, &mut hash_writer);
     hash_writer.flush();
     println!(

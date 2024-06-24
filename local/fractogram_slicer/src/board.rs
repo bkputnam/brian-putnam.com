@@ -53,18 +53,21 @@ impl Board {
             self.pieces[0] = piece_at_coord;
         } else {
             for piece_index in (0..self.num_pieces).rev() {
-                if self.pieces[piece_index].coord > coord_index {
-                    // This piece should come after the new piece, so move it
-                    // backwards in the array to make room
-                    self.pieces[piece_index + 1] = self.pieces[piece_index];
-                } else if self.pieces[piece_index].coord == coord_index {
+                if self.pieces[piece_index].coord == coord_index {
                     // This should be impossible.
                     panic!(
                         "Tried to insert two pieces at the same coordinates {}",
                         coord
                     );
-                } else {
-                    // This piece
+                }
+                if self.pieces[piece_index].coord > coord_index {
+                    // This piece should come after the new piece, so move it
+                    // backwards in the array to make room
+                    self.pieces[piece_index + 1] = self.pieces[piece_index];
+                }
+                let do_insert = piece_index == 0
+                    || self.pieces[piece_index - 1].coord < coord_index;
+                if do_insert {
                     self.pieces[piece_index + 1] = piece_at_coord;
                     break;
                 }

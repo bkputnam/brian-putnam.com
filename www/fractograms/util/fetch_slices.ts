@@ -2,7 +2,7 @@ import { u64 } from "./deserializer.js";
 
 // According to fractogram_slicer, this is the number of possible slices of a
 // 5x5 grid.
-export const MAX_SLICE_INDEX = 999941;
+export const MAX_SLICE_INDEX = 13390701;
 
 // Values are unsigned int64
 const BYTES_PER_VALUE = 8;
@@ -17,7 +17,7 @@ export async function fetchSliceHash(sliceIndex: number): Promise<u64> {
     const fileIndex = Math.floor(sliceIndex / MAX_HASHES_PER_FILE);
     const valueIndex = sliceIndex % MAX_HASHES_PER_FILE;
 
-    const fileName = String(fileIndex).padStart(4, '0');
+    const fileName = String(fileIndex).padStart(6, '0');
     const response = await fetch(`data/slices/${fileName}.slice`);
     const buf = await response.arrayBuffer();
     const dataView = new DataView(buf);

@@ -5,30 +5,34 @@ use crate::board_hash::{BoardHash, SerializedHash};
 // Aim for 3kb per .slice file (arbitrary size)
 const MAX_HASHES_PER_FILE: usize = (1024 * 3) / size_of::<SerializedHash>();
 
-pub struct HashWriter {
+pub struct HashWriter<'a> {
     current_file_index: usize,
     write_buffer:
         [u8; MAX_HASHES_PER_FILE * size_of::<u64>() / size_of::<u8>()],
     next_byte_index: usize,
     num_hashes_written: u64,
+    dest: &'a str,
 }
 
-impl HashWriter {
-    pub fn new() -> HashWriter {
+impl<'a> HashWriter<'a> {
+    pub fn new(dest: &'a str) -> HashWriter {
         HashWriter {
             current_file_index: 0,
             write_buffer: [0; MAX_HASHES_PER_FILE * size_of::<u64>()
                 / size_of::<u8>()],
             next_byte_index: 0,
             num_hashes_written: 0,
+            dest,
         }
     }
 
     pub fn flush(&mut self) {
-        let file_name = format!("{:04}.slice", self.current_file_index);
+        let file_name = format!("{:06}.slice", self.current_file_index);
         let file_path = Path::new(&file_name);
+        let dest_path = Path::new(self.dest);
+        let full_path = dest_path.join(&file_name);
         self.current_file_index += 1;
-        let mut file = match File::create(&file_name) {
+        let mut file = match File::create(&full_path) {
             Err(reason) => {
                 panic!("couldn't open {}: {}", file_path.display(), reason);
             }
