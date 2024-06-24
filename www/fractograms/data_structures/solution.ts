@@ -129,7 +129,17 @@ export class Solution {
                     });
                 }
             }
-            const placed = placementBoard.tryPlacePiece(piece, coord);
+            // coordToPlaceAt may be different from coord if there's an overhang
+            // in the left direction. In other words, if {row: 0, col: 0} isn't
+            // populated. Example 3-letter piece:
+            //
+            // _ A
+            // E L
+            const coordToPlaceAt = {
+                row: boundingBox.row,
+                col: boundingBox.col,
+            };
+            const placed = placementBoard.tryPlacePiece(piece, coordToPlaceAt);
             if (!placed) {
                 throw new Error('This should be impossible');
             }
