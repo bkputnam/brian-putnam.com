@@ -7,7 +7,7 @@ import { PageController } from './render/page_controller.js';
 
 
 const pageController = new PageController(
-    /* parent= */ document.body,
+    /* parent= */ document.getElementById('play-area')!,
     /* onWinCallback= */() => {
         const elapsedTimeStr =
             msToHumanReadable(pageController.getTimer().getElapsedMs());

@@ -24,7 +24,7 @@ export class PlayAreaController extends Controller {
     protected override createEl(): SVGGraphicsElement {
         const el =
             document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        el.id = 'play-area';
+        el.id = 'play-area-svg';
         return el;
     }
 

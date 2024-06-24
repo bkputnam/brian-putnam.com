@@ -5,6 +5,7 @@ import { MAX_SLICE_INDEX, fetchSliceHash } from "../util/fetch_slices.js";
 import { toFragment, fromFragment } from "../util/fragment_hash.js";
 import { randInt } from "../util/random.js";
 import { Timer } from "../util/time.js";
+import { IntroDialog } from "./intro_dialog.js";
 import { PlayAreaController } from "./play_area_controller.js";
 
 class GameState {
@@ -66,6 +67,7 @@ export class PageController {
     }
 
     private async render(): Promise<SVGGraphicsElement> {
+        this.showIntroDialog();
         const solution = await this.getSolution();
         const playAreaController = new PlayAreaController(solution);
         this.gameState = new GameState(
@@ -82,6 +84,12 @@ export class PageController {
         );
         this.element = playAreaController.render();
         return this.element;
+    }
+
+    private showIntroDialog(): void {
+        const dialog = new IntroDialog();
+        dialog.render();
+        dialog.showModal();
     }
 
     async clearAndRender(): Promise<void> {
