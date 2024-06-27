@@ -35,6 +35,18 @@ impl<'a> Board<'a> {
 
     fn make_consistent(&mut self) {
         loop {
+            // settle() won't return until it has done a pass where nothing
+            // changed, and so we don't need to check if something changed here.
+            self.settle();
+
+            if !self.remove_duplicates() {
+                break;
+            }
+        }
+    }
+
+    fn settle(&mut self) {
+        loop {
             let mut something_changed = false;
 
             for row_index in 0..WORD_SIZE {
@@ -61,6 +73,39 @@ impl<'a> Board<'a> {
                 break;
             }
         }
+    }
+
+    fn remove_duplicates(&mut self) -> bool {
+        let mut rows_and_cols: Vec<&mut HashSet<&str>> =
+            self.rows.iter_mut().chain(self.cols.iter_mut()).collect();
+        let mut used_words: Vec<String> = Vec::new();
+        let mut used_words_owner: Vec<usize> = Vec::new();
+        for (index, row_or_col) in rows_and_cols.iter().enumerate() {
+            if row_or_col.len() == 1 {
+                let used_word = row_or_col.iter().next().unwrap().to_string();
+                if !used_words.contains(&used_word) {
+                    used_words.push(used_word);
+                    used_words_owner.push(index);
+                }
+            }
+        }
+        if used_words.len() == 0 {
+            return false;
+        }
+        let mut something_changed = false;
+        for (used_word, owner_index) in
+            used_words.iter().zip(used_words_owner.iter())
+        {
+            for (index, row_or_col) in rows_and_cols.iter_mut().enumerate() {
+                if index == *owner_index {
+                    continue;
+                }
+                if row_or_col.remove(used_word.as_str()) {
+                    something_changed = true;
+                }
+            }
+        }
+        something_changed
     }
 
     pub fn is_empty(&self) -> bool {

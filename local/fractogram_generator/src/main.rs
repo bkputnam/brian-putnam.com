@@ -50,7 +50,7 @@ fn main() {
     iter_root_children(&root_board, &mut |board: Board, progress: f64| {
         num_results += 1;
         println!("{}", board);
-        println!("{:.2}%", progress * 100.0);
+        println!("{:.2}%\n", progress * 100.0);
     });
 
     println!("\nDone: {} results", num_results);
