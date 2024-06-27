@@ -6,6 +6,6 @@ export function getProjectRoot(): string {
     return dirname.substring(0, index);
 }
 
-export function getWwwRoot(): string {
-    return path.join(getProjectRoot(), 'www');
+export function getClientRoot(): string {
+    return path.join(getProjectRoot(), 'client');
 }

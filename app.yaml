@@ -3,31 +3,31 @@ runtime: python312
 handlers:
 - url: /
   secure: always
-  static_files: www/index.html
-  upload: www/index.html
+  static_files: client/index.html
+  upload: client/index.html
 
 - url: /wordle
   secure: always
-  static_files: www/redirectAddSlash.html
-  upload: www/redirectAddSlash.html
+  static_files: client/redirectAddSlash.html
+  upload: client/redirectAddSlash.html
 
 - url: /word_puzzle(/(.*))?
   secure: always
-  static_files: www/word_puzzle/redirect-to-fractograms.html
-  upload: www/word_puzzle/redirect-to-fractograms.html
+  static_files: client/word_puzzle/redirect-to-fractograms.html
+  upload: client/word_puzzle/redirect-to-fractograms.html
 
 - url: /fractograms
   secure: always
-  static_files: www/redirectAddSlash.html
-  upload: www/redirectAddSlash.html
+  static_files: client/redirectAddSlash.html
+  upload: client/redirectAddSlash.html
 
 - url: /(.*)/
   secure: always
-  static_files: www/\1/index.html
-  upload: www/(.*)/index.html
+  static_files: client/\1/index.html
+  upload: client/(.*)/index.html
 
 - url: /(.*)
   secure: always
-  static_files: www/\1
-  upload: www/(.*)
+  static_files: client/\1
+  upload: client/(.*)
 

@@ -16,7 +16,7 @@ use board::Board;
 use board_hash::BoardHash;
 use hash_writer::HashWriter;
 
-const DEST: &str = "../../www/fractograms/data/slices";
+const DEST: &str = "../../client/fractograms/data/slices";
 
 fn delete_preexisting_slices() {
     let dest = Path::new(DEST);
