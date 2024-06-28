@@ -2,7 +2,7 @@ import { u64 } from "./deserializer.js";
 
 // According to fractogram_slicer, this is the number of possible slices of a
 // 5x5 grid.
-export const MAX_SLICE_INDEX = 13390701;
+export const MAX_SLICE_INDEX = 778363;
 
 // Values are unsigned int64
 const BYTES_PER_VALUE = 8;
