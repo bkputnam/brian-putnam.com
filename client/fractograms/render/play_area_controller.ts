@@ -1,5 +1,4 @@
 import { Board } from "../data_structures/board.js";
-import { globalGameState } from "../data_structures/game.js";
 import { Solution } from "../data_structures/solution.js";
 import { DomRectLike, boxesIntersect } from "../util/geometry.js";
 import { randInt } from "../util/random.js";
@@ -149,9 +148,7 @@ export class PlayAreaController extends Controller {
         this.boardCompleteResolver.resolve(board);
     }
 
-    applyHint() {
-        globalGameState.numHints++;
-
+    applyHint(): number {
         let smallestPieces: PieceController[] | null = null;
         let smallestSize = Number.POSITIVE_INFINITY;
         for (const piece of this.model.pieces) {
@@ -166,7 +163,7 @@ export class PlayAreaController extends Controller {
             }
         }
         if (smallestPieces === null) {
-            return;
+            return 0;
         }
 
         const pieceIndex = randInt(0, smallestPieces.length);
@@ -177,10 +174,10 @@ export class PlayAreaController extends Controller {
                 `Unable to find solution coord for piece\n\n` +
                 piece.toString());
         }
-        globalGameState.numHintCells += smallestSize;
         piece.delete();
         this.model.removePiece(piece);
         this.boardController.pieceToHint(piece, pieceCoord);
+        return smallestSize;
     }
 }
 

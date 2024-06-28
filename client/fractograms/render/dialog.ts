@@ -1,3 +1,4 @@
+import { Resolver } from "../util/resolver.js";
 
 export abstract class Dialog {
     private readonly dialog: HTMLDialogElement;
@@ -37,8 +38,15 @@ export abstract class Dialog {
     protected abstract getTitle(): string;
     protected abstract renderHtmlContent(): HTMLElement;
 
-    showModal() {
+    showModal(): Promise<void> {
+        const resolver = new Resolver<void>();
+        const closeCallback = () => {
+            this.dialog.removeEventListener('close', closeCallback);
+            resolver.resolve();
+        };
+        this.dialog.addEventListener('close', closeCallback);
         this.dialog.showModal();
+        return resolver.promise;
     }
 
     close() {

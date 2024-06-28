@@ -5,11 +5,15 @@ import { shuffleInPlace } from "../util/random.js";
 import { TETROMINOES, TETROMINO_REVERSE_LOOKUP } from "../data/tetrominoes.js";
 import { WORD_SIZE } from "../data/solutions.js";
 import { deserialize, u64 } from "../util/deserializer.js";
+import { GameType } from "../render/page_controller.js";
 
 export class Solution {
     private readonly grid: string[][];
 
-    constructor(letterGrid: string, private readonly serializedSlices: u64) {
+    constructor(
+        letterGrid: string,
+        private readonly serializedSlices: u64,
+        readonly gameType: GameType) {
         this.grid = letterGrid
             .split('\n')
             .map((rowStr: string) =>

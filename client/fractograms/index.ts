@@ -4,31 +4,27 @@ import './bkp_drag_drop/drag_drop_service.js';
 import { msToHumanReadable } from './util/time.js';
 import { globalGameState } from './data_structures/game.js';
 import { PageController } from './render/page_controller.js';
+import { WinDialog } from './render/win_dialog.js';
 
 
 const pageController = new PageController(
     /* parent= */ document.getElementById('play-area')!,
     /* onWinCallback= */() => {
-        const elapsedTimeStr =
-            msToHumanReadable(pageController.getTimer().getElapsedMs());
-        const winMsg = [
-            'You win!',
-            `Time: ${elapsedTimeStr}`,
-            `Hints: ${globalGameState.numHintCells} cells ` +
-            `(${globalGameState.numHints} hints)`
-        ].join('\n');
         hintBtn.disabled = true;
         // Use setTimeout to give the page a moment to render the final move
         setTimeout(
-            () => {
-                alert(winMsg);
-                pageController.clearAndRender();
+            async () => {
+                const winDialog = new WinDialog();
+                winDialog.render();
+                await winDialog.showModal();
+                pageController.clearAndRender('random');
                 hintBtn.disabled = false;
             },
             50);
     },
 );
-pageController.clearAndRender();
+globalGameState.pageController = pageController;
+pageController.clearAndRender('daily');
 
 const hintBtn = document.getElementById('hint-btn') as HTMLButtonElement;
 hintBtn.addEventListener('click', (e: MouseEvent) => {

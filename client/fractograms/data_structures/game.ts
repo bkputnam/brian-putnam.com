@@ -1,5 +1,10 @@
+import { PageController } from "../render/page_controller.js";
 
-export const globalGameState = {
-    numHints: 0,
-    numHintCells: 0,
+interface GlobalGameState {
+    pageController: PageController | null,
+}
+
+export const globalGameState: GlobalGameState = {
+    pageController: null,
 };
+

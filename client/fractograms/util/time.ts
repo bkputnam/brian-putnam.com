@@ -81,6 +81,6 @@ function hmsToHumanReadable(hms: HoursMinutesSeconds): string {
     if (hms.minutes > 0 || chunks.length > 0) {
         chunks.push(`${hms.minutes} mins`);
     }
-    chunks.push(hms.seconds.toFixed(0) + ' secs');
+    chunks.push(hms.seconds.toFixed(0) + ' sec');
     return chunks.join(' ');
 }
