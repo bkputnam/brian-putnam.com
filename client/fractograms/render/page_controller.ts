@@ -136,13 +136,7 @@ export class PageController {
         location.hash = indices.hash;
         const solutionText = SOLUTIONS[indices.solutionIndex];
         console.log(solutionText);
-
-        // TODO: debug why this slice index is so weird. We seem to be getting
-        // a {O_1, 255} piece back from the server in index 2 (piece 3) that's
-        // preventing further pieces from being read. Unclear why.
-        // const pieces = await fetchSliceHash(indices.sliceIndex);
-        const pieces = await fetchSliceHash(13390670);
-
+        const pieces = await fetchSliceHash(indices.sliceIndex);
         return new Solution(solutionText, pieces, indices.gameType);
     }
 
