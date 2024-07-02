@@ -17,8 +17,6 @@ const pageController = new PageController(
                 const winDialog = new WinDialog();
                 winDialog.render();
                 await winDialog.showModal();
-                pageController.clearAndRender('random');
-                hintBtn.disabled = false;
             },
             50);
     },
@@ -33,6 +31,14 @@ hintBtn.addEventListener('click', (e: MouseEvent) => {
     if (!pageController.isComplete()) {
         pageController.applyHint();
     }
+});
+
+const randBtn = document.getElementById('random-btn') as HTMLButtonElement;
+randBtn.addEventListener('click', (e: MouseEvent) => {
+    // Prevent page refresh, since this lives in a <form>
+    e.preventDefault();
+    pageController.clearAndRender('random');
+    hintBtn.disabled = false;
 });
 
 const timerEl = document.getElementById('timer')!;
