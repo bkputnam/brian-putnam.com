@@ -38,8 +38,9 @@ export class WinDialog extends Dialog {
         const shareBtn = document.createElement('button');
         shareBtn.classList.add('share');
         shareBtn.innerText = 'Share';
-        shareBtn.addEventListener('click', () => {
-            navigator.clipboard.writeText(this.winStats().join('\n'));
+        shareBtn.addEventListener('click', async () => {
+            await navigator.clipboard.writeText(this.winStats().join('\n'));
+            alert('Copied to clipboard');
         });
         result.appendChild(shareBtn);
 
