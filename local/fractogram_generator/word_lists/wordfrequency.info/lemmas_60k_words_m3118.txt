@@ -1,11 +1,3 @@
-* Top 60,000 lemmas, with word forms for each lemma
-* This word frequency data is taken from the one billion word Corpus of Contemporary American English (COCA)
-(www.english-corpora.org/coca), which is the only corpus of English that is large, up-to-date, and is based on a wide range of genres.
-* For complete word frequency data from COCA, please see https://www.wordfrequency.info
-* For instructions on using this file in Excel, see https://www.wordfrequency.info/freqTxtToExcel.pdf
-* For an explanation of the columns below, see https://www.wordfrequency.info/files.asp
------ Before converting file to Excel, remove the first eight lines, with the first line being the one starting with "rank"
-
 lemRank	lemma	PoS	lemFreq	wordFreq	word
 1	the	a	50033612	50033323	the
 1	the	a	50033612	287	ze
