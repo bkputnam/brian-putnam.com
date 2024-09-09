@@ -1,14 +1,14 @@
 // mod read_teowl;
-mod read_wordle;
+mod read_wordfrequency;
 
 use std::collections::HashSet;
 
 // use read_teowl::read_teowl_words;
-use read_wordle::read_wordle_answers;
+use read_wordfrequency::read_words;
 
 pub fn all_words() -> HashSet<String> {
     let mut result: HashSet<String> = HashSet::new();
-    for word in read_wordle_answers().iter() {
+    for word in read_words().iter() {
         result.insert(word.to_ascii_uppercase());
     }
     result
