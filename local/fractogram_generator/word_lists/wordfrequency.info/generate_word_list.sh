@@ -6,15 +6,15 @@ echo ""
 
 query="
 SELECT
-    lemma
+    rank,
+    word
 FROM
-    lemmas_60k_m3118.txt
+    words_219k_m3118.txt
 WHERE
-    length(lemma) = 5
-    AND pos != 'u'
-    AND lemma NOT LIKE '%-%'
+    length(word) = 5
+    AND word REGEXP '\w{5}'
 ORDER BY
-    rank DESC
+    rank ASC
 "
 
 rm five_letter_words.txt
