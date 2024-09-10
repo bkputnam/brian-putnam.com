@@ -13,7 +13,7 @@ const GAME_INDEX_SIZE_BYTES = bytesToEncode(SOLUTIONS.length);
 const SLICE_INDEX_SIZE_BYTES = nextMultipleOf4(bytesToEncode(MAX_SLICE_INDEX));
 
 // Dumb check to make sure the code stays in sync with these constants.
-if (GAME_INDEX_SIZE_BYTES != 1 || SLICE_INDEX_SIZE_BYTES != 4) {
+if (GAME_INDEX_SIZE_BYTES != 2 || SLICE_INDEX_SIZE_BYTES != 4) {
     throw new Error('toFragment/fromFragment need to be updated');
 }
 
@@ -25,7 +25,7 @@ export function toFragment(indices: { solutionIndex: number, sliceIndex: number 
     // (not sure if this is an actual problem, but just to be safe)
     const dataView = new DataView(arrayBuffer);
     dataView.setUint32(0, sliceIndex);
-    dataView.setUint8(SLICE_INDEX_SIZE_BYTES, solutionIndex);
+    dataView.setUint16(SLICE_INDEX_SIZE_BYTES, solutionIndex);
     return window.btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
         .replaceAll('=', '');
 }
@@ -46,6 +46,6 @@ export function fromFragment(fragment: string): { solutionIndex: number, sliceIn
     }
     const dataView = new DataView(arrayBuffer);
     const sliceIndex = dataView.getUint32(0);
-    const solutionIndex = dataView.getUint8(SLICE_INDEX_SIZE_BYTES);
+    const solutionIndex = dataView.getUint16(SLICE_INDEX_SIZE_BYTES);
     return { solutionIndex, sliceIndex };
 }
