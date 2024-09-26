@@ -4,7 +4,6 @@ import './bkp_drag_drop/drag_drop_service.js';
 import { msToHumanReadable } from './util/time.js';
 import { globalGameState } from './data_structures/game.js';
 import { PageController } from './render/page_controller.js';
-import { WinDialog } from './render/win_dialog.js';
 
 
 const pageController = new PageController(
@@ -14,9 +13,7 @@ const pageController = new PageController(
         // Use setTimeout to give the page a moment to render the final move
         setTimeout(
             async () => {
-                const winDialog = new WinDialog();
-                winDialog.render();
-                await winDialog.showModal();
+                pageController.displayWinMessage();
             },
             50);
     },

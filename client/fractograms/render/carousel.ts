@@ -1,3 +1,5 @@
+import { Controller } from "./controller.js";
+
 interface Dimensions {
     minWidth: number,
     minHeight: number,
@@ -5,21 +7,26 @@ interface Dimensions {
     maxHeight: number,
 }
 
-export abstract class Carousel {
+export abstract class Carousel extends Controller<HTMLElement> {
     private pageIndex = 0;
     private viewportContents: HTMLElement | null = null;
 
     constructor(
         private readonly dimensions: Dimensions,
         private readonly numPages: number
-    ) { }
+    ) {
+        super();
+    }
 
     abstract renderPage(pageIndex: number): HTMLElement;
 
-    render(): HTMLElement {
+    protected override createEl(): HTMLElement {
         const viewport = document.createElement('div');
         viewport.classList.add('carousel');
+        return viewport;
+    }
 
+    protected override decorate(viewport: HTMLElement): HTMLElement {
         this.viewportContents = document.createElement('div');
         this.viewportContents.classList.add('carousel-contents');
         this.viewportContents.style.minWidth = this.dimensions.minWidth + 'px';

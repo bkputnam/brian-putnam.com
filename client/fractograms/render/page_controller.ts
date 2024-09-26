@@ -8,6 +8,7 @@ import { hashNum, randInt } from "../util/random.js";
 import { Timer } from "../util/time.js";
 import { IntroDialog } from "./intro_dialog.js";
 import { PlayAreaController } from "./play_area_controller.js";
+import { WinMessage } from "./win_message.js";
 
 export type GameType = 'daily' | 'random' | 'link';
 
@@ -159,6 +160,13 @@ export class PageController {
         return this.element;
     }
 
+    displayWinMessage(): void {
+        const winMessage = new WinMessage();
+        const winMessageEl = winMessage.render();
+        this.parent.appendChild(winMessageEl);
+        this.parent.classList.add('solved');
+    }
+
     private showIntroDialog(): void {
         const dialog = new IntroDialog();
         dialog.render();
@@ -166,9 +174,8 @@ export class PageController {
     }
 
     async clearAndRender(gameType: GameType): Promise<void> {
-        if (this.element) {
-            this.element.remove();
-        }
+        this.parent.innerHTML = '';
+        this.element = null;
         this.parent.appendChild(await this.render(gameType));
         this.gameState!.playAreaController.renderPieces();
     }

@@ -1,18 +1,22 @@
 import { globalGameState } from "../data_structures/game.js";
 import { msToHumanReadable } from "../util/time.js";
-import { Dialog } from "./dialog.js";
+import { Controller } from "./controller.js";
 
-export class WinDialog extends Dialog {
+export class WinMessage extends Controller<HTMLElement> {
     constructor() {
         super();
     }
 
-    protected override getTitle(): string {
-        return "You Win!";
+    protected override createEl(): HTMLElement {
+        const el = document.createElement('div');
+        el.classList.add('win-message');
+        return el;
     }
 
-    protected override renderHtmlContent(): HTMLElement {
-        const result = document.createElement('div');
+    protected override decorate(el: HTMLElement): void {
+        const title = document.createElement('h2');
+        title.innerText = 'You Win!';
+        el.appendChild(title);
 
         const paragraph = document.createElement('p');
         let isFirst = true;
@@ -33,7 +37,7 @@ export class WinDialog extends Dialog {
             el.innerText = line;
             paragraph.appendChild(el);
         }
-        result.appendChild(paragraph);
+        el.appendChild(paragraph);
 
         const shareBtn = document.createElement('button');
         shareBtn.classList.add('share');
@@ -42,9 +46,7 @@ export class WinDialog extends Dialog {
             await navigator.clipboard.writeText(this.winStats().join('\n'));
             alert('Copied to clipboard');
         });
-        result.appendChild(shareBtn);
-
-        return result;
+        el.appendChild(shareBtn);
     }
 
     private winStats(): string[] {
@@ -62,8 +64,7 @@ export class WinDialog extends Dialog {
         return [
             firstLine,
             location.href,
-            elapsedTimeStr,
-            hintStr,
+            elapsedTimeStr + ', ' + hintStr,
         ];
     }
 }

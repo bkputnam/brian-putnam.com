@@ -9,7 +9,7 @@ import { createLetterEl } from "./letter.js";
 import { PieceController } from "./piece_controller.js";
 import { PlayAreaModel } from "./play_area_model.js";
 
-export class BoardController extends Controller {
+export class BoardController extends Controller<SVGGraphicsElement> {
     private readonly board: Board;
     private readonly cells: Array<Array<SVGGraphicsElement>> = [];
 

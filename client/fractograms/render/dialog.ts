@@ -1,18 +1,21 @@
 import { Resolver } from "../util/resolver.js";
+import { Controller } from "./controller.js";
 
-export abstract class Dialog {
-    private readonly dialog: HTMLDialogElement;
-
+export abstract class Dialog extends Controller<HTMLDialogElement> {
     constructor() {
-        this.dialog = document.createElement('dialog');
+        super();
     }
 
-    render(): HTMLElement {
+    protected override createEl(): HTMLDialogElement {
+        return document.createElement('dialog');
+    }
+
+    protected override decorate(dialog: HTMLDialogElement): void {
         const header = document.createElement('form');
 
         header.method = 'dialog'
         header.classList.add('dialog-header');
-        this.dialog.appendChild(header);
+        dialog.appendChild(header);
 
         const title = document.createElement('h2');
         title.classList.add('title');
@@ -29,10 +32,9 @@ export abstract class Dialog {
         const content = document.createElement('div');
         content.classList.add('dialog-content');
         content.appendChild(this.renderHtmlContent());
-        this.dialog.appendChild(content);
+        dialog.appendChild(content);
 
-        document.getElementById('dialogs')!.appendChild(this.dialog);
-        return this.dialog;
+        document.getElementById('dialogs')!.appendChild(dialog);
     }
 
     protected abstract getTitle(): string;
@@ -41,15 +43,15 @@ export abstract class Dialog {
     showModal(): Promise<void> {
         const resolver = new Resolver<void>();
         const closeCallback = () => {
-            this.dialog.removeEventListener('close', closeCallback);
+            this.getElStrict().removeEventListener('close', closeCallback);
             resolver.resolve();
         };
-        this.dialog.addEventListener('close', closeCallback);
-        this.dialog.showModal();
+        this.getElStrict().addEventListener('close', closeCallback);
+        this.getElStrict().showModal();
         return resolver.promise;
     }
 
     close() {
-        this.dialog.close();
+        this.getElStrict().close();
     }
 }

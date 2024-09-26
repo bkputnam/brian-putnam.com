@@ -3,6 +3,7 @@
     --letter-side-len: 60px;
     --border-width: 2px;
     --font-family: 'Courier New', 'Lucida Console', 'Monaco', monospace;
+    --box-side-len: calc(var(--letter-side-len) * 5 + var(--border-width) * 6);
 }
 
 html,
@@ -59,12 +60,50 @@ div#play-area {
     width: 100%;
     height: auto;
     flex-grow: 1;
+
+    /* Play area should also be display:flex so that we can make room for the
+    WinMessage later on */
+    display: flex;
+    flex-direction: column;
 }
 
 svg#play-area-svg {
     display: block;
     width: 100%;
-    height: 100%;
+    /* By default (when no win message is shown) the play area should take up
+    all available height so that the scattered pieces are visible */
+    flex-grow: 1;
+    /* When the puzzle is solved and the WinMessage is shown, use min-height to
+    make sure that the entire board is still visible */
+    min-height: var(--box-side-len);
+}
+
+div#play-area.solved svg#play-area-svg {
+    /* Once the puzzle is solved, the play area <svg> element no longer needs to
+    to take up the entire height of the page, because there are no more pieces
+    hanging about */
+    flex-grow: 0;
+}
+
+div#play-area.solved .win-message {
+    /* Cause the WinMessage to take up the rest of the height of the page
+    because it's the last thing on the page */
+    flex-grow: 1;
+}
+
+.win-message {
+    width: var(--box-side-len);
+    margin: auto;
+}
+
+.win-message h2 {
+    text-align: center;
+}
+
+.win-message .share {
+    display: block;
+    width: 150px;
+    margin: auto;
 }
 
 svg#centering-svg {

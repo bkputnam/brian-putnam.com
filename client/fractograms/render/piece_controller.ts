@@ -9,7 +9,7 @@ import { getTranslateXY } from "../util/svg_util.js";
 import { BORDER_WIDTH } from "../consts.js";
 import { Board } from "../data_structures/board.js";
 
-export class PieceController extends Controller {
+export class PieceController extends Controller<SVGGraphicsElement> {
     private dragStartCoords: CssTransformCoords | undefined = undefined;
 
     constructor(readonly board: Board, readonly piece: Piece) {

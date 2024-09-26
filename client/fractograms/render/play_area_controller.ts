@@ -8,7 +8,7 @@ import { Controller } from "./controller.js";
 import { PieceController } from "./piece_controller.js";
 import { PlayAreaModel } from "./play_area_model.js";
 
-export class PlayAreaController extends Controller {
+export class PlayAreaController extends Controller<SVGGraphicsElement> {
     readonly model: PlayAreaModel;
     readonly boardController: BoardController;
 
