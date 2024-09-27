@@ -23,6 +23,7 @@ export class BkpDragEvent extends CustomEvent<DragDetail> {
         super(detail.eventType, {
             detail,
             bubbles: false,
+            cancelable: true,
         });
     }
 }

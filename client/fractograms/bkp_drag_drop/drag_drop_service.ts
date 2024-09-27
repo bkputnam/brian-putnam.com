@@ -49,11 +49,12 @@ class DragDropService {
             curPos: startPos,
         };
         const doDrag = el.dispatchEvent(new BkpDragEvent(detail));
-        if (doDrag) {
-            this.claimedEls.add(el);
-            dragInfo.dropController = detail.dropController;
-            this.drags.set(id, dragInfo);
+        if (!doDrag) {
+            return false;
         }
+        this.claimedEls.add(el);
+        dragInfo.dropController = detail.dropController;
+        this.drags.set(id, dragInfo);
         return true;
     }
 
