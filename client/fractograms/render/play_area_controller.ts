@@ -1,5 +1,7 @@
 import { Board } from "../data_structures/board.js";
+import { PieceAtCoord } from "../data_structures/piece.js";
 import { Solution } from "../data_structures/solution.js";
+import { deserializeHintStats, HintStats, isInHints } from "../data_structures/solution_stats.js";
 import { DomRectLike, boxesIntersect } from "../util/geometry.js";
 import { randInt } from "../util/random.js";
 import { Resolver } from "../util/resolver.js";
@@ -115,13 +117,30 @@ export class PlayAreaController extends Controller<SVGGraphicsElement> {
             .getElementById('centering-svg') as unknown as SVGSVGElement;
 
         let pieceNumber = 1;
+        const isPreviouslySolved = !!this.solution.solutionStats;
+        const hints: HintStats | null = isPreviouslySolved ?
+            deserializeHintStats(this.solution.solutionStats.hints) : null;
         for (const pieceController of this.model.pieces) {
-            const pieceEl = pieceController.render();
-            centeringSvg.appendChild(pieceEl);
-            pieceEl.classList.add('p' + pieceNumber % 6);
-            pieceNumber++;
+            const piece = pieceController.piece;
+            const coord = this.model.solutionCoords.get(pieceController)!;
+            if (hints && isInHints({ piece, coord }, hints)) {
+                this.boardController.pieceToHint(pieceController, coord);
+                continue;
+            } else {
+                const pieceEl = pieceController.render();
+                centeringSvg.appendChild(pieceEl);
+                pieceEl.classList.add('p' + pieceNumber % 6);
 
-            this.placePieceRandomlyHelper(pieceController, positioningInfo);
+                if (isPreviouslySolved) {
+                    this.boardController.tryPlacePiece(
+                        pieceController,
+                        coord,
+                    );
+                } else {
+                    this.placePieceRandomlyHelper(pieceController, positioningInfo);
+                }
+            }
+            pieceNumber++;
         }
     }
 
@@ -148,7 +167,7 @@ export class PlayAreaController extends Controller<SVGGraphicsElement> {
         this.boardCompleteResolver.resolve(board);
     }
 
-    applyHint(): number {
+    applyHint(): PieceAtCoord | null {
         let smallestPieces: PieceController[] | null = null;
         let smallestSize = Number.POSITIVE_INFINITY;
         for (const piece of this.model.pieces) {
@@ -163,7 +182,7 @@ export class PlayAreaController extends Controller<SVGGraphicsElement> {
             }
         }
         if (smallestPieces === null) {
-            return 0;
+            return null;
         }
 
         const pieceIndex = randInt(0, smallestPieces.length);
@@ -177,7 +196,7 @@ export class PlayAreaController extends Controller<SVGGraphicsElement> {
         piece.delete();
         this.model.removePiece(piece);
         this.boardController.pieceToHint(piece, pieceCoord);
-        return smallestSize;
+        return { piece: piece.piece, coord: pieceCoord };
     }
 }
 

@@ -1,11 +1,10 @@
 import { Board } from "./board.js";
-import { BoardCoord, LetterCoord } from "./coord.js";
+import { BoardCoord } from "./coord.js";
 import { Piece, PieceAtCoord } from "./piece.js";
-import { shuffleInPlace } from "../util/random.js";
-import { TETROMINOES, TETROMINO_REVERSE_LOOKUP } from "../data/tetrominoes.js";
 import { WORD_SIZE } from "../data/solutions.js";
 import { deserialize, u64 } from "../util/deserializer.js";
 import { GameType } from "../render/page_controller.js";
+import { SolutionStats } from "./solution_stats.js";
 
 export class Solution {
     private readonly grid: string[][];
@@ -13,7 +12,12 @@ export class Solution {
     constructor(
         letterGrid: string,
         private readonly serializedSlices: u64,
-        readonly gameType: GameType) {
+        readonly gameType: GameType,
+        readonly hash: string,
+        // Will only be populated if the player has completed this puzzle
+        // previously. If solutionStats is populated, solutionStats.hash must be
+        // equal to hash.
+        readonly solutionStats: SolutionStats | null) {
         this.grid = letterGrid
             .split('\n')
             .map((rowStr: string) =>
@@ -24,6 +28,12 @@ export class Solution {
                 throw new Error('Solution must be a square');
             }
         }
+    }
+
+    getSolutionText(colSeparator = '', rowSeparator = '\n'): string {
+        return this.grid
+            .map((row) => row.join(colSeparator))
+            .join(rowSeparator);
     }
 
     private *iterCoords(): Iterable<BoardCoord> {
@@ -45,36 +55,6 @@ export class Solution {
             result.setLetter(letter, pieceCoord);
         }
         return result;
-    }
-
-    private makeRandomPieces(): PieceAtCoord[] {
-        // Just a temp Board to keep track of where we've placed Pieces
-        const placementBoard = new Board(this.grid.length);
-        const pieces: Array<{ piece: Piece, coord: BoardCoord; }> = [];
-
-        const tetrominoes = [...TETROMINOES];
-        const coords = [...this.iterCoords()];
-
-        const placeRandomPiece = () => {
-            for (const tetromino of shuffleInPlace(tetrominoes)) {
-                for (const coord of shuffleInPlace(coords)) {
-                    if (placementBoard.tryPlacePiece(tetromino, coord)) {
-                        pieces.push({
-                            piece: this.makePieceFromTemplate(tetromino, coord),
-                            coord,
-                        });
-                        return true;
-                    }
-                }
-            }
-            return false;
-        };
-
-        while (placeRandomPiece()) { }
-        for (const pieceAtCoord of this.leftoversToPieces(placementBoard)) {
-            pieces.push(pieceAtCoord);
-        }
-        return pieces;
     }
 
     private getSerializedPieces(): PieceAtCoord[] {
@@ -105,7 +85,6 @@ export class Solution {
         pieces: PieceAtCoord[];
     } {
         const startingBoard = Board.fromStringArray(this.grid);
-        // const pieces = this.makeRandomPieces();
         const pieces = this.getSerializedPieces();
         for (const { piece, coord } of pieces) {
             startingBoard.clearPiece(piece, coord);

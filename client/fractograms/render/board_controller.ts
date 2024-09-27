@@ -70,17 +70,19 @@ export class BoardController extends Controller<SVGGraphicsElement> {
         const pieceController = detail.dropController as PieceController;
         const transformCoords = pieceController.getTranslateXY();
         const { row, col } = svgToBoardCoords(transformCoords);
-        if (this.board.tryPlacePiece(pieceController.piece, { row, col })) {
-            const snapToXY = boardToSvgCoords({ row, col });
+        this.tryPlacePiece(pieceController, { row, col });
+    }
+
+    tryPlacePiece(pieceController: PieceController, coord: BoardCoord): boolean {
+        const success = this.board.tryPlacePiece(pieceController.piece, coord);
+        if (success) {
+            const snapToXY = boardToSvgCoords(coord);
             pieceController.setTranslateXY(snapToXY);
             if (this.board.isComplete()) {
                 this.model.notifyBoardComplete(this.board);
             }
         }
-    }
-
-    placePiece(pieceController: PieceController, coord: BoardCoord): boolean {
-        return this.board.tryPlacePiece(pieceController.piece, coord);
+        return success;
     }
 
     pieceToHint(piece: PieceController, coord: BoardCoord): void {

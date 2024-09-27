@@ -1,9 +1,11 @@
-import { globalGameState } from "../data_structures/game.js";
+import { PieceAtCoord } from "../data_structures/piece.js";
+import { deserializeHintStats, SolutionStats } from "../data_structures/solution_stats.js";
+import { sum } from "../util/array_helpers.js";
 import { msToHumanReadable } from "../util/time.js";
 import { Controller } from "./controller.js";
 
 export class WinMessage extends Controller<HTMLElement> {
-    constructor() {
+    constructor(private readonly solutionStats: SolutionStats) {
         super();
     }
 
@@ -50,17 +52,20 @@ export class WinMessage extends Controller<HTMLElement> {
     }
 
     private winStats(): string[] {
-        const pageController = globalGameState.pageController!;
-        const firstLine = pageController.getGameType() == 'daily'
+        const firstLine = this.solutionStats.gameType == 'daily'
             ? `I beat today's Fractogram!`
             : `I beat this Fractogram:`;
         const elapsedTimeStr =
-            msToHumanReadable(pageController.getTimer().getElapsedMs());
-        const hintStats = pageController.getHintStats();
+            msToHumanReadable(this.solutionStats.elapsedMs);
+        const hintStats = deserializeHintStats(this.solutionStats.hints);
+        const numHints = hintStats.hints.length;
+        const numCells = sum(
+            hintStats.hints.map(
+                (hint: PieceAtCoord) => hint.piece.countLetters()));
         const hintStr =
-            hintStats.numHints == 0 ? 'Zero hints' :
-                hintStats.numHints == 1 ? `1 hint (${hintStats.numCells} cells)` :
-                    `${hintStats.numHints} hints (${hintStats.numCells} cells)`;
+            numHints == 0 ? 'Zero hints' :
+                numHints == 1 ? `1 hint (${numCells} cells)` :
+                    `${numHints} hints (${numCells} cells)`;
         return [
             firstLine,
             location.href,

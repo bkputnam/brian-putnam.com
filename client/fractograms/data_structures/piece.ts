@@ -4,6 +4,33 @@ import { BoardCoord, LetterCoord } from "./coord.js";
 export type PieceAtCoord = { piece: Piece, coord: BoardCoord; };
 export type PieceAtIndex = { piece: Piece, coord: number; };
 
+export function pieceAtCoordEquals(a: PieceAtCoord, b: PieceAtCoord) {
+    if (
+        a.coord.row !== b.coord.row ||
+        a.coord.col !== b.coord.col
+    ) {
+        return false;
+    }
+    const aLetters = a.piece.getLetterGrid();
+    const bLetters = b.piece.getLetterGrid();
+    if (aLetters.length !== bLetters.length) {
+        return false;
+    }
+    for (let rowIndex = 0; rowIndex < aLetters.length; rowIndex++) {
+        const aRow = aLetters[rowIndex];
+        const bRow = bLetters[rowIndex];
+        if (aRow.length !== bRow.length) {
+            return false;
+        }
+        for (let colIndex = 0; colIndex < aRow.length; colIndex++) {
+            if (aRow[colIndex] !== bRow[colIndex]) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 export class Piece {
     readonly width: number;
     readonly height: number;

@@ -1,6 +1,8 @@
 import { SOLUTIONS } from "../data/solutions.js";
 import { Board } from "../data_structures/board.js";
+import { PieceAtCoord } from "../data_structures/piece.js";
 import { Solution } from "../data_structures/solution.js";
+import { getSolutionStats, HintStats, serializeHintStats, setSolutionStats, SolutionStats } from "../data_structures/solution_stats.js";
 import { daysSinceDailyStart } from "../util/date_math.js";
 import { MAX_SLICE_INDEX, fetchSliceHash } from "../util/fetch_slices.js";
 import { toFragment, fromFragment } from "../util/fragment_hash.js";
@@ -15,8 +17,8 @@ export type GameType = 'daily' | 'random' | 'link';
 class GameState {
     isComplete = false;
     timer = Timer.newStarted();
-    numHints = 0;
-    numHintCells = 0;
+
+    private readonly hints: PieceAtCoord[] = [];
 
     constructor(
         readonly pageController: PageController,
@@ -30,6 +32,14 @@ class GameState {
                 onCompleteCallback(this);
             }
         });
+    }
+
+    recordHint(hint: PieceAtCoord) {
+        this.hints.push(hint);
+    }
+
+    getHints(): PieceAtCoord[] {
+        return this.hints;
     }
 }
 
@@ -138,7 +148,13 @@ export class PageController {
         const solutionText = SOLUTIONS[indices.solutionIndex];
         console.log(solutionText);
         const pieces = await fetchSliceHash(indices.sliceIndex);
-        return new Solution(solutionText, pieces, indices.gameType);
+        const solutionStats = getSolutionStats(indices.hash);
+        return new Solution(
+            solutionText,
+            pieces,
+            indices.gameType,
+            indices.hash,
+            solutionStats);
     }
 
     private async render(gameType: GameType): Promise<SVGGraphicsElement> {
@@ -161,7 +177,34 @@ export class PageController {
     }
 
     displayWinMessage(): void {
-        const winMessage = new WinMessage();
+        const gameState = this.gameState;
+        if (!gameState) {
+            throw new Error('Cannot display win message: missing game state');
+        }
+        if (!gameState.isComplete) {
+            throw new Error('Cannot display win message: game not finished');
+        }
+        let solutionStats: SolutionStats;
+        if (gameState.solution.solutionStats) {
+            // The player has won this game previously, and we're displaying a
+            // win message because we've just finished automatically
+            // reconstructing the player's win from a previous page load. Don't
+            // Overwrite the hintStats in localStorage in that case.
+            solutionStats = gameState.solution.solutionStats;
+        } else {
+            // This is the normal case: the player played the game normally and
+            // won, so we should record winStats to localStorage.
+            solutionStats = {
+                hash: gameState.solution.hash,
+                gameType: gameState.solution.gameType,
+                solutionText: this.gameState!.solution.getSolutionText(
+                    /* colSeparator= */ '', /* rowSeparator= */ ''),
+                elapsedMs: this.getTimer().getElapsedMs(),
+                hints: serializeHintStats({ hints: gameState.getHints() }),
+            };
+            setSolutionStats(solutionStats);
+        }
+        const winMessage = new WinMessage(solutionStats);
         const winMessageEl = winMessage.render();
         this.parent.appendChild(winMessageEl);
         this.parent.classList.add('solved');
@@ -175,6 +218,7 @@ export class PageController {
 
     async clearAndRender(gameType: GameType): Promise<void> {
         this.parent.innerHTML = '';
+        this.parent.classList.remove('solved');
         this.element = null;
         this.parent.appendChild(await this.render(gameType));
         this.gameState!.playAreaController.renderPieces();
@@ -186,10 +230,9 @@ export class PageController {
 
     applyHint() {
         if (this.gameState) {
-            const numHintCells = this.gameState.playAreaController.applyHint();
-            if (numHintCells > 0) {
-                this.gameState.numHints++;
-                this.gameState.numHintCells += numHintCells;
+            const pieceAtCoord = this.gameState.playAreaController.applyHint();
+            if (pieceAtCoord) {
+                this.gameState.recordHint(pieceAtCoord);
             }
         }
     }
@@ -202,11 +245,10 @@ export class PageController {
         return this.gameState!.solution.gameType;
     }
 
-    getHintStats(): { numHints: number, numCells: number } {
+    getHintStats(): HintStats {
         const gameState = this.gameState!;
         return {
-            numHints: gameState.numHints,
-            numCells: gameState.numHintCells,
+            hints: gameState.getHints(),
         };
     }
 }
