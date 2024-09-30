@@ -33,6 +33,30 @@ impl<'a> Board<'a> {
         result
     }
 
+    pub fn with_capacity(all_words: &'a HashSet<String>) -> Board<'a> {
+        let capacity = all_words.len();
+        Board {
+            rows: [
+                HashSet::with_capacity(capacity),
+                HashSet::with_capacity(capacity),
+                HashSet::with_capacity(capacity),
+                HashSet::with_capacity(capacity),
+                HashSet::with_capacity(capacity),
+            ],
+            cols: [
+                HashSet::with_capacity(capacity),
+                HashSet::with_capacity(capacity),
+                HashSet::with_capacity(capacity),
+                HashSet::with_capacity(capacity),
+                HashSet::with_capacity(capacity),
+            ],
+        }
+    }
+
+    /**
+     * Makes the board self-consistent by filtering out words from each row and
+     * column that don't meet our criteria.
+     */
     fn make_consistent(&mut self) {
         loop {
             // settle() won't return until it has done a pass where nothing
@@ -45,6 +69,15 @@ impl<'a> Board<'a> {
         }
     }
 
+    /**
+     * Removes words that couldn't be in the final solution because one or more
+     * of their letters is no longer available in the opposing row or column.
+     *
+     * First this filters the remaining words in each row, by comparing against
+     * the remaining words in the columns. Then it filters the columns by the
+     * remaining words in the rows. It repeats this process until both the row
+     * filtering step and the column filtering step produce no changes.
+     */
     fn settle(&mut self) {
         loop {
             let mut something_changed = false;
@@ -75,15 +108,23 @@ impl<'a> Board<'a> {
         }
     }
 
+    /**
+     * Searches through all rows and cols for words that are already claimed,
+     * and removes them from the other rows and cols so that we don't search
+     * through solutions containing duplicate words.
+     *
+     * A word is "claimed" if a row or col has that word as the only remaining
+     * value in its set of possible words.
+     */
     fn remove_duplicates(&mut self) -> bool {
         let mut rows_and_cols: Vec<&mut HashSet<&str>> =
             self.rows.iter_mut().chain(self.cols.iter_mut()).collect();
-        let mut used_words: Vec<String> = Vec::new();
+        let mut used_words: Vec<&str> = Vec::new();
         let mut used_words_owner: Vec<usize> = Vec::new();
         for (index, row_or_col) in rows_and_cols.iter().enumerate() {
             if row_or_col.len() == 1 {
-                let used_word = row_or_col.iter().next().unwrap().to_string();
-                if !used_words.contains(&used_word) {
+                let used_word = row_or_col.iter().next().unwrap();
+                if !used_words.contains(used_word) {
                     used_words.push(used_word);
                     used_words_owner.push(index);
                 }
@@ -100,12 +141,21 @@ impl<'a> Board<'a> {
                 if index == *owner_index {
                     continue;
                 }
-                if row_or_col.remove(used_word.as_str()) {
+                if row_or_col.remove(used_word) {
                     something_changed = true;
                 }
             }
         }
         something_changed
+    }
+
+    pub fn clear(&mut self) {
+        for row in self.rows.iter_mut() {
+            row.clear();
+        }
+        for col in self.cols.iter_mut() {
+            col.clear();
+        }
     }
 
     pub fn is_empty(&self) -> bool {
@@ -136,7 +186,12 @@ impl<'a> Board<'a> {
         true
     }
 
-    pub fn set_row(&self, row_index: usize, word: &'a str) -> Board<'a> {
+    pub fn set_row(
+        &self,
+        row_index: usize,
+        word: &'a str,
+        child_board: &mut Board<'a>,
+    ) {
         if self.is_empty() {
             panic!("Can't set_row({}, {}) in empty board", row_index, word);
         }
@@ -149,26 +204,18 @@ impl<'a> Board<'a> {
             );
         }
 
-        let mut result = self.clone();
-        result.rows[row_index] = HashSet::from_iter(once(word));
-        result.make_consistent();
-
-        result
-    }
-
-    pub fn first_editable_row(&self) -> usize {
+        child_board.clear();
         for (index, row) in self.rows.iter().enumerate() {
-            if row.len() > 1 {
-                return index;
+            if index == row_index {
+                child_board.rows[index].extend(once(word));
+            } else {
+                child_board.rows[index].extend(row.iter());
             }
         }
-        if self.is_empty() {
-            panic!("Couldn't get first_editable_row: board is empty");
+        for (index, col) in self.cols.iter().enumerate() {
+            child_board.cols[index].extend(col.iter());
         }
-        if self.is_complete() {
-            panic!("Couldn't get first_editable_row: board is complete");
-        }
-        panic!("This should be impossible");
+        child_board.make_consistent();
     }
 }
 
@@ -225,20 +272,14 @@ fn filter_against(
         for word in opposite_words[op_index].iter() {
             opposite_letters.insert(word.chars().nth(self_index).unwrap());
         }
-        let mut to_remove: Vec<&str> = Vec::new();
-        for word in to_filter.iter() {
+        to_filter.retain(|word| {
             let keep =
                 opposite_letters.contains(&word.chars().nth(op_index).unwrap());
             if !keep {
-                to_remove.push(word);
+                something_changed = true;
             }
-        }
-        if to_remove.len() > 0 {
-            something_changed = true;
-        }
-        for word in to_remove {
-            to_filter.remove(word);
-        }
+            keep
+        });
     }
     something_changed
 }
