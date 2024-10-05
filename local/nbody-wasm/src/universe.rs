@@ -1,6 +1,6 @@
 use crate::vec2::Vec2;
 use rand::Rng;
-use std::f64::consts::PI;
+use std::{f64::consts::TAU, f64::consts::PI};
 use wasm_bindgen::prelude::*;
 
 const MIN_MASS: f64 = 1.0;
@@ -27,37 +27,66 @@ impl Universe {
         let mut accelerations: Vec<Vec2> = Vec::with_capacity(num_bodies);
         let mut r = rand::thread_rng();
 
-        for _i in 0..num_bodies {
-            // Simple way to have more smaller masses than larger masses in the
-            // distribution. Note that x^2 < x if x < 1.
-            let mass_rand = 1.0; // r.gen_range(0.0..1.0);
-            let mass = mass_rand * mass_rand * (MAX_MASS - MIN_MASS) + MIN_MASS;
+        // for _i in 0..num_bodies {
+        //     // Simple way to have more smaller masses than larger masses in the
+        //     // distribution. Note that x^2 < x if x < 1.
+        //     let mass_rand = 1.0; // r.gen_range(0.0..1.0);
+        //     let mass = mass_rand * mass_rand * (MAX_MASS - MIN_MASS) + MIN_MASS;
 
-            let theta: f64 = r.gen_range(0.0..(2.0 * PI));
-            let radius: f64 = r.gen_range(0.0..(side_len / 2.0));
-            let position = Vec2 {
-                x: radius * theta.cos(),
-                y: radius * theta.sin(),
-            };
+        //     let theta: f64 = r.gen_range(0.0..(2.0 * PI));
+        //     let radius: f64 = r.gen_range(0.0..(side_len / 2.0));
+        //     let position = Vec2 {
+        //         x: radius * theta.cos(),
+        //         y: radius * theta.sin(),
+        //     };
 
-            // Orbital velocity: V = sqrt( G * M / R )
-            // G = 1
-            // M is mass of orbited body, in this case all of the mass inside
-            // current body's orbit can be approximated as the orbited body
-            // R is the radius
-            // let mass_inside = radius / side_len;
-            // let speed: f64 = (mass_inside / radius).sqrt() + 10.0;
-            // let speed: f64 = radius / side_len * 12.0 + 1.0;
-            let speed = 5.0;
-            let velocity = Vec2 {
-                x: speed * (theta + PI / 2.0).cos(),
-                y: speed * (theta + PI / 2.0).sin(),
-            };
-            positions.push(position);
-            masses.push(mass);
-            velocities.push(velocity);
+        //     // Orbital velocity: V = sqrt( G * M / R )
+        //     // G = 1
+        //     // M is mass of orbited body, in this case all of the mass inside
+        //     // current body's orbit can be approximated as the orbited body
+        //     // R is the radius
+        //     // let mass_inside = radius / side_len;
+        //     // let speed: f64 = (mass_inside / radius).sqrt() + 10.0;
+        //     // let speed: f64 = radius / side_len * 12.0 + 1.0;
+        //     let speed = 5.0;
+        //     let velocity = Vec2 {
+        //         x: speed * (theta + PI / 2.0).cos(),
+        //         y: speed * (theta + PI / 2.0).sin(),
+        //     };
+        //     positions.push(position);
+        //     masses.push(mass);
+        //     velocities.push(velocity);
+        //     accelerations.push(Vec2::zero());
+        // }
+
+        for n in 0..num_bodies {
+            let a = r.gen::<f64>() * TAU;
+            let sin = a.sin(); let cos = a.cos();
+            let r = (0..6).map(|_| r.gen::<f64>()).sum::<f64>();
+            let r = (r / 3.0 - 1.0).abs();
+            positions.push(Vec2 { x: cos, y: sin } * (n as f64).sqrt() * 10.0 * r);
+            velocities.push(Vec2 { x: sin, y: -cos });
+            masses.push(1.0);
             accelerations.push(Vec2::zero());
         }
+
+        let mut sorted_indices: Vec<usize> = (0..num_bodies).collect();
+        sorted_indices.sort_by(|a, b| {
+            let pos_a = positions[*a];
+            let pos_b = positions[*b];
+            pos_a.magnitude_squared().total_cmp(&pos_b.magnitude_squared())
+        });
+        let positions_old = positions.clone();
+        let velocities_old = velocities.clone();
+        // let masses_old = masses.clone();
+        let sort_by_indices = |arr: &mut Vec<Vec2>, arr_old: &Vec<Vec2>| {
+            for i in 0..num_bodies {
+                arr[i] = arr_old[sorted_indices[i]];
+            }
+        };
+        sort_by_indices(&mut positions, &positions_old);
+        sort_by_indices(&mut velocities, &velocities_old);
+        // sort_by_indices(&masses, &masses_old);
 
         let mut result = Universe {
             num_bodies,
