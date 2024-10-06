@@ -1,12 +1,19 @@
-use crate::vec2::Vec2;
+use crate::{
+    quad_tree::{QuadTree, QuadTreeContents},
+    vec2::Vec2,
+};
 use rand::Rng;
-use std::{f64::consts::TAU, f64::consts::PI};
+use std::f64::consts::TAU;
 use wasm_bindgen::prelude::*;
 
-const MIN_MASS: f64 = 1.0;
-const MAX_MASS: f64 = 100.0;
+// const MIN_MASS: f64 = 1.0;
+// const MAX_MASS: f64 = 100.0;
 
 const DELTA_T: f64 = 0.1;
+
+// If a node's size / node's distance is smaller than this number, use the node
+// as an approximation of its contents.
+const QUADTREE_THETA: f64 = 0.1;
 
 #[wasm_bindgen]
 pub struct Universe {
@@ -61,10 +68,12 @@ impl Universe {
 
         for n in 0..num_bodies {
             let a = r.gen::<f64>() * TAU;
-            let sin = a.sin(); let cos = a.cos();
+            let sin = a.sin();
+            let cos = a.cos();
             let r = (0..6).map(|_| r.gen::<f64>()).sum::<f64>();
             let r = (r / 3.0 - 1.0).abs();
-            positions.push(Vec2 { x: cos, y: sin } * (n as f64).sqrt() * 10.0 * r);
+            positions
+                .push(Vec2 { x: cos, y: sin } * (n as f64).sqrt() * 10.0 * r);
             velocities.push(Vec2 { x: sin, y: -cos });
             masses.push(1.0);
             accelerations.push(Vec2::zero());
@@ -74,7 +83,9 @@ impl Universe {
         sorted_indices.sort_by(|a, b| {
             let pos_a = positions[*a];
             let pos_b = positions[*b];
-            pos_a.magnitude_squared().total_cmp(&pos_b.magnitude_squared())
+            pos_a
+                .magnitude_squared()
+                .total_cmp(&pos_b.magnitude_squared())
         });
         let positions_old = positions.clone();
         let velocities_old = velocities.clone();
@@ -101,13 +112,27 @@ impl Universe {
     }
 
     fn step(&mut self) {
-        for i in 0..self.num_bodies {
-            for j in (i + 1)..self.num_bodies {
-                let pos_1 = self.positions[i];
-                let pos_2 = self.positions[j];
+        self.compute_accelerations();
+        self.update_velocities_and_positions();
+        // Bumping into the boundaries can impart momentum to the system.
+        // Random rounding errors can have the same effect, but (probably) more
+        // slowly.
+        self.cancel_momentum();
+    }
 
-                // Vector from body_1 to body_2
-                let dist_vec = pos_2 - pos_1;
+    fn compute_accelerations(&mut self) {
+        let positions = &self.positions;
+        let masses = &self.masses;
+        let accelerations = &mut self.accelerations;
+
+        let quadtree = QuadTree::new(&self.positions, &self.masses);
+
+        let mut update_body =
+            |body_pos: Vec2,
+             body_index: usize,
+             attractor_pos: Vec2,
+             attractor_mass: f64| {
+                let dist_vec = attractor_pos - body_pos;
                 let dist_mag_sq_actual = dist_vec.magnitude_squared();
                 let dist_mag_sq = dist_mag_sq_actual.max(5.0);
                 let dist_unit = dist_vec / dist_mag_sq_actual.sqrt();
@@ -120,10 +145,53 @@ impl Universe {
                 // a_1 = m_2 / dist_mag^2 * dist_unit
                 let inv_dist = dist_unit * (1.0 / dist_mag_sq);
 
-                self.accelerations[i] += inv_dist * self.masses[j];
-                self.accelerations[j] += inv_dist * -self.masses[i];
-            }
+                accelerations[body_index] += inv_dist * attractor_mass;
+            };
+
+        for (body_index, body_pos) in self.positions.iter().copied().enumerate()
+        {
+            quadtree.walk(|_node_index, _depth, node| {
+                match &node.contents {
+                    QuadTreeContents::Points(point_indices) => {
+                        for &attractor_index in point_indices {
+                            if attractor_index != body_index {
+                                update_body(
+                                    body_pos,
+                                    body_index,
+                                    positions[attractor_index],
+                                    masses[attractor_index],
+                                );
+                            }
+                        }
+                        false // Don't recurse: there are no children anyway
+                    }
+                    QuadTreeContents::Children(_) => {
+                        let node_center_of_mass = node.center_of_mass;
+                        let dist_to_center =
+                            (body_pos - node_center_of_mass).magnitude();
+                        let diag = node.diagonal_len();
+                        if diag / dist_to_center < QUADTREE_THETA {
+                            update_body(
+                                body_pos,
+                                body_index,
+                                node_center_of_mass,
+                                node.total_mass,
+                            );
+                            // We've accepted the approximation, so don't
+                            // recurse
+                            false
+                        } else {
+                            // We've rejected the approximation, so recurse and
+                            // try again
+                            true
+                        }
+                    }
+                }
+            });
         }
+    }
+
+    fn update_velocities_and_positions(&mut self) {
         for i in 0..self.num_bodies {
             if !self.is_in_bounds(i) {
                 // The body should be pulled back towards the center as long as
@@ -135,10 +203,6 @@ impl Universe {
             self.positions[i] += self.velocities[i] * DELTA_T;
             self.accelerations[i].clear();
         }
-        // Bumping into the boundaries can impart momentum to the system.
-        // Random rounding errors can have the same effect, but (probably) more
-        // slowly.
-        self.cancel_momentum();
     }
 
     fn is_in_bounds(&self, index: usize) -> bool {

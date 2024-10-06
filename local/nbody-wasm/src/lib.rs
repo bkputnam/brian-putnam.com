@@ -1,4 +1,3 @@
-mod f64_magic;
 mod quad_tree;
 mod set_panic_hook;
 mod universe;
