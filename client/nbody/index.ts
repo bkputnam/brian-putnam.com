@@ -1,16 +1,11 @@
 import init, { start_simulation } from "./wasm/nbody_wasm.js";
 
 const SIDE_LEN = document.body.clientHeight;
-debugger;
 
 const wasm = await init({});
-const universe = start_simulation(500, SIDE_LEN);
+const universe = start_simulation(2500, SIDE_LEN);
 
 const num_bodies = universe.get_num_bodies();
-const positions = new Float64Array(
-    wasm.memory.buffer, universe.get_positions(), num_bodies * 2);
-const masses = new Float64Array(
-    wasm.memory.buffer, universe.get_masses(), num_bodies);
 
 const canvas = document.createElement('canvas');
 canvas.width = SIDE_LEN;
@@ -27,7 +22,25 @@ function isInBounds(x: number) {
 }
 
 function draw() {
-    context.clearRect(0, 0, canvas.width, canvas.height)
+    // Not sure why we have to recreate these every time. In previous versions
+    // of the code initializing these once, outside this function, worked just
+    // fine. However with commit 1be55af I started getting error messages about
+    // "attempting to access detached ArrayBuffer". I tracked it down to the
+    // line in QuadTree::new where we allocate the `nodes` array using
+    // `Vec::with_capacity`. I don't understand what that does to the
+    // `positions` and `masses` arrays, but if I comment it out I don't get the
+    // "detached ArrayBuffer" messages, and if I uncomment it I have to
+    // re-initialize these Float64Arrays on every draw() call as a workaround.
+    const positions = new Float64Array(
+        wasm.memory.buffer, universe.get_positions(), num_bodies * 2);
+    const masses = new Float64Array(
+        wasm.memory.buffer, universe.get_masses(), num_bodies);
+
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    context.fillStyle = "#000";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
     context.fillStyle = "#FFF";
     for (let i = 0; i < num_bodies; i++) {
         const x = toCanvasCoords(positions[i * 2]);
