@@ -1,9 +1,10 @@
+import { getRed, setRgb } from "./util/imagedata_util.js";
 import init, { start_simulation } from "./wasm/nbody_wasm.js";
 
 const SIDE_LEN = document.body.clientHeight;
 
 const wasm = await init({});
-const universe = start_simulation(2500, SIDE_LEN);
+const universe = start_simulation(5_000, SIDE_LEN);
 
 const num_bodies = universe.get_num_bodies();
 
@@ -14,7 +15,7 @@ document.body.appendChild(canvas);
 const context = canvas.getContext("2d")!;
 
 function toCanvasCoords(x: number) {
-    return x + canvas.width / 2;
+    return Math.round(x / 2 + canvas.width / 2);
 }
 
 function isInBounds(x: number) {
@@ -41,14 +42,17 @@ function draw() {
     context.fillStyle = "#000";
     context.fillRect(0, 0, canvas.width, canvas.height);
 
-    context.fillStyle = "#FFF";
+    let imageData = context.getImageData(0, 0, canvas.width, canvas.height);
     for (let i = 0; i < num_bodies; i++) {
         const x = toCanvasCoords(positions[i * 2]);
         const y = toCanvasCoords(positions[i * 2 + 1]);
         if (isInBounds(x) && isInBounds(y)) {
-            context.fillRect(x, y, 1, 1);
+            let red = getRed(imageData, x, y);
+            red = Math.round(255 - (255 - red) * 0.5);
+            setRgb(imageData, x, y, red, red, red);
         }
     }
+    context.putImageData(imageData, 0, 0);
 }
 function drawLoop() {
     draw();

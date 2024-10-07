@@ -3,7 +3,7 @@ use std::{mem, ops::Range};
 
 use crate::vec2::Vec2;
 
-const MAX_DEPTH: u32 = 10;
+const MAX_DEPTH: u32 = 20;
 
 pub enum QuadTreeContents {
     Points(Vec<usize>),
