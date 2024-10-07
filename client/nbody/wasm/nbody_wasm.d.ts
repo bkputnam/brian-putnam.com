@@ -2,20 +2,21 @@
 /* eslint-disable */
 /**
 * @param {number} num_bodies
-* @param {number} side_len
 * @returns {Universe}
 */
-export function start_simulation(num_bodies: number, side_len: number): Universe;
+export function start_simulation(num_bodies: number): Universe;
 /**
 */
 export class Universe {
   free(): void;
 /**
 * @param {number} num_bodies
-* @param {number} side_len
 * @returns {Universe}
 */
-  static new(num_bodies: number, side_len: number): Universe;
+  static new(num_bodies: number): Universe;
+/**
+*/
+  init(): void;
 /**
 * @param {number} n
 */
@@ -31,11 +32,11 @@ export class Universe {
 /**
 * @returns {number}
 */
-  get_num_bodies(): number;
+  get_velocities(): number;
 /**
 * @returns {number}
 */
-  get_side_len(): number;
+  get_num_bodies(): number;
 }
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
@@ -43,17 +44,17 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
   readonly __wbg_universe_free: (a: number, b: number) => void;
-  readonly universe_new: (a: number, b: number) => number;
+  readonly universe_new: (a: number) => number;
+  readonly universe_init: (a: number) => void;
   readonly universe_step_n: (a: number, b: number) => void;
   readonly universe_get_positions: (a: number) => number;
   readonly universe_get_masses: (a: number) => number;
+  readonly universe_get_velocities: (a: number) => number;
   readonly universe_get_num_bodies: (a: number) => number;
-  readonly universe_get_side_len: (a: number) => number;
-  readonly start_simulation: (a: number, b: number) => number;
+  readonly start_simulation: (a: number) => number;
   readonly __wbindgen_free: (a: number, b: number, c: number) => void;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
-  readonly __wbindgen_exn_store: (a: number) => void;
 }
 
 export type SyncInitInput = BufferSource | WebAssembly.Module;
