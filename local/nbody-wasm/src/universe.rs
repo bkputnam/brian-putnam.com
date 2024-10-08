@@ -76,6 +76,11 @@ impl Universe {
                 let dist_vec = attractor_pos - body_pos;
                 let dist_mag_sq_actual = dist_vec.magnitude_squared();
                 let dist_mag_sq = dist_mag_sq_actual.max(100.0);
+
+                // The "Quake3 Fast Inverse Square Root" algorithm has been
+                // investigated for use here, and it was found to be slower than
+                // the naive "1.0 / val.sqrt()" method. See README.md for
+                // details.
                 let dist_unit = dist_vec / dist_mag_sq_actual.sqrt();
 
                 // Universal gravitational formula:
