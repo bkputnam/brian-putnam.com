@@ -58,8 +58,7 @@ mod tests {
                 x: speed * (theta + PI / 2.0).cos(),
                 y: speed * (theta + PI / 2.0).sin(),
             };
-            universe
-                .set_i(i, position.x, position.y, mass, velocity.x, velocity.y);
+            universe.set_i(i, position, mass, velocity);
         }
         universe.init();
         universe

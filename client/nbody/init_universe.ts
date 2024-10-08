@@ -2,8 +2,8 @@ import init, { InitOutput, Universe } from "./wasm/nbody_wasm.js";
 
 const MIN_MASS = 1.0;
 const MAX_MASS = 100.0;
-const SIDE_LEN = 700.0;
-const NUM_BODIES = 5_000;
+const MAX_RADIUS = 350.0;
+const NUM_BODIES = 4_000;
 
 function randBetween(min: number, max: number): number {
     return Math.random() * (max - min) + min;
@@ -27,11 +27,11 @@ export async function initUniverse(): Promise<InitResult> {
         const mass = mass_rand * mass_rand * (MAX_MASS - MIN_MASS) + MIN_MASS;
 
         const theta = randBetween(0, 2 * Math.PI);
-        const radius = randBetween(0, SIDE_LEN / 2);
+        const radius = randBetween(0, MAX_RADIUS);
         const position_x = radius * Math.cos(theta);
         const position_y = radius * Math.sin(theta);
 
-        const speed = 7 * Math.log(radius + 1);
+        const speed = 6 * Math.log(radius + 1);
         let vel_x = speed * Math.cos(theta + Math.PI / 2);
         let vel_y = speed * Math.sin(theta + Math.PI / 2);
 

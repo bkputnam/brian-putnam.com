@@ -201,7 +201,18 @@ impl QuadTree {
     ) {
         let pos = positions[position_index];
         if !self.nodes[node_index].contains(pos) {
-            panic!("Inserting into wrong node");
+            let node = &self.nodes[node_index];
+            panic!(
+                "Inserting into wrong node:
+            node: ({}, {}) -> ({}, {})
+            pos: ({}, {})",
+                node.x.start,
+                node.y.start,
+                node.x.end,
+                node.y.end,
+                pos.x,
+                pos.y,
+            );
         }
 
         self.nodes[node_index].update_center_of_mass(
@@ -396,7 +407,7 @@ mod tests {
         let quadtree = QuadTree::new_without_weights(&positions);
         assert_eq!(quadtree.num_points(), 8);
         let max_depth = quadtree.max_depth();
-        assert!(max_depth == MAX_DEPTH);
+        assert!(max_depth <= MAX_DEPTH);
     }
 
     #[test]

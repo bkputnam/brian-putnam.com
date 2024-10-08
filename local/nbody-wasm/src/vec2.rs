@@ -23,6 +23,25 @@ impl Vec2 {
     pub fn magnitude_squared(&self) -> f64 {
         self.x * self.x + self.y * self.y
     }
+
+    pub fn set_magnitude(&mut self, magnitude: f64) {
+        *self *= magnitude / self.magnitude()
+    }
+
+    // Has the same effect as set_magnitude, but allows you to pass magnitude^2
+    // instead of magnitude, which can sometimes save you a few sqrt calls.
+    pub fn set_magnitude_squared(&mut self, mut magnitude_squared: f64) {
+        // A negative magnitude should reverse the direction of the vector, but
+        // if you just do `negative_number.sqrt()` you'll get a panic. So do
+        // this test first.
+        let sign: f64 = if magnitude_squared < 0.0 {
+            magnitude_squared = -magnitude_squared;
+            -1.0
+        } else {
+            1.0
+        };
+        *self *= sign * (magnitude_squared / self.magnitude_squared()).sqrt();
+    }
 }
 
 impl ops::Add for Vec2 {
@@ -101,5 +120,17 @@ impl ops::DivAssign<f64> for Vec2 {
     fn div_assign(&mut self, rhs: f64) {
         self.x /= rhs;
         self.y /= rhs;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_set_magnitude_squared() {
+        let mut foo = Vec2 { x: 1.0, y: 2.0 };
+        foo.set_magnitude_squared(2.0);
+        assert_eq!(foo.magnitude(), (2.0f64).sqrt());
     }
 }
