@@ -12,6 +12,20 @@ N celestial objects interacting with each other gravitationally.
 Builds code to wasm files (in `./pkg`), and then copies those files to
 `client/nbody/wasm` so that the client-side code can use it.
 
+## Links
+
+- The YouTube videos that started it all:
+    - https://www.youtube.com/watch?v=L9N7ZbGSckk
+    - https://www.youtube.com/watch?v=nZHjD3cI-EU
+- Wikipedia:
+    - [N-Body Simulation](https://en.wikipedia.org/wiki/N-body_simulation)
+    - [Leapfrog integration](https://en.wikipedia.org/wiki/N-body_simulation)
+        (including kick-step-kick)
+- Quake3 Fast Inverse Square Root:
+    - https://www.youtube.com/watch?v=p8u_k2LIZyo
+- Matlab kick-step-kick example:
+    - https://medium.com/quantaphy/the-n-body-problem-2acda67b11b5
+
 ## History
 
 ### Investigating the Quake3 Fast Inverse Square Root Algorithm
