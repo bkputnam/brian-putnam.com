@@ -324,30 +324,35 @@ mod test {
     // happening.
     //
     // This test always "passes" - it's not intended to catch anything in an
-    // automated way, it just provides a means to inspect an debug a simple (but
-    // often buggy) case.
+    // automated way, it just provides a means to inspect and debug a simple
+    // (but often buggy) case.
     #[test]
     fn test_close_encounter() {
+        let x: f64 = 0.1;
         let mut universe = Universe::new(2);
         universe.set_i(
             /* index= */ 0,
-            /* pos= */ Vec2 { x: 2.0, y: 0.0 },
+            /* pos= */ Vec2 { x, y: 0.0 },
             /* mass= */ 1.0,
             /* vel= */ Vec2::zero(),
         );
         universe.set_i(
             /* index= */ 1,
-            /* pos= */ Vec2 { x: -2.0, y: 0.0 },
+            /* pos= */ Vec2 { x: -x, y: 0.0 },
             /* mass= */ 1.0,
             /* vel= */ Vec2::zero(),
         );
         universe.init();
 
-        println!("x\tv");
+        println!("step\tx\tv\tU_old\tU_new");
         for i in 0..400 {
             println!(
-                "{}\t{}",
-                universe.positions[0].x, universe.velocities[0].x,
+                "{}\t{}\t{}\t{}\t{}",
+                i,
+                universe.positions[0].x,
+                universe.velocities[0].x,
+                universe.potential_energies_old[0],
+                universe.potential_energies_new[0],
             );
 
             universe.step();
