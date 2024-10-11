@@ -6,6 +6,8 @@ use crate::{
 use std::iter::repeat;
 use wasm_bindgen::prelude::*;
 
+use rayon::prelude::*;
+
 const DELTA_T: f64 = 0.1;
 
 // If a node's size / node's distance is smaller than this number, use the node
@@ -78,39 +80,47 @@ impl Universe {
     }
 
     fn compute_accelerations(&mut self) {
-        let accelerations = &mut self.accelerations;
+        let positions = &self.positions;
+        let masses = &self.masses;
+        let quadtree = &self.quadtree;
 
-        for (body_index, body_pos) in self.positions.iter().copied().enumerate()
-        {
-            walk_quadtree(
-                body_index,
-                body_pos,
-                &self.positions,
-                &self.masses,
-                &self.quadtree,
-                |attractor_pos: Vec2, attractor_mass: f64| {
-                    let dist_vec = attractor_pos - body_pos;
-                    let dist_mag_sq_actual = dist_vec.magnitude_squared();
-                    let dist_mag_sq = dist_mag_sq_actual.max(100.0);
+        let mut new_accelerations: Vec<Vec2> = (0..positions.len())
+            .into_par_iter()
+            .map(|body_index| {
+                let mut acc = Vec2::zero();
+                let body_pos = positions[body_index];
+                walk_quadtree(
+                    body_index,
+                    body_pos,
+                    positions,
+                    masses,
+                    quadtree,
+                    |attractor_pos: Vec2, attractor_mass: f64| {
+                        let dist_vec = attractor_pos - body_pos;
+                        let dist_mag_sq_actual = dist_vec.magnitude_squared();
+                        let dist_mag_sq = dist_mag_sq_actual.max(100.0);
 
-                    // The "Quake3 Fast Inverse Square Root" algorithm has been
-                    // investigated for use here, and it was found to be slower than
-                    // the naive "1.0 / val.sqrt()" method. See README.md for
-                    // details.
-                    let dist_unit = dist_vec / dist_mag_sq_actual.sqrt();
+                        // The "Quake3 Fast Inverse Square Root" algorithm has
+                        // been investigated for use here, and it was found to
+                        // be slower than the naive "1.0 / val.sqrt()" method.
+                        // See nbody-wasm/README.md for details.
+                        let dist_unit = dist_vec / dist_mag_sq_actual.sqrt();
 
-                    // Universal gravitational formula:
-                    // F = G * m_1 * m_2 / dist_mag^2 * dist_vec_unit
-                    // F = m_1 * a_1 = m_2 * a_2
-                    // dist_vec_unit = dist_vec / dist_mag
-                    // Let G=1 in our universe, and solve for a_1:
-                    // a_1 = m_2 / dist_mag^2 * dist_unit
-                    let inv_dist = dist_unit * (1.0 / dist_mag_sq);
+                        // Universal gravitational formula:
+                        // F = G * m_1 * m_2 / dist_mag^2 * dist_vec_unit
+                        // F = m_1 * a_1 = m_2 * a_2
+                        // dist_vec_unit = dist_vec / dist_mag
+                        // Let G=1 in our universe, and solve for a_1:
+                        // a_1 = m_2 / dist_mag^2 * dist_unit
+                        let inv_dist = dist_unit * (1.0 / dist_mag_sq);
 
-                    accelerations[body_index] += inv_dist * attractor_mass;
-                },
-            );
-        }
+                        acc += inv_dist * attractor_mass;
+                    },
+                );
+                acc
+            })
+            .collect();
+        std::mem::swap(&mut self.accelerations, &mut new_accelerations);
     }
 
     fn update_velocities_and_positions(&mut self) {
@@ -145,23 +155,32 @@ impl Universe {
     }
 
     fn compute_new_potential_energies(&mut self) {
-        let potential_energies_new = &mut self.potential_energies_new;
-        for (body_index, &body_pos) in self.positions.iter().enumerate() {
-            walk_quadtree(
-                body_index,
-                body_pos,
-                &self.positions,
-                &self.masses,
-                &self.quadtree,
-                |attractor_pos: Vec2, attractor_mass: f64| {
-                    let r = (body_pos - attractor_pos).magnitude();
-                    if r != 0.0 {
-                        let potential = -attractor_mass / (r * r);
-                        potential_energies_new[body_index] += potential;
-                    }
-                },
-            );
-        }
+        let positions = &self.positions;
+        let masses = &self.masses;
+        let quadtree = &self.quadtree;
+        let mut pot_eng_new: Vec<f64> = (0..self.positions.len())
+            .into_par_iter()
+            .map(|body_index| {
+                let body_pos = positions[body_index];
+                let mut new_pot_eng: f64 = 0.0;
+                walk_quadtree(
+                    body_index,
+                    body_pos,
+                    positions,
+                    masses,
+                    quadtree,
+                    |attractor_pos: Vec2, attractor_mass: f64| {
+                        let r = (body_pos - attractor_pos).magnitude();
+                        if r != 0.0 {
+                            let potential = -attractor_mass / (r * r);
+                            new_pot_eng += potential;
+                        }
+                    },
+                );
+                new_pot_eng
+            })
+            .collect();
+        std::mem::swap(&mut pot_eng_new, &mut self.potential_energies_new);
     }
 
     // Update the magnitude of the velocity vectors to match their new potential

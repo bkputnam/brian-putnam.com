@@ -26,6 +26,29 @@ handlers:
   static_files: client/redirectAddSlash.html
   upload: client/redirectAddSlash.html
 
+# This would already be served by the /(.*)/ rule below, but we add this
+# "duplicate" rule first so that we can add COOP/COEP headers to just this
+# request. These headers make this page "cross-origin isolated" [1] so that we
+# can use SharedArrayBuffer which is required for WASM threads [2][3]
+# [1] https://web.dev/articles/coop-coep
+# [2] https://web.dev/articles/webassembly-threads
+# [3] https://github.com/RReverser/wasm-bindgen-rayon
+- url: /nbody/
+  secure: always
+  static_files: client/nbody/index.html
+  upload: client/nbody/index.html
+  http_headers:
+    Cross-Origin-Opener-Policy: same-origin
+    Cross-Origin-Embedder-Policy: require-corp
+
+# Apparently these need COEP headers because they're for Workers?
+- url: /nbody/wasm/snippets/(.*\.worker.js)
+  secure: always
+  static_files: client/nbody/wasm/snippets/\1
+  upload: client/nbody/wasm/snippets/(.*)
+  http_headers:
+    Cross-Origin-Embedder-Policy: require-corp
+
 - url: /(.*)/
   secure: always
   static_files: client/\1/index.html

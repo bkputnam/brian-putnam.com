@@ -1,4 +1,4 @@
-import init, { InitOutput, Universe } from "./wasm/nbody_wasm.js";
+import init, { InitOutput, Universe, initThreadPool } from "./wasm/nbody_wasm.js";
 
 const MIN_MASS = 1.0;
 const MAX_MASS = 100.0;
@@ -13,6 +13,7 @@ export type InitResult = { wasm: InitOutput, universe: Universe };
 
 export async function initUniverse(): Promise<InitResult> {
     const wasm = await init({});
+    await initThreadPool(navigator.hardwareConcurrency - 1);
     const universe = Universe.new(NUM_BODIES);
 
     const positions = new Float64Array(

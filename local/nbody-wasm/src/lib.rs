@@ -3,6 +3,9 @@ mod set_panic_hook;
 mod universe;
 mod vec2;
 
+// https://github.com/RReverser/wasm-bindgen-rayon
+pub use wasm_bindgen_rayon::init_thread_pool;
+
 use universe::Universe;
 use wasm_bindgen::prelude::*;
 
