@@ -8,4 +8,5 @@ export interface Handler {
     secure?: 'always';
     static_files: string;
     upload: string;
+    http_headers?: { [key: string]: string }
 }
