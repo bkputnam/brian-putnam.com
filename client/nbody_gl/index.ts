@@ -1,5 +1,5 @@
-import { createProgram, createShader, loadShaderSource } from "./bkp_gl.js";
 import * as webglUtils from "./webgl_utils.js";
+import { createProgram, runProgramWithData, WebGL2ProgramConfig, WebGL2ProgramWrapper } from "./webgl2_wrapper.js";
 
 async function main() {
     const canvas = document.querySelector("#c")! as HTMLCanvasElement;
@@ -7,52 +7,32 @@ async function main() {
     if (!gl) {
         throw new Error('No GL for you!');
     }
-    webglUtils.registerCanvas(canvas);
 
-    const [vertexShaderSource, fragmentShaderSource] = await Promise.all([
-        loadShaderSource('./vert.glsl'),
-        loadShaderSource('./frag.glsl'),
-    ]);
+    const program = await createProgram({
+        gl,
+        vertexShaderSourceUrl: './vert.glsl',
+        fragmentShaderSourceUrl: './frag.glsl',
 
-    // Create shader program
-    const vertexShader =
-        createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-    const fragmentShader =
-        createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
-    const program = createProgram(gl, vertexShader, fragmentShader);
+        drawMode: gl.TRIANGLES,
 
-    var positionAttributeLocation = gl.getAttribLocation(program, "a_position");
-    var resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution");
-    var colorLocation = gl.getUniformLocation(program, "u_color");
+        attributes: {
+            a_position: {
+                size: 2,
+                type: gl.FLOAT,
+                normalize: false,
+                stride: 0,
+                offset: 0,
+                target: gl.ARRAY_BUFFER,
+                usage: gl.STATIC_DRAW,
+            }
+        },
 
-    // Bind some data to ARRAY_BUFFER
-    var positionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    // three 2d points
-    var positions = [
-        10, 20,
-        80, 20,
-        10, 30,
-        10, 30,
-        80, 20,
-        80, 30,
-    ];
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+        uniforms: {
+            u_resolution: 'uniform2f',
+            u_color: 'uniform4f',
+        },
+    });
 
-    var vao = gl.createVertexArray();
-    gl.bindVertexArray(vao);
-    gl.enableVertexAttribArray(positionAttributeLocation);
-    gl.vertexAttribPointer(
-        positionAttributeLocation,
-        /* size= */ 2,          // 2 components per iteration
-        /* type= */ gl.FLOAT,   // the data is 32bit floats
-        /* normalize= */ false, // don't normalize the data
-        /* stride= */ 0,        // 0 = move forward size * sizeof(type) each
-                                // iteration to get the next position
-        /* offset= */ 0);       // start at the beginning of the buffer
-
-    // Resize the canvas to match its displayed size, and then update the
-    // GL viewport to be the whole canvas
     webglUtils.resizeCanvasToDisplaySize(gl.canvas);
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
@@ -60,44 +40,20 @@ async function main() {
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    // Tell it to use our program (pair of shaders)
-    gl.useProgram(program);
+    for (let i = 0; i < 50; i++) {
+        runProgramWithData(program, {
+            attributes: {
+                a_position: randRectangleCoords(program),
+            },
 
-    // Pass in the canvas resolution so we can convert from
-    // pixels to clip space in the shader
-    gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
-
-    // Bind the attribute/buffer set we want.
-    gl.bindVertexArray(vao);
-
-    // var primitiveType = gl.TRIANGLES;
-    // var offset = 0;
-    // var count = 6;
-    // gl.drawArrays(primitiveType, offset, count);
-
-    const MIN_RECT_WIDTH = 10;
-    const MAX_RECT_WIDTH = 300;
-
-    // draw 50 random rectangles in random colors
-    for (var ii = 0; ii < 50; ++ii) {
-        // Setup a random rectangle
-        const width = randomInt(MIN_RECT_WIDTH, MAX_RECT_WIDTH);
-        const height = randomInt(MIN_RECT_WIDTH, MAX_RECT_WIDTH);
-        const x = randomInt(0, gl.canvas.width - width);
-        const y = randomInt(0, gl.canvas.height - height);
-        setRectangle(gl, x, y, width, height);
-
-        // Set a random color.
-        gl.uniform4f(
-            colorLocation, Math.random(), Math.random(), Math.random(), 1);
-
-        // Draw the rectangle.
-        var primitiveType = gl.TRIANGLES;
-        var offset = 0;
-        var count = 6;
-        gl.drawArrays(primitiveType, offset, count);
+            uniforms: {
+                u_resolution: [gl.canvas.width, gl.canvas.height],
+                u_color: [Math.random(), Math.random(), Math.random(), 1],
+            }
+        });
     }
 }
+main();
 
 // Returns a random integer from 0 to range - 1.
 function randomInt(min: number, max: number): number {
@@ -105,31 +61,28 @@ function randomInt(min: number, max: number): number {
 }
 
 // Fills the buffer with the values that define a rectangle.
+const MIN_RECT_WIDTH = 10;
+const MAX_RECT_WIDTH = 300;
+function randRectangleCoords<T extends WebGL2ProgramConfig>(
+    program: WebGL2ProgramWrapper<T>): Float32Array {
+    const gl = program.config.gl;
 
-function setRectangle(
-    gl: WebGL2RenderingContext,
-    x: number,
-    y: number,
-    width: number,
-    height: number) {
+    const width = randomInt(MIN_RECT_WIDTH, MAX_RECT_WIDTH);
+    const height = randomInt(MIN_RECT_WIDTH, MAX_RECT_WIDTH);
+    const x = randomInt(0, gl.canvas.width - width);
+    const y = randomInt(0, gl.canvas.height - height);
+
     var x1 = x;
     var x2 = x + width;
     var y1 = y;
     var y2 = y + height;
 
-    // NOTE: gl.bufferData(gl.ARRAY_BUFFER, ...) will affect
-    // whatever buffer is bound to the `ARRAY_BUFFER` bind point
-    // but so far we only have one buffer. If we had more than one
-    // buffer we'd want to bind that buffer to `ARRAY_BUFFER` first.
-
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+    return new Float32Array([
         x1, y1,
         x2, y1,
         x1, y2,
         x1, y2,
         x2, y1,
-        x2, y2]), gl.STATIC_DRAW);
+        x2, y2
+    ]);
 }
-
-main();
-
