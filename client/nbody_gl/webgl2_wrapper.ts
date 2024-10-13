@@ -111,7 +111,7 @@ export type UniformDataObj<T extends { [name: string]: UniformType }> = {
     [Property in keyof T]: UniformData<T[Property]>;
 };
 
-async function loadShaderSource(url: string): Promise<string> {
+export async function loadShaderSource(url: string): Promise<string> {
     const response = await fetch(url);
     if (!response.ok) {
         throw new Error(`Response status: ${response.status}`);
@@ -121,7 +121,7 @@ async function loadShaderSource(url: string): Promise<string> {
     return result;
 }
 
-function createShader(
+export function createShader(
     gl: WebGL2RenderingContext, type: ShaderType, source: string):
     WebGLShader {
     var shader = gl.createShader(type)!;
