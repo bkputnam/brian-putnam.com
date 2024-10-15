@@ -65,7 +65,7 @@ async function main() {
             a: new Float32Array([1, 2, 3, 4, 5, 6]),
             b: new Float32Array([3, 6, 9, 12, 15, 18]),
         },
-        uniforms: {},
+        uniforms: undefined,
     });
 
     for (const buf of transformFeedback.buffers) {

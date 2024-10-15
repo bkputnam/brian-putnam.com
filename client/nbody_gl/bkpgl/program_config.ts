@@ -1,6 +1,6 @@
-import { AttributeConfig, AttributeDataObj } from "./attribute_config.js";
-import { TransformFeedbackConfig, TransformFeedbackOutput, TransformFeedbackRunConfig } from "./transform_feedback_config.js";
-import { UniformType } from "./uniform_config.js";
+import { AttributeConfig, AttributeConfigObj, AttributeDataObj } from "./attribute.js";
+import { TransformFeedbackConfig, TransformFeedbackOutput, TransformFeedbackRunConfig } from "./transform_feedback.js";
+import { UniformConfig, UniformDataObj, UniformType } from "./uniform_config.js";
 
 type gl = WebGLRenderingContextBase;
 // type gl2 = WebGL2RenderingContextBase;
@@ -24,8 +24,8 @@ export interface WebGL2ProgramConfig {
     drawMode: DrawArraysMode,
     rasterizerDiscard?: boolean,
 
-    attributes: { [name: string]: AttributeConfig },
-    uniforms?: { [name: string]: UniformType },
+    attributes: AttributeConfigObj,
+    uniforms?: UniformConfig,
     transformFeedback?: TransformFeedbackConfig,
 };
 
@@ -41,13 +41,13 @@ export interface WebGL2ProgramWrapper<T extends WebGL2ProgramConfig> {
         TransformFeedbackRunConfig>,
 }
 
-export interface WebGL2RunConfig<T extends WebGL2ProgramConfig> {
+export type WebGL2RunConfig<T extends WebGL2ProgramConfig> = {
     offset?: GLint,
     count?: GLsizei,
 
     attributes: AttributeDataObj<T['attributes']>,
     uniforms:
-    T['uniforms'] extends undefined ? never : { [name: string]: UniformType },
+    T['uniforms'] extends UniformConfig ? UniformDataObj<T['uniforms']> : undefined,
 }
 
 export interface WebGL2RunOutput<T extends WebGL2ProgramConfig> {

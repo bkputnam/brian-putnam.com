@@ -1,6 +1,8 @@
+import { populateAttributes } from "./attribute.js";
 import * as canvasResize from "./canvas_resize.js";
 import { ShaderType, WebGL2ProgramConfig, WebGL2ProgramWrapper, WebGL2RunConfig, WebGL2RunOutput } from "./program_config.js";
-import { SeparateVaryingConfig, TransformFeedbackInterleavedOutput, TransformFeedbackRunConfig, TransformFeedbackSeparateOutput } from "./transform_feedback_config.js";
+import { bindTFBuffers, initTransformFeedback, prepareToReadTFBuffers, readTFBuffers, SeparateVaryingConfig, TransformFeedbackInterleavedOutput, TransformFeedbackRunConfig, TransformFeedbackSeparateOutput } from "./transform_feedback.js";
+import { populateUniforms } from "./uniform_config.js";
 
 export { resizeCanvasToDisplaySize } from "./canvas_resize.js";
 
@@ -45,14 +47,9 @@ export async function createProgram<T extends WebGL2ProgramConfig>(config: T):
     const program = gl.createProgram()!;
     gl.attachShader(program, vertexShader);
     gl.attachShader(program, fragmentShader);
-    if (config.transformFeedback) {
-        const names = config.transformFeedback.varyingConfigs
-            .map((vCfg) => vCfg.name);
-        gl.transformFeedbackVaryings(
-            program,
-            names,
-            config.transformFeedback.bufferMode,
-        );
+    const tfConfig = config.transformFeedback;
+    if (tfConfig) {
+        initTransformFeedback(gl, program, tfConfig);
     }
     gl.linkProgram(program);
     const success = gl.getProgramParameter(program, gl.LINK_STATUS);
@@ -73,39 +70,8 @@ export async function createProgram<T extends WebGL2ProgramConfig>(config: T):
         program,
     };
 
-    const tfConfig = config.transformFeedback;
     if (tfConfig) {
-        const tf = gl.createTransformFeedback()!;
-        gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, tf);
-        const numBuffers =
-            tfConfig.bufferMode == gl.INTERLEAVED_ATTRIBS ? 1 :
-                tfConfig.varyingConfigs.length;
-        const transformFeedbackBuffers = new Array(numBuffers);
-        for (let i = 0; i < numBuffers; i++) {
-            const varyingConfig = tfConfig.varyingConfigs[i];
-            const buffer = gl.createBuffer()!;
-            transformFeedbackBuffers[i] = buffer;
-            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-            const numBytes: number = (() => {
-                if (tfConfig.bufferMode == gl.INTERLEAVED_ATTRIBS) {
-                    return tfConfig.totalByteLength;
-                } else {
-                    const vConf = varyingConfig as SeparateVaryingConfig;
-                    const bytesPerElement = vConf.type.BYTES_PER_ELEMENT;
-                    return vConf.length * bytesPerElement;
-                }
-            })();
-            gl.bufferData(
-                gl.ARRAY_BUFFER, numBytes, gl.STATIC_DRAW);
-            gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, i, buffer);
-        }
-        gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, null);
-        gl.bindBuffer(gl.ARRAY_BUFFER, null);
-        let runConfig: TransformFeedbackRunConfig = {
-            tf,
-            buffers: transformFeedbackBuffers,
-        };
-        result.transformFeedback = runConfig;
+        result.transformFeedback = bindTFBuffers(gl, program, tfConfig);
     }
 
     return result as WebGL2ProgramWrapper<T>;
@@ -124,63 +90,19 @@ export function runProgramWithData<T extends WebGL2ProgramConfig>(
         gl.enable(gl.RASTERIZER_DISCARD);
     }
 
-    let count: number | undefined = config.count;
-
-    for (const [name, data] of Object.entries(config.attributes)) {
-        const attrConfig = programWrapper.config.attributes[name];
-
-        let dataCount: number | undefined = ((): number | undefined => {
-            const dataAny = data as any;
-            if (dataAny.hasOwnProperty('length')) {
-                return dataAny.length / attrConfig.size;
-            }
-            const byteLen = dataAny.byteLength;
-            const bytesPerElement = dataAny.constructor.BYTES_PER_ELEMENT;
-            if (byteLen !== undefined && bytesPerElement) {
-                return byteLen / (bytesPerElement * attrConfig.size);
-            }
-            return undefined;
-        })();
-        if (count == undefined) {
-            count = dataCount;
-        } else {
-            if (count !== dataCount) {
-                throw new Error(
-                    `Attr '${name}' had wrong count: ` +
-                    `expected ${count}, found ${dataCount}`);
-            }
-        }
-
-        const buffer = gl.createBuffer()!;
-        gl.bindBuffer(attrConfig.target, buffer);
-        gl.bufferData(attrConfig.target, data, attrConfig.usage);
-
-        const location = gl.getAttribLocation(program, name);
-        gl.enableVertexAttribArray(location);
-        gl.vertexAttribPointer(
-            location,
-            attrConfig.size,
-            attrConfig.type,
-            attrConfig.normalize,
-            attrConfig.stride,
-            attrConfig.offset);
-    }
-
-    if (count === undefined) {
-        throw new Error(
-            `Unable to determine 'count' automatically. Try passing it ` +
-            `manually, or using an array with a '.length' property`);
-    }
+    const count = populateAttributes(
+        gl,
+        programWrapper.program,
+        programWrapper.config.attributes,
+        config.attributes,
+        config.count,
+    );
 
     // The presence of either 'uniforms' property implies the presense of the
     // other, but checking for both makes the compiler happy.
     if (config.uniforms && programWrapper.config.uniforms) {
-        for (const [name, data] of Object.entries(config.uniforms)) {
-            const uniformType = programWrapper.config.uniforms[name];
-            const uniformLocation = gl.getUniformLocation(program, name);
-            const uniformFn = gl[uniformType];
-            uniformFn.call(gl, uniformLocation, ...data);
-        }
+        populateUniforms(
+            gl, program, programWrapper.config.uniforms, config.uniforms);
     }
 
     const result: any = {};
@@ -188,38 +110,15 @@ export function runProgramWithData<T extends WebGL2ProgramConfig>(
     const tfConfig = programWrapper.config.transformFeedback;
     const tfRunConfig = programWrapper.transformFeedback;
     if (tfConfig && tfRunConfig) {
-        gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, tfRunConfig.tf);
-        gl.beginTransformFeedback(programWrapper.config.drawMode);
+        prepareToReadTFBuffers(gl, tfRunConfig, programWrapper.config.drawMode);
     }
     gl.drawArrays(programWrapper.config.drawMode, config.offset ?? 0, count);
     if (tfConfig && tfRunConfig) {
-        gl.endTransformFeedback();
-        gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, null);
-
-        if (tfConfig.bufferMode == gl.INTERLEAVED_ATTRIBS) {
-            const arrayBuf = new ArrayBuffer(tfConfig.totalByteLength);
-            const buffer = new DataView(arrayBuf);
-            gl.bindBuffer(gl.ARRAY_BUFFER, tfRunConfig.buffers[0]);
-            gl.getBufferSubData(
-                gl.ARRAY_BUFFER,
-                0,
-                buffer);
-            const tfResults: TransformFeedbackInterleavedOutput = {
-                buffer,
-            };
-            result.transformFeedback = tfResults;
-        } else {
-            const tfResults: TransformFeedbackSeparateOutput<typeof tfConfig> =
-            {
-                buffers: tfConfig.varyingConfigs.map((vConfig, index) => {
-                    const results = new vConfig.type(vConfig.length);
-                    gl.bindBuffer(gl.ARRAY_BUFFER, tfRunConfig.buffers[index]);
-                    gl.getBufferSubData(gl.ARRAY_BUFFER, 0, results);
-                    return results;
-                }),
-            };
-            result.transformFeedback = tfResults;
-        }
+        result.transformFeedback = readTFBuffers(
+            gl,
+            tfConfig,
+            tfRunConfig,
+            programWrapper.config.drawMode);
     }
 
     if (programWrapper.config.rasterizerDiscard) {
