@@ -1,4 +1,5 @@
-import { AttributeConfig, AttributeConfigObj, AttributeDataObj } from "./attribute.js";
+import { AttributeConfigObj, AttributeDataObj } from "./attribute.js";
+import { Texture2DConfig } from "./texture_config.js";
 import { TransformFeedbackConfig, TransformFeedbackOutput, TransformFeedbackRunConfig } from "./transform_feedback.js";
 import { UniformConfig, UniformDataObj, UniformType } from "./uniform_config.js";
 
@@ -26,6 +27,7 @@ export interface WebGL2ProgramConfig {
 
     attributes: AttributeConfigObj,
     uniforms?: UniformConfig,
+    textures2D?: Texture2DConfig,
     transformFeedback?: TransformFeedbackConfig,
 };
 
@@ -47,7 +49,8 @@ export type WebGL2RunConfig<T extends WebGL2ProgramConfig> = {
 
     attributes: AttributeDataObj<T['attributes']>,
     uniforms:
-    T['uniforms'] extends UniformConfig ? UniformDataObj<T['uniforms']> : undefined,
+    T['uniforms'] extends UniformConfig ? UniformDataObj<T['uniforms']> :
+    undefined,
 }
 
 export interface WebGL2RunOutput<T extends WebGL2ProgramConfig> {

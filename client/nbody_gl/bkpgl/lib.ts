@@ -2,6 +2,7 @@ import { populateAttributes } from "./attribute.js";
 import * as canvasResize from "./canvas_resize.js";
 import { ShaderType, WebGL2ProgramConfig, WebGL2ProgramWrapper, WebGL2RunConfig, WebGL2RunOutput } from "./program_config.js";
 import { sync } from "./sync.js";
+import { configureTextures, setTextureUniforms } from "./texture_config.js";
 import { bindTFBuffers, initTransformFeedback, prepareToReadTFBuffers, readTFBuffers, SeparateVaryingConfig, TransformFeedbackInterleavedOutput, TransformFeedbackRunConfig, TransformFeedbackSeparateOutput } from "./transform_feedback.js";
 import { populateUniforms } from "./uniform_config.js";
 
@@ -75,6 +76,11 @@ export async function createProgram<T extends WebGL2ProgramConfig>(config: T):
         result.transformFeedback = bindTFBuffers(gl, program, tfConfig);
     }
 
+    const texConfig = config.textures2D;
+    if (texConfig) {
+        configureTextures(gl, texConfig);
+    }
+
     return result as WebGL2ProgramWrapper<T>;
 }
 
@@ -104,6 +110,11 @@ export async function runProgramWithData<T extends WebGL2ProgramConfig>(
     if (config.uniforms && programWrapper.config.uniforms) {
         populateUniforms(
             gl, program, programWrapper.config.uniforms, config.uniforms);
+    }
+
+    const texConfig = programWrapper.config.textures2D;
+    if (texConfig) {
+        setTextureUniforms(gl, program, texConfig);
     }
 
     const result: any = {};
