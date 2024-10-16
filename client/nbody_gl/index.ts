@@ -64,8 +64,8 @@ async function main() {
 
     const program = await createProgram({
         gl,
-        vertexShaderSourceUrl: './vert.glsl',
-        fragmentShaderSourceUrl: './frag.glsl',
+        vertexShaderSourceUrl: './nbody.vert',
+        fragmentShaderSourceUrl: './nbody.frag',
 
         drawMode: gl.POINTS,
         rasterizerDiscard: true,
