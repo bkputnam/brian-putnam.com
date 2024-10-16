@@ -1,6 +1,7 @@
 import { populateAttributes } from "./attribute.js";
 import * as canvasResize from "./canvas_resize.js";
 import { ShaderType, WebGL2ProgramConfig, WebGL2ProgramWrapper, WebGL2RunConfig, WebGL2RunOutput } from "./program_config.js";
+import { sync } from "./sync.js";
 import { bindTFBuffers, initTransformFeedback, prepareToReadTFBuffers, readTFBuffers, SeparateVaryingConfig, TransformFeedbackInterleavedOutput, TransformFeedbackRunConfig, TransformFeedbackSeparateOutput } from "./transform_feedback.js";
 import { populateUniforms } from "./uniform_config.js";
 
@@ -77,9 +78,9 @@ export async function createProgram<T extends WebGL2ProgramConfig>(config: T):
     return result as WebGL2ProgramWrapper<T>;
 }
 
-export function runProgramWithData<T extends WebGL2ProgramConfig>(
+export async function runProgramWithData<T extends WebGL2ProgramConfig>(
     programWrapper: WebGL2ProgramWrapper<T>,
-    config: WebGL2RunConfig<T>): WebGL2RunOutput<T> {
+    config: WebGL2RunConfig<T>): Promise<WebGL2RunOutput<T>> {
     const program = programWrapper.program;
     const gl = programWrapper.config.gl;
 
@@ -113,7 +114,13 @@ export function runProgramWithData<T extends WebGL2ProgramConfig>(
         prepareToReadTFBuffers(gl, tfRunConfig, programWrapper.config.drawMode);
     }
     gl.drawArrays(programWrapper.config.drawMode, config.offset ?? 0, count);
+    const finishedRunning = sync(gl);
     if (tfConfig && tfRunConfig) {
+        // Wait for finishedRunning before reading TF buffers to avoid this
+        // warning: """WebGL warning: getBufferSubData: Reading from a buffer
+        // without checking for previous command completion likely causes
+        // pipeline stalls. Please use FenceSync."""
+        await finishedRunning;
         result.transformFeedback = readTFBuffers(
             gl,
             tfConfig,
@@ -125,5 +132,6 @@ export function runProgramWithData<T extends WebGL2ProgramConfig>(
         gl.disable(gl.RASTERIZER_DISCARD);
     }
 
+    await finishedRunning;
     return result as WebGL2RunOutput<T>;
 }

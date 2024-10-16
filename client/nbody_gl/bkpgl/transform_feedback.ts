@@ -91,7 +91,7 @@ export function bindTFBuffers(
             }
         })();
         gl.bufferData(
-            gl.ARRAY_BUFFER, numBytes, gl.STATIC_DRAW);
+            gl.ARRAY_BUFFER, numBytes, gl.STREAM_READ);
         gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, i, buffer);
     }
     gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, null);
@@ -124,10 +124,7 @@ export function readTFBuffers<T extends TransformFeedbackConfig>(
         const arrayBuf = new ArrayBuffer(tfConfig.totalByteLength);
         const buffer = new DataView(arrayBuf);
         gl.bindBuffer(gl.ARRAY_BUFFER, tfRunConfig.buffers[0]);
-        gl.getBufferSubData(
-            gl.ARRAY_BUFFER,
-            0,
-            buffer);
+        gl.getBufferSubData(gl.ARRAY_BUFFER, /* srcByteOffset= */ 0, buffer);
         const tfResults: TransformFeedbackInterleavedOutput = {
             buffer,
         };

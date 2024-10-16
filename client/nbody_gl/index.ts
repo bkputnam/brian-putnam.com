@@ -60,7 +60,7 @@ async function main() {
 
     resizeCanvasToDisplaySize(gl.canvas);
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-    const { transformFeedback } = runProgramWithData(program, {
+    const { transformFeedback } = await runProgramWithData(program, {
         attributes: {
             a: new Float32Array([1, 2, 3, 4, 5, 6]),
             b: new Float32Array([3, 6, 9, 12, 15, 18]),
