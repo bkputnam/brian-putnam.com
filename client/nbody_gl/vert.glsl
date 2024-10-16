@@ -15,7 +15,7 @@ void main() {
     sum = a + b;
     difference = a - b;
     product = a * b;
+
     // foo = int(texelFetch(fooTex, ivec2(index, 0), 0)[0]);
-    // foo = index;
-    foo = 5;
+    foo = index;
 }

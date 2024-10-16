@@ -39,6 +39,7 @@ export type SrcData =
 export interface AttributeConfig {
     size: 1 | 2 | 3 | 4,
     type: AttributeType,
+    /** Ignored for integer types */
     normalize: GLboolean,
     stride: GLsizei,
     offset: GLintptr,
@@ -54,6 +55,23 @@ export type AttributeConfigObj = {
 export type AttributeDataObj<T extends AttributeConfigObj> = {
     [Property in keyof T]: SrcData;
 };
+
+function isInt(gl: WebGL2RenderingContext, type: AttributeType): boolean {
+    switch (type) {
+        case gl.FLOAT:
+        case gl.HALF_FLOAT:
+            return false;
+        case gl.BYTE:
+        case gl.SHORT:
+        case gl.UNSIGNED_BYTE:
+        case gl.UNSIGNED_SHORT:
+        case gl.INT:
+        case gl.UNSIGNED_INT:
+        case gl.INT_2_10_10_10_REV:
+        case gl.UNSIGNED_INT_2_10_10_10_REV:
+            return true;
+    }
+}
 
 export function populateAttributes<T extends AttributeConfigObj>(
     gl: WebGL2RenderingContext,
@@ -92,14 +110,32 @@ export function populateAttributes<T extends AttributeConfigObj>(
         gl.bufferData(attrConfig.target, data, attrConfig.usage);
 
         const location = gl.getAttribLocation(program, name);
+        if (location === -1) {
+            throw new Error(
+                `getAttribLocation('${name}') failed. Attribute name ` +
+                `'${name}' may be  misspelled, or the GLSL compiler may have ` +
+                `removed it if isn't being used by the shader code.`);
+        }
         gl.enableVertexAttribArray(location);
-        gl.vertexAttribPointer(
-            location,
-            attrConfig.size,
-            attrConfig.type,
-            attrConfig.normalize,
-            attrConfig.stride,
-            attrConfig.offset);
+        // https://stackoverflow.com/questions/78203199/webgl-2-0-unsigned-integer-input-variable
+        if (isInt(gl, attrConfig.type)) {
+            // Note that attrConfig.normalize is ignored
+            gl.vertexAttribIPointer(
+                location,
+                attrConfig.size,
+                attrConfig.type,
+                attrConfig.stride,
+                attrConfig.offset);
+        } else {
+            gl.vertexAttribPointer(
+                location,
+                attrConfig.size,
+                attrConfig.type,
+                attrConfig.normalize,
+                attrConfig.stride,
+                attrConfig.offset);
+
+        }
     }
     if (count === undefined) {
         throw new Error(

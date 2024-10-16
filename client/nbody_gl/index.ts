@@ -34,6 +34,15 @@ async function main() {
                 target: gl.ARRAY_BUFFER,
                 usage: gl.STATIC_DRAW,
             },
+            index: {
+                size: 1,
+                type: gl.INT,
+                normalize: false,
+                stride: 0,
+                offset: 0,
+                target: gl.ARRAY_BUFFER,
+                usage: gl.STATIC_DRAW,
+            }
         },
 
         transformFeedback: {
@@ -53,7 +62,12 @@ async function main() {
                     name: 'product',
                     length: 6,
                     type: Float32Array
-                }
+                },
+                {
+                    name: 'foo',
+                    length: 6,
+                    type: Int32Array
+                },
             ]
         },
     });
@@ -64,6 +78,7 @@ async function main() {
         attributes: {
             a: new Float32Array([1, 2, 3, 4, 5, 6]),
             b: new Float32Array([3, 6, 9, 12, 15, 18]),
+            index: new Int32Array([0, 1, 2, 3, 4, 5]),
         },
         uniforms: undefined,
     });
