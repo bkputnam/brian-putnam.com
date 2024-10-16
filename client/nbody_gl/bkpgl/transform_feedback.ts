@@ -90,8 +90,12 @@ export function bindTFBuffers(
                 return vConf.length * bytesPerElement;
             }
         })();
+        // Using STATIC_DRAW causes a warning in Firefox, but if I use something
+        // else it breaks WebGL in Chrome and you have to close and re-open the
+        // whole browser to fix it.
+        const usage = gl.STATIC_DRAW;
         gl.bufferData(
-            gl.ARRAY_BUFFER, numBytes, gl.STREAM_READ);
+            gl.ARRAY_BUFFER, numBytes, usage);
         gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, i, buffer);
     }
     gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, null);
