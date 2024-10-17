@@ -68,7 +68,6 @@ async function main() {
         fragmentShaderSourceUrl: './nbody.frag',
 
         drawMode: gl.POINTS,
-        rasterizerDiscard: true,
 
         attributes: {
             index: {
@@ -84,6 +83,8 @@ async function main() {
 
         uniforms: {
             'num_bodies': 'uniform1i',
+            'min_xy': 'uniform2f',
+            'max_xy': 'uniform2f',
         },
 
         textures2D: {
@@ -125,12 +126,19 @@ async function main() {
 
     resizeCanvasToDisplaySize(gl.canvas);
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+    // Clear the canvas
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
     const { transformFeedback } = await runProgramWithData(program, {
         attributes: {
             index: new Int32Array(indices(NUM_BODIES)),
         },
         uniforms: {
             'num_bodies': [2],
+            'min_xy': [-2, -2],
+            'max_xy': [2, 2],
         },
     });
 
