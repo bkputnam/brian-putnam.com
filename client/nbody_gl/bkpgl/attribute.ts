@@ -80,7 +80,8 @@ export function populateAttributes<T extends AttributeConfigObj>(
     aData: AttributeDataObj<T>,
     count: number | undefined,
 ): number {
-    for (const [name, data] of Object.entries(aData)) {
+    const entries = Object.entries(aData);
+    for (const [name, data] of entries) {
         const attrConfig = aConfig[name];
 
         let dataCount: number | undefined = ((): number | undefined => {
@@ -136,6 +137,9 @@ export function populateAttributes<T extends AttributeConfigObj>(
                 attrConfig.offset);
 
         }
+    }
+    if (entries.length === 0) {
+        return 0;
     }
     if (count === undefined) {
         throw new Error(
