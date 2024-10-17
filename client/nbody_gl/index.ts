@@ -87,6 +87,7 @@ async function main() {
             'num_bodies': 'uniform1i',
             'min_xy': 'uniform2f',
             'max_xy': 'uniform2f',
+            'delta_t': "uniform1f",
         },
 
         textures2D: {
@@ -142,9 +143,10 @@ async function main() {
             index: new Int32Array(indices(NUM_BODIES)),
         },
         uniforms: {
-            'num_bodies': [2],
+            'num_bodies': 2,
             'min_xy': [-2, -2],
             'max_xy': [2, 2],
+            'delta_t': 0.1,
         },
     });
 
