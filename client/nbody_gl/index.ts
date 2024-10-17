@@ -14,7 +14,9 @@ function indices(len: number): number[] {
 
 async function main() {
     const canvas = document.querySelector("#c")! as HTMLCanvasElement;
-    const gl = canvas.getContext("webgl2");
+    const gl = canvas.getContext("webgl2", {
+        premultipliedAlpha: false  // Ask for non-premultiplied alpha
+    });
     if (!gl) {
         throw new Error('No GL for you!');
     }
@@ -123,6 +125,10 @@ async function main() {
             ]
         },
     });
+
+    gl.disable(gl.DEPTH_TEST);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     resizeCanvasToDisplaySize(gl.canvas);
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
