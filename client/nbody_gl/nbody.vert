@@ -1,7 +1,5 @@
 #version 300 es
 
-in int index;
-
 uniform int num_bodies;
 uniform vec2 min_xy;
 uniform vec2 max_xy;
@@ -36,11 +34,11 @@ Body getBody(int index) {
 }
 
 void main() {
-    Body self = getBody(index);
+    Body self = getBody(gl_VertexID);
 
     vec2 acc = vec2(0);
     for(int i = 0; i < num_bodies; i++) {
-        if(i == index) {
+        if(i == gl_VertexID) {
             continue;
         }
         Body attractor = getBody(i);

@@ -71,17 +71,7 @@ async function main() {
 
         drawMode: gl.POINTS,
 
-        attributes: {
-            index: {
-                size: 1,
-                type: gl.INT,
-                normalize: false,
-                stride: 0,
-                offset: 0,
-                target: gl.ARRAY_BUFFER,
-                usage: gl.STATIC_DRAW,
-            }
-        },
+        numVertexes: NUM_BODIES,
 
         uniforms: {
             'num_bodies': 'uniform1i',
@@ -139,9 +129,7 @@ async function main() {
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     const { transformFeedback } = await runProgramWithData(program, {
-        attributes: {
-            index: new Int32Array(indices(NUM_BODIES)),
-        },
+        attributes: undefined,
         uniforms: {
             'num_bodies': 2,
             'min_xy': [-2, -2],

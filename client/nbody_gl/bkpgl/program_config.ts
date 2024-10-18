@@ -25,10 +25,12 @@ export interface WebGL2ProgramConfig {
     drawMode: DrawArraysMode,
     rasterizerDiscard?: boolean,
 
-    attributes: AttributeConfigObj,
+    attributes?: AttributeConfigObj,
     uniforms?: UniformConfig,
     textures2D?: Texture2DConfig,
     transformFeedback?: TransformFeedbackConfig,
+
+    numVertexes?: number,
 };
 
 // Helps to make mapped types on optional properties by mapping the 'undefined'
@@ -47,7 +49,9 @@ export type WebGL2RunConfig<T extends WebGL2ProgramConfig> = {
     offset?: GLint,
     count?: GLsizei,
 
-    attributes: AttributeDataObj<T['attributes']>,
+    attributes:
+    T['attributes'] extends AttributeConfigObj ?
+    AttributeDataObj<T['attributes']> : undefined,
     uniforms:
     T['uniforms'] extends UniformConfig ? UniformDataObj<T['uniforms']> :
     undefined,

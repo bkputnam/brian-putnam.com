@@ -84,6 +84,16 @@ export async function createProgram<T extends WebGL2ProgramConfig>(config: T):
     return result as WebGL2ProgramWrapper<T>;
 }
 
+function isNotEmpty<T extends { [key: string]: any }>(obj: T | undefined): obj is T {
+    if (obj === undefined) {
+        return false;
+    }
+    for (const key in obj) {
+        return true;
+    }
+    return false;
+}
+
 export async function runProgramWithData<T extends WebGL2ProgramConfig>(
     programWrapper: WebGL2ProgramWrapper<T>,
     config: WebGL2RunConfig<T>): Promise<WebGL2RunOutput<T>> {
@@ -97,13 +107,32 @@ export async function runProgramWithData<T extends WebGL2ProgramConfig>(
         gl.enable(gl.RASTERIZER_DISCARD);
     }
 
-    const count = populateAttributes(
-        gl,
-        programWrapper.program,
-        programWrapper.config.attributes,
-        config.attributes,
-        config.count,
-    );
+    let count: number;
+    let numVertexes = programWrapper.config.numVertexes;
+    const attrConfig = programWrapper.config.attributes;
+    if (isNotEmpty(attrConfig)) {
+        count = populateAttributes(
+            gl,
+            programWrapper.program,
+            attrConfig,
+            config.attributes!,
+            config.count,
+        );
+        if (numVertexes !== undefined && numVertexes !== count) {
+            throw new Error(
+                `If both 'attributes' and 'numVertexes' are specified, then ` +
+                `attributes[*].length must equal numVertexes.\n` +
+                `attributes[*].length == ${count}\n` +
+                `numVertexes == ${numVertexes}`);
+        }
+    } else {
+        if (numVertexes !== undefined) {
+            count = numVertexes;
+        } else {
+            throw new Error(
+                `You must either specify 'attributes' or 'numVertexes'.`);
+        }
+    }
 
     // The presence of either 'uniforms' property implies the presense of the
     // other, but checking for both makes the compiler happy.
