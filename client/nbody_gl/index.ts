@@ -86,7 +86,7 @@ async function main() {
     });
     const defaultDims = bkp.dimsForLen(gl, NUM_BODIES);
     const { textures, texturesReady } = bkp.createTextures(gl, {
-        masses: bkp.makeFloatTexture(gl, defaultDims),
+        masses: bkp.makeFloatTexture(gl, defaultDims, [1, 1]),
 
         x_positions_a: bkp.makeFloatTexture(gl, defaultDims, [1, -1]),
         y_positions_a: bkp.makeFloatTexture(gl, defaultDims, [0, 0]),
@@ -120,6 +120,7 @@ async function main() {
         'max_xy': [2, 2],
         'delta_t': 0.1,
         'tex_size': [defaultDims.width, defaultDims.height],
+        'masses': textures.masses,
         'x_positions_in': textures.x_positions_a,
         'y_positions_in': textures.y_positions_a,
         'x_velocities_in': textures.x_velocities_a,

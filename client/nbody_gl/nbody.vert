@@ -38,33 +38,38 @@ Body getBody(int index) {
 void main() {
     Body self = getBody(gl_VertexID);
 
+    // Compute acceleration due to all N other bodies
     vec2 acc = vec2(0);
     for(int i = 0; i < num_bodies; i++) {
         if(i == gl_VertexID) {
             continue;
         }
         Body attractor = getBody(i);
-        vec2 distVec = self.pos - attractor.pos;
+        vec2 distVec = attractor.pos - self.pos;
         float distMagSquared = dot(distVec, distVec);
         vec2 distUnit = distVec / sqrt(distMagSquared);
-        float softenedMag = max(distMagSquared, 100.f);
+        float softenedMag = max(distMagSquared, 1.f);
 
         acc += attractor.mass * distUnit / softenedMag;
     }
 
+    // Update velocity and position based on acceleration
     vec2 new_vel = self.vel + acc * delta_t;
+    vec2 new_pos = self.pos + new_vel * delta_t;
+
+    // Populate out variables
     x_vel = new_vel.x;
     y_vel = new_vel.y;
-
-    vec2 new_pos = self.pos + new_vel * delta_t;
     x = new_pos.x;
     y = new_pos.y;
 
+    // Convert to clipspace so we can populate gl_Position
     const vec2 CLIP_MIN_XY = vec2(-1, -1);
     const vec2 CLIP_MAX_XY = vec2(1, 1);
     vec2 scale = (CLIP_MAX_XY - CLIP_MIN_XY) / (max_xy - min_xy);
-
     vec2 clip_xy = (new_pos - min_xy) * scale + CLIP_MIN_XY;
     gl_Position = vec4(clip_xy, 0, 1);
+
+    // Arbitrary size
     gl_PointSize = 4.0f;
 }
