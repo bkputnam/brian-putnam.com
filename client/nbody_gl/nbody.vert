@@ -4,12 +4,14 @@ uniform int num_bodies;
 uniform vec2 min_xy;
 uniform vec2 max_xy;
 uniform float delta_t;
+uniform ivec2 tex_size;
 
-uniform sampler2D x_positions;
-uniform sampler2D y_positions;
 uniform sampler2D masses;
-uniform sampler2D x_velocities;
-uniform sampler2D y_velocities;
+
+uniform sampler2D x_positions_in;
+uniform sampler2D y_positions_in;
+uniform sampler2D x_velocities_in;
+uniform sampler2D y_velocities_in;
 
 out float x;
 out float y;
@@ -23,12 +25,12 @@ struct Body {
 };
 
 Body getBody(int index) {
-    ivec2 indexVec = ivec2(index, 0);
-    float x = texelFetch(x_positions, indexVec, 0).r;
-    float y = texelFetch(y_positions, indexVec, 0).r;
+    ivec2 indexVec = ivec2(index % tex_size.x, index / tex_size.x);
+    float x = texelFetch(x_positions_in, indexVec, 0).r;
+    float y = texelFetch(y_positions_in, indexVec, 0).r;
     float mass = texelFetch(masses, indexVec, 0).r;
-    float x_vel = texelFetch(x_velocities, indexVec, 0).r;
-    float y_vel = texelFetch(y_velocities, indexVec, 0).r;
+    float x_vel = texelFetch(x_velocities_in, indexVec, 0).r;
+    float y_vel = texelFetch(y_velocities_in, indexVec, 0).r;
 
     return Body(vec2(x, y), mass, vec2(x_vel, y_vel));
 }
