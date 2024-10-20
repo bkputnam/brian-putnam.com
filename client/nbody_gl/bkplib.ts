@@ -3,7 +3,50 @@ import * as twgl from "./twgl/twgl-full.module.js";
 
 type GL = WebGLRenderingContext;
 type GL2 = WebGL2RenderingContext;
+
 type ShaderType = GL['VERTEX_SHADER'] | GL['FRAGMENT_SHADER'];
+
+type TextureTarget =
+    GL['TEXTURE_2D'] |
+    GL['TEXTURE_CUBE_MAP_POSITIVE_X'] |
+    GL['TEXTURE_CUBE_MAP_NEGATIVE_X'] |
+    GL['TEXTURE_CUBE_MAP_POSITIVE_Y'] |
+    GL['TEXTURE_CUBE_MAP_NEGATIVE_Y'] |
+    GL['TEXTURE_CUBE_MAP_POSITIVE_Z'] |
+    GL['TEXTURE_CUBE_MAP_NEGATIVE_Z'];
+
+type TextureInternalFormat =
+    GL['RGBA'] | GL['RGB'] | GL['RGBA'] | GL['RGBA'] | GL['RGB'] |
+    GL['LUMINANCE_ALPHA'] | GL['LUMINANCE'] | GL['ALPHA'] | GL2['R8'] |
+    GL2['R8_SNORM'] | GL2['RG8'] | GL2['RG8_SNORM'] | GL2['RGB8'] |
+    GL2['RGB8_SNORM'] | GL['RGB565'] | GL['RGBA4'] | GL['RGB5_A1'] |
+    GL['RGBA8'] | GL2['RGBA8_SNORM'] | GL2['RGB10_A2'] | GL2['RGB10_A2UI'] |
+    GL2['SRGB8'] | GL2['SRGB8_ALPHA8'] | GL2['R16F'] | GL2['RG16F'] |
+    GL2['RGB16F'] | GL2['RGBA16F'] | GL2['R32F'] | GL2['RG32F'] |
+    GL2['RGB32F'] | GL2['RGBA32F'] | GL2['R11F_G11F_B10F'] | GL2['RGB9_E5'] |
+    GL2['R8I'] | GL2['R8UI'] | GL2['R16I'] | GL2['R16UI'] | GL2['R32I'] |
+    GL2['R32UI'] | GL2['RG8I'] | GL2['RG8UI'] | GL2['RG16I'] | GL2['RG16UI'] |
+    GL2['RG32I'] | GL2['RG32UI'] | GL2['RGB8I'] | GL2['RGB8UI'] |
+    GL2['RGB16I'] | GL2['RGB16UI'] | GL2['RGB32I'] | GL2['RGB32UI'] |
+    GL2['RGBA8I'] | GL2['RGBA8UI'] | GL2['RGBA16I'] | GL2['RGBA16UI'] |
+    GL2['RGBA32I'] | GL2['RGBA32UI'];
+
+type TextureType =
+    GL['UNSIGNED_BYTE'] |
+    GL['UNSIGNED_SHORT_5_6_5'] |
+    GL['UNSIGNED_SHORT_4_4_4_4'] |
+    GL['UNSIGNED_SHORT_5_5_5_1'] |
+    GL['BYTE'] |
+    GL['UNSIGNED_SHORT'] |
+    GL['SHORT'] |
+    GL['UNSIGNED_INT'] |
+    GL['INT'] |
+    GL2['HALF_FLOAT'] |
+    GL['FLOAT'] |
+    GL2['UNSIGNED_INT_2_10_10_10_REV'] |
+    GL2['UNSIGNED_INT_10F_11F_11F_REV'] |
+    GL2['UNSIGNED_INT_5_9_9_9_REV'] |
+    GL2['UNSIGNED_INT_24_8'];
 
 async function loadShaderSource(url: string): Promise<string> {
     const response = await fetch(url);
@@ -28,8 +71,13 @@ export interface Dims {
     height: number,
 }
 
-export function dimsForLen(gl: GL2, len: number): Dims {
-    const sideLen = Math.ceil(Math.sqrt(len));
+export function dimsForLen(gl: GL2, len: number, numComponents = 1): Dims {
+    let sideLen = Math.sqrt(len);
+    if (sideLen % numComponents !== 0) {
+        // Round up to the nearest multiple of numComponents
+        sideLen = Math.ceil(sideLen / numComponents) * numComponents;
+    }
+
     const max = gl.getParameter(gl.MAX_TEXTURE_SIZE);
     if (sideLen > max) {
         throw new Error(
@@ -37,36 +85,27 @@ export function dimsForLen(gl: GL2, len: number): Dims {
             `MAX_TEXTURE_SIZE is ${max} and ` +
             `so len cannot be greater than ${max} x ${max} = ${max * max}`);
     }
-    return {
-        width: sideLen,
-        height: sideLen,
-    };
+
+    const width = sideLen;
+    let height = sideLen;
+    const actualLen = len * numComponents;
+    while (width * (height - 1) >= actualLen) {
+        height--;
+    }
+
+    return { width, height };
 }
 
 export function makeFloatTexture(
     gl: GL2,
     dims: Dims,
+    internalFormat: TextureInternalFormat,
     data?: number[]):
     twgl.TextureOptions {
-    data = data ?? [];
-    const texLen = dims.width * dims.height;
-    if (data.length > texLen) {
-        throw new Error(
-            `data too long (${data.length} items) for ` +
-            `${dims.width} x ${dims.height} texture`);
-    }
-    if (data.length < texLen) {
-        // Pad data with zeros to fill up entire texture, but don't modify
-        // the input array
-        const oldData = data;
-        data = new Array(texLen);
-        data.splice(0, oldData.length, ...oldData);
-        data.fill(0, oldData.length);
-    }
     const result: twgl.TextureOptions = {
         target: gl.TEXTURE_2D,
         level: 0,
-        internalFormat: gl.R32F,
+        internalFormat,
         width: dims.width,
         height: dims.height,
         type: gl.FLOAT,
@@ -75,6 +114,23 @@ export function makeFloatTexture(
         wrap: gl.CLAMP_TO_EDGE,
         src: data,
     };
+    if (data !== undefined) {
+        const texLen = dims.width * dims.height;
+        if (internalFormat == gl.RGBA32F && data.length % 4 !== 0) {
+            throw new Error(
+                `Wrong data size: ${data.length}. Must be divisible by 4`);
+        }
+        if (data.length < texLen) {
+            // Pad data with zeros to fill up entire texture, but don't modify
+            // the input array
+            const oldData = data;
+            data = new Array(texLen);
+            data.splice(0, oldData.length, ...oldData);
+            data.fill(0, oldData.length);
+        }
+        result.src = data;
+    }
+
     return result;
 }
 

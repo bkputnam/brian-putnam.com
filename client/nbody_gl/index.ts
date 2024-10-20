@@ -22,6 +22,7 @@ function getGlEnumReference(gl: GL2): Map<number, string> {
     }
     return glEnumReference;
 }
+(window as any).getGlEnumReference = getGlEnumReference;
 
 function recordGlCalls(gl: GL2) {
     const enumRef = getGlEnumReference(gl);
@@ -63,6 +64,23 @@ function recordGlCalls(gl: GL2) {
     }
 }
 
+function framebufferStatusToString(gl: GL2, status: GLenum): string {
+    switch (status) {
+        case gl.FRAMEBUFFER_COMPLETE:
+            return 'FRAMEBUFFER_COMPLETE'
+        case gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+            return 'FRAMEBUFFER_INCOMPLETE_ATTACHMENT';
+        case gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+            return 'FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT';
+        case gl.FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
+            return 'FRAMEBUFFER_INCOMPLETE_DIMENSIONS';
+        case gl.FRAMEBUFFER_UNSUPPORTED:
+            return 'FRAMEBUFFER_UNSUPPORTED';
+        default:
+            return `Unknown status: ${status}`;
+    }
+}
+
 async function main() {
     const canvas = document.getElementById('c') as HTMLCanvasElement;
     const gl = canvas.getContext('webgl2');
@@ -78,7 +96,8 @@ async function main() {
     twgl.resizeCanvasToDisplaySize(canvas, window.devicePixelRatio);
     gl.viewport(0, 0, canvas.width, canvas.height);
 
-    const shaderSrcs = await bkp.loadShaderSources('nbody.vert', 'nbody.frag');
+    const shaderSrcs = await bkp.loadShaderSources(
+        'nbody_compute.vert', 'nbody_compute.frag');
     const programInfo = twgl.createProgramInfo(gl, shaderSrcs, {
         transformFeedbackVaryings: [
             'x', 'y', 'x_vel', 'y_vel'
@@ -86,17 +105,31 @@ async function main() {
     });
     const defaultDims = bkp.dimsForLen(gl, NUM_BODIES);
     const { textures, texturesReady } = bkp.createTextures(gl, {
-        masses: bkp.makeFloatTexture(gl, defaultDims, [1, 1]),
+        masses: bkp.makeFloatTexture(gl, defaultDims, gl.R32F, [1, 1]),
 
-        x_positions_a: bkp.makeFloatTexture(gl, defaultDims, [1, -1]),
-        y_positions_a: bkp.makeFloatTexture(gl, defaultDims, [0, 0]),
-        x_velocities_a: bkp.makeFloatTexture(gl, defaultDims, [0, 0]),
-        y_velocities_a: bkp.makeFloatTexture(gl, defaultDims, [-1, 1]),
+        bodies_a: bkp.makeFloatTexture(
+            gl,
+            bkp.dimsForLen(gl, NUM_BODIES, 1),
+            gl.RGBA32F,
+            [
+                1, 0, 0, -1,
+                -1, 0, 0, 1,
+            ]),
 
-        x_positions_b: bkp.makeFloatTexture(gl, defaultDims),
-        y_positions_b: bkp.makeFloatTexture(gl, defaultDims),
-        x_velocities_b: bkp.makeFloatTexture(gl, defaultDims),
-        y_velocities_b: bkp.makeFloatTexture(gl, defaultDims),
+        bodies_b: bkp.makeFloatTexture(
+            gl,
+            bkp.dimsForLen(gl, NUM_BODIES, 1),
+            gl.RGBA32F),
+
+        // x_positions_a: bkp.makeFloatTexture(gl, defaultDims, [1, -1]),
+        // y_positions_a: bkp.makeFloatTexture(gl, defaultDims, [0, 0]),
+        // x_velocities_a: bkp.makeFloatTexture(gl, defaultDims, [0, 0]),
+        // y_velocities_a: bkp.makeFloatTexture(gl, defaultDims, [-1, 1]),
+
+        // x_positions_b: bkp.makeFloatTexture(gl, defaultDims),
+        // y_positions_b: bkp.makeFloatTexture(gl, defaultDims),
+        // x_velocities_b: bkp.makeFloatTexture(gl, defaultDims),
+        // y_velocities_b: bkp.makeFloatTexture(gl, defaultDims),
     });
     await texturesReady;
 
@@ -116,16 +149,30 @@ async function main() {
 
     twgl.setUniforms(programInfo, {
         'num_bodies': NUM_BODIES,
-        'min_xy': [-2, -2],
-        'max_xy': [2, 2],
+        // 'min_xy': [-2, -2],
+        // 'max_xy': [2, 2],
         'delta_t': 0.1,
         'tex_size': [defaultDims.width, defaultDims.height],
         'masses': textures.masses,
-        'x_positions_in': textures.x_positions_a,
-        'y_positions_in': textures.y_positions_a,
-        'x_velocities_in': textures.x_velocities_a,
-        'y_velocities_in': textures.y_velocities_a,
+        'bodies_in': textures.bodies_a,
     });
+
+    // const attachments = [
+    //     { attachment: textures.x_positions_b },
+    //     { attachment: textures.y_positions_b },
+    //     { attachment: textures.x_velocities_b },
+    //     { attachment: textures.y_velocities_b },
+    // ];
+    // const fbi = twgl.createFramebufferInfo(gl, attachments);
+    // const fbStatus = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+    // const fbStatusStr = framebufferStatusToString(gl, fbStatus);
+    // // check if you can read from this type of texture.
+    // const canRead = (fbStatus == gl.FRAMEBUFFER_COMPLETE);
+    // if (!canRead) {
+    //     throw new Error(`Cannot read: fbStatus = ${fbStatusStr}`);
+    // }
+    // console.log(`Success: fbStatus = ${fbStatusStr}`);
+
     gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, tf);
     gl.beginTransformFeedback(gl.POINTS);
     twgl.drawBufferInfo(gl, tfBufferInfo, gl.POINTS);
