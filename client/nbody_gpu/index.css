@@ -1,0 +1,16 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+    background-color: black;
+    color: #999;
+}
+
+.fail {
+    max-width: 600px;
+    margin: auto;
+}
+
+.hidden {
+    display: none !important;
+}
