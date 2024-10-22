@@ -6,11 +6,20 @@ body {
     color: #999;
 }
 
+strong {
+    color: #aaa;
+}
+
+a {
+    color: #0087ff
+}
+
+a:visited {
+    color: #b806f9;
+}
+
 .fail {
     max-width: 600px;
     margin: auto;
-}
-
-.hidden {
-    display: none !important;
+    padding: 5px;
 }

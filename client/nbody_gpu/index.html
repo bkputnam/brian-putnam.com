@@ -3,6 +3,13 @@
 
 <head>
     <title>N-Body Simulation (WebGPU)</title>
+    <style>
+        /** Make this inline and first so that we don't see a flash of hidden
+        messages on page load */
+        .hidden {
+            display: none !important;
+        }
+    </style>
     <link rel="stylesheet" href="./index.css">
     <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -10,15 +17,82 @@
 
 <body>
     <div id="fail-msg" class="hidden">
-        <p>Sorry, this page only works in browsers that support WebGPU</p>
+        <h1>WebGPU Required</h1>
         <p>
-            As of 2024, WebGPU is only supported in Chrome and Chromium-based
-            browsers like Edge and Opera. Notably, Firefox and Safari don't
-            support WebGPU.
+            Your browser doesn't support the WebGPU API, which is required to
+            run this simulation.
         </p>
         <p>
-            See <a href="https://caniuse.com/webgpu">caniuse</a> for more
-            information on which browsers are supported.
+            Support as of Oct 2024:
+        <ul>
+            <li>
+                <strong>Chrome:</strong>
+                <ul>
+                    <li><strong>Windows:</strong> should be enabled by default</li>
+                    <li><strong>Mac:</strong> should be enabled by default</li>
+                    <li>
+                        <strong>Linux:</strong> supposedly works if you enable
+                        <a href="https://github.com/gpuweb/gpuweb/wiki/Implementation-Status#implementation-status"></a>
+                        a few flags</a>, but I haven't been able to get it
+                        to work
+                    </li>
+                    <li>
+                        <strong>TIP:</strong> If you think you should be seeing WebGPU in
+                        Chrome and you're still not,
+                        <strong>chrome://gpu</strong>
+                        can give you an idea of how (or if) the browser is
+                        correctly detecting your GPU hardware.
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <strong>Firefox:</strong>
+                <ul>
+                    <li>Enabled by default in
+                        <a href="https://www.mozilla.org/en-US/firefox/channel/desktop/">
+                            Nightly</a> builds, but not available in other channels
+                        (like Release, ESR, or Beta). Firefox support lags Chrome, and
+                        doesn't yet cover the full spec. However
+                        <a href="https://news.ycombinator.com/item?id=41157383">
+                            this post
+                        </a>
+                        makes it sound like work is actively progressing so hopefully
+                        we'll see full support sooner rather than later.
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <strong>Edge, Opera, and other Chromium-based browsers:</strong>
+                <ul>
+                    <li>Same as Chrome</li>
+                </ul>
+            </li>
+            <li>
+                <strong>Safari:</strong>
+                <ul>
+                    <li>No support</li>
+                </ul>
+            </li>
+        </ul>
+        </p>
+        <p>
+            For more details see:
+        <ul>
+            <li>
+                <a href="https://caniuse.com/webgpu">
+                    Browser Support Matrix (caniuse.com)</a>
+            </li>
+            <li>
+                <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API#browser_compatibility">
+                    Browser Support Matrix (MDN)
+                </a>
+            </li>
+            <li>
+                <a href="https://github.com/gpuweb/gpuweb/wiki/Implementation-Status#implementation-status">
+                    Implementation Status (Github tracking doc)
+                </a>
+            </li>
+        </ul>
         </p>
     </div>
 </body>
