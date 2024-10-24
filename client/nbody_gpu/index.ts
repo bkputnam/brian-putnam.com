@@ -2,6 +2,8 @@ import { fail } from "./fail.js";
 import * as bkp from "./bkplib.js";
 
 const NUM_BODIES = 2;
+const WORKGROUP_SIZE = 64;
+const DELTA_T = 0.1;
 
 interface Body {
     x: number,
@@ -34,74 +36,90 @@ async function main() {
         code: await bkp.loadShaderSource('nbody_compute.wgsl'),
     });
 
-    // const pipeline = device.createComputePipeline({
-    //     label: 'doubling compute pipeline',
-    //     layout: 'auto',
-    //     compute: {
-    //         module,
-    //     },
-    // });
+    const pipeline = device.createComputePipeline({
+        label: 'doubling compute pipeline',
+        layout: 'auto',
+        compute: {
+            module,
+        },
+    });
 
-    // const input = new Float32Array([
-    //     ...body({ x: 1, y: 0, x_vel: 0, y_vel: -1, mass: 1 }),
-    //     ...body({ x: -1, y: 0, x_vel: 0, y_vel: 1, mass: 1 })
-    // ]);
-    // const bodiesA = device.createBuffer({
-    //     label: 'input buffer',
-    //     size: input.byteLength,
-    //     usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
-    // });
-    // const bodiesB = device.createBuffer({
-    //     label: 'input buffer',
-    //     size: input.byteLength,
-    //     usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
-    // });
-    // // Copy our input data to that buffer
-    // device.queue.writeBuffer(bodiesA, 0, input);
+    const input = new Float32Array([
+        ...body({ x: 1, y: 0, x_vel: 0, y_vel: -1, mass: 1 }),
+        ...body({ x: -1, y: 0, x_vel: 0, y_vel: 1, mass: 1 })
+    ]);
+    const bodiesA = device.createBuffer({
+        label: 'bodiesA',
+        size: input.byteLength,
+        usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
+    });
+    const bodiesB = device.createBuffer({
+        label: 'bodiesB',
+        size: input.byteLength,
+        usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
+    });
+    // Copy our input data to that buffer
+    device.queue.writeBuffer(bodiesA, 0, input);
+    // Note: we also have to write to bodiesB so that it has `mass` populated,
+    // since we don't copy that back and forth
+    device.queue.writeBuffer(bodiesB, 0, new Float32Array(input));
 
-    // // create a buffer on the GPU to get a copy of the results
-    // const resultBuffer = device.createBuffer({
-    //     label: 'result buffer',
-    //     size: input.byteLength,
-    //     usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST
-    // });
+    const uniformBuffer = device.createBuffer({
+        label: 'uniform buffer',
+        size: 4 // numBodies: u32
+            + 4 // deltaT: f32
+        ,
+        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+    const uniformArrayBuffer = new ArrayBuffer(uniformBuffer.size);
+    new Uint32Array(uniformArrayBuffer, 0, 1)[0] = NUM_BODIES;
+    new Float32Array(uniformArrayBuffer, 4, 1)[0] = DELTA_T;
+    device.queue.writeBuffer(uniformBuffer, 0, uniformArrayBuffer);
 
-    // // Setup a bindGroup to tell the shader which
-    // // buffer to use for the computation
-    // const bindGroup = device.createBindGroup({
-    //     label: 'bindGroup for work buffer',
-    //     layout: pipeline.getBindGroupLayout(0),
-    //     entries: [
-    //         { binding: 0, resource: { buffer: workBuffer } },
-    //     ],
-    // });
+    // create a buffer on the GPU to get a copy of the results
+    const resultBuffer = device.createBuffer({
+        label: 'result buffer',
+        size: input.byteLength,
+        usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST
+    });
 
-    // // Encode commands to do the computation
-    // const encoder = device.createCommandEncoder({
-    //     label: 'doubling encoder',
-    // });
-    // const pass = encoder.beginComputePass({
-    //     label: 'doubling compute pass',
-    // });
-    // pass.setPipeline(pipeline);
-    // pass.setBindGroup(0, bindGroup);
-    // pass.dispatchWorkgroups(input.length);
-    // pass.end();
+    // Setup a bindGroup to tell the shader which
+    // buffer to use for the computation
+    const bindGroupA = device.createBindGroup({
+        label: 'bindGroup for work buffer',
+        layout: pipeline.getBindGroupLayout(0),
+        entries: [
+            { binding: 0, resource: { buffer: bodiesA } },
+            { binding: 1, resource: { buffer: bodiesB } },
+            { binding: 2, resource: { buffer: uniformBuffer } },
+        ],
+    });
 
-    // // Encode a command to copy the results to a mappable buffer.
-    // encoder.copyBufferToBuffer(workBuffer, 0, resultBuffer, 0, resultBuffer.size);
+    // Encode commands to do the computation
+    const encoder = device.createCommandEncoder({
+        label: 'nbody compute encoder',
+    });
+    const pass = encoder.beginComputePass({
+        label: 'nbody compute pass',
+    });
+    pass.setPipeline(pipeline);
+    pass.setBindGroup(0, bindGroupA);
+    pass.dispatchWorkgroups(Math.ceil(NUM_BODIES / WORKGROUP_SIZE));
+    pass.end();
 
-    // // Finish encoding and submit the commands
-    // const commandBuffer = encoder.finish();
-    // device.queue.submit([commandBuffer]);
+    // Encode a command to copy the results to a mappable buffer.
+    encoder.copyBufferToBuffer(bodiesB, 0, resultBuffer, 0, resultBuffer.size);
 
-    // // Read the results
-    // await resultBuffer.mapAsync(GPUMapMode.READ);
-    // const result = new Float32Array(resultBuffer.getMappedRange());
+    // Finish encoding and submit the commands
+    const commandBuffer = encoder.finish();
+    device.queue.submit([commandBuffer]);
+
+    // Read the results
+    await resultBuffer.mapAsync(GPUMapMode.READ);
+    const result = new Float32Array(resultBuffer.getMappedRange());
 
     // console.log('input', input);
-    // console.log('result', result);
-
-    // resultBuffer.unmap();
+    console.log('result', result);
+    resultBuffer.unmap();
 }
 main();
