@@ -25,11 +25,13 @@ function body(config: Body): [number, number, number, number, number] {
 
 async function main() {
     const adapter = await navigator.gpu?.requestAdapter();
-    const device = await adapter?.requestDevice();
-    if (!device) {
+    const maybeDevice = await adapter?.requestDevice();
+    if (!maybeDevice) {
         fail('fail-msg');
         return;
     }
+    // Using two variables like this prevents some compiler errors below
+    const device = maybeDevice;
 
     const module = device.createShaderModule({
         label: 'nbody compute module',
@@ -94,32 +96,74 @@ async function main() {
             { binding: 2, resource: { buffer: uniformBuffer } },
         ],
     });
-
-    // Encode commands to do the computation
-    const encoder = device.createCommandEncoder({
-        label: 'nbody compute encoder',
+    const bindGroupB = device.createBindGroup({
+        label: 'bindGroup for work buffer',
+        layout: pipeline.getBindGroupLayout(0),
+        entries: [
+            { binding: 0, resource: { buffer: bodiesB } },
+            { binding: 1, resource: { buffer: bodiesA } },
+            { binding: 2, resource: { buffer: uniformBuffer } },
+        ],
     });
-    const pass = encoder.beginComputePass({
-        label: 'nbody compute pass',
-    });
-    pass.setPipeline(pipeline);
-    pass.setBindGroup(0, bindGroupA);
-    pass.dispatchWorkgroups(Math.ceil(NUM_BODIES / WORKGROUP_SIZE));
-    pass.end();
 
-    // Encode a command to copy the results to a mappable buffer.
-    encoder.copyBufferToBuffer(bodiesB, 0, resultBuffer, 0, resultBuffer.size);
+    let runCount = 0;
+    const MAX_RUN_COUNT = 4;
+    let bindGroup = bindGroupA;
+    let outputBuffer = bodiesB;
+    async function run() {
+        runCount++;
 
-    // Finish encoding and submit the commands
-    const commandBuffer = encoder.finish();
-    device.queue.submit([commandBuffer]);
+        // Encode commands to do the computation
+        const encoder = device.createCommandEncoder({
+            label: 'nbody compute encoder',
+        });
+        const pass = encoder.beginComputePass({
+            label: 'nbody compute pass',
+        });
+        pass.setPipeline(pipeline);
+        pass.setBindGroup(0, bindGroup);
+        pass.dispatchWorkgroups(Math.ceil(NUM_BODIES / WORKGROUP_SIZE));
+        pass.end();
 
-    // Read the results
-    await resultBuffer.mapAsync(GPUMapMode.READ);
-    const result = new Float32Array(resultBuffer.getMappedRange());
+        // Encode a command to copy the results to a mappable buffer.
+        encoder.copyBufferToBuffer(bodiesB, 0, resultBuffer, 0, resultBuffer.size);
 
-    // console.log('input', input);
-    console.log('result', result);
-    resultBuffer.unmap();
+        // Finish encoding and submit the commands
+        const commandBuffer = encoder.finish();
+        device.queue.submit([commandBuffer]);
+
+        // Read the results
+        await resultBuffer.mapAsync(GPUMapMode.READ);
+        const result = new Float32Array(resultBuffer.getMappedRange());
+
+        // console.log('input', input);
+        // console.log('result', result);
+        function logBody(i: number) {
+            const index = i * 5;
+            const x = result[index + 0].toFixed(3);
+            const y = result[index + 1].toFixed(3);
+            const x_vel = result[index + 2].toFixed(3);
+            const y_vel = result[index + 3].toFixed(3);
+            const msg =
+                `[${i}]:\n\tpos: ${x}\t${y}\tvel: ${x_vel}\t${y_vel}`;
+            console.log(msg);
+        }
+        logBody(0);
+        logBody(1);
+        console.log('------------------------');
+        resultBuffer.unmap();
+
+        if (runCount < MAX_RUN_COUNT) {
+            if (bindGroup === bindGroupA) {
+                bindGroup = bindGroupB;
+                outputBuffer = bodiesA;
+            } else {
+                bindGroup = bindGroupA;
+                outputBuffer = bodiesB;
+            }
+            requestAnimationFrame(run);
+        }
+    }
+    requestAnimationFrame(run);
 }
 main();
