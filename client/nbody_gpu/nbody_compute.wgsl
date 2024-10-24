@@ -1,10 +1,22 @@
-@group(0) @binding(0) var<storage, read> bodies_in: array<f32>;
-@group(0) @binding(1) var<storage, read_write> bodies_out: array<f32>;
-@group(0) @binding(2) var<uniform> uniforms: Uniforms;
+@group(0) @binding(0) var<storage, read> bodiesIn: array<f32>;
+@group(0) @binding(1) var<storage, read_write> bodiesOut: array<f32>;
+@group(0) @binding(2) var<uniform> computeUniforms: ComputeUniforms;
+@group(0) @binding(3) var<uniform> renderUniforms: RenderUniforms;
 
-struct Uniforms {
+const BODY_SIZE = 5;
+const WORKGROUP_SIZE = 64;
+
+const CLIP_MIN_XY = vec2f(-1, -1);
+const CLIP_MAX_XY = vec2f(1, 1);
+
+struct ComputeUniforms {
     numBodies: u32,
     deltaT: f32,
+}
+
+struct RenderUniforms {
+    viewportMinXy: vec2f,
+    viewportMaxXy: vec2f,
 }
 
 struct Body {
@@ -13,33 +25,31 @@ struct Body {
     mass: f32,
 }
 
-const BODY_SIZE = 5;
-
 fn readBody(index: u32, body: ptr<function, Body>) {
     let arrayIndex = index * BODY_SIZE;
     (*body).pos = vec2(
-        bodies_in[arrayIndex],
-        bodies_in[arrayIndex + 1]);
+        bodiesIn[arrayIndex],
+        bodiesIn[arrayIndex + 1]);
     (*body).vel = vec2(
-        bodies_in[arrayIndex + 2],
-        bodies_in[arrayIndex + 3]);
-    (*body).mass = bodies_in[arrayIndex + 4];
+        bodiesIn[arrayIndex + 2],
+        bodiesIn[arrayIndex + 3]);
+    (*body).mass = bodiesIn[arrayIndex + 4];
 }
 
 fn writeBody(index: u32, body: ptr<function, Body>) {
     let arrayIndex = index * BODY_SIZE;
-    bodies_out[arrayIndex] = (*body).pos.x;
-    bodies_out[arrayIndex + 1] = (*body).pos.y;
-    bodies_out[arrayIndex + 2] = (*body).vel.x;
-    bodies_out[arrayIndex + 3] = (*body).vel.y;
+    bodiesOut[arrayIndex] = (*body).pos.x;
+    bodiesOut[arrayIndex + 1] = (*body).pos.y;
+    bodiesOut[arrayIndex + 2] = (*body).vel.x;
+    bodiesOut[arrayIndex + 3] = (*body).vel.y;
 
     // Skip writing out mass - it doesn't change
-    // bodies_out[arrayIndex + 4] = (*body).mass;
+    // bodiesOut[arrayIndex + 4] = (*body).mass;
 }
 
 @compute
-@workgroup_size(64)
-fn computeSomething(
+@workgroup_size(WORKGROUP_SIZE)
+fn computeShader(
     @builtin(global_invocation_id) id: vec3u
 ) {
     let index = id.x;
@@ -49,7 +59,7 @@ fn computeSomething(
 
     var attractor: Body;
     var acceleration = vec2f(0, 0);
-    for (var i = 0u; i < uniforms.numBodies; i++) {
+    for (var i = 0u; i < computeUniforms.numBodies; i++) {
         readBody(i, &attractor);
 
         let distVec = attractor.pos - selfBody.pos;
@@ -66,7 +76,32 @@ fn computeSomething(
         // be infinity or NaN anyway)
         acceleration += select(acc, vec2f(), i == index);
     }
-    selfBody.vel += acceleration * uniforms.deltaT;
-    selfBody.pos += selfBody.vel * uniforms.deltaT;
+    selfBody.vel += acceleration * computeUniforms.deltaT;
+    selfBody.pos += selfBody.vel * computeUniforms.deltaT;
     writeBody(index, &selfBody);
+}
+
+fn toClipSpace(worldCoord: vec2f) -> vec2f {
+    let minXy = renderUniforms.viewportMinXy;
+    let maxXy = renderUniforms.viewportMaxXy;
+    let scale = (CLIP_MAX_XY - CLIP_MIN_XY) / (maxXy - minXy);
+    return (worldCoord - minXy) * scale + CLIP_MIN_XY;
+}
+
+@vertex
+fn vertexShader(@builtin(vertex_index) id: u32)
+    -> @builtin(position) vec4f
+{
+    // Note: don't call bodies(...) because it reads more values than we need
+    let arrayIndex = id * BODY_SIZE;
+    let x = bodiesIn[arrayIndex + 0];
+    let y = bodiesIn[arrayIndex + 1];
+
+    let worldCoord = vec2f(x, y);
+    return vec4f(toClipSpace(worldCoord), 0, 1);
+}
+
+@fragment
+fn fragmentShader() -> @location(0) vec4f {
+    return vec4f(1, 1, 1, 0.5);
 }
