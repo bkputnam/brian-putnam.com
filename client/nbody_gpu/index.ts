@@ -1,31 +1,14 @@
 import { fail } from "./fail.js";
 import * as bkp from "./bkplib.js";
 import { Swapper } from "./swapper.js";
+import { initBodies, MAX_RADIUS, NUM_BODIES } from "./populate_data.js";
 
-const NUM_BODIES = 2;
 const WORKGROUP_SIZE = 64;
 const DELTA_T = 0.01;
 
-const VIEWPORT_MIN_XY = [-2, -2];
-const VIEWPORT_MAX_XY = [2, 2];
-
-interface Body {
-    x: number,
-    y: number,
-    x_vel: number,
-    y_vel: number,
-    mass: number
-}
-
-function body(config: Body): [number, number, number, number, number] {
-    return [
-        config.x,
-        config.y,
-        config.x_vel,
-        config.y_vel,
-        config.mass,
-    ];
-}
+const RADIUS_WITH_PADDING = MAX_RADIUS * 1.2;
+const VIEWPORT_MIN_XY = [-RADIUS_WITH_PADDING, -RADIUS_WITH_PADDING];
+const VIEWPORT_MAX_XY = [RADIUS_WITH_PADDING, RADIUS_WITH_PADDING];
 
 interface SwapGroup {
     renderBindGroup: GPUBindGroup,
@@ -193,10 +176,7 @@ async function main() {
         },
     });
 
-    const bodies = new Float32Array([
-        ...body({ x: 1, y: 0, x_vel: 0, y_vel: -0.5, mass: 1 }),
-        ...body({ x: -1, y: 0, x_vel: 0, y_vel: 0.5, mass: 1 })
-    ]);
+    const bodies = initBodies(NUM_BODIES);
     const swapper =
         createBindGroups(
             device,
