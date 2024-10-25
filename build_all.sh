@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
 
-tsc -p client/wordle
-tsc -p client/fractograms
+for dir in ./client/*/; do
+    if [ -f $dir/tsconfig.json ]; then
+        cmd="tsc -p ${dir}"
+        echo $cmd
+        eval $cmd || { exit -1; }
+    fi
+    # $($cmd)
+done
