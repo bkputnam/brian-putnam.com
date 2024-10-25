@@ -23,7 +23,7 @@ export function initBodies(numBodies: number): Float32Array {
         const position_x = radius * Math.cos(theta);
         const position_y = radius * Math.sin(theta);
 
-        const speed = 12 * Math.log(radius + 1);
+        const speed = 8 * Math.log(radius + 1);
         let vel_x = speed * Math.cos(theta + Math.PI / 2);
         let vel_y = speed * Math.sin(theta + Math.PI / 2);
 

@@ -5,9 +5,9 @@ import { initBodies, MAX_RADIUS, NUM_BODIES } from "./populate_data.js";
 import { COMPUTE_UNIFORM_ALIGNER, RENDER_UNIFORM_ALIGNER } from "./uniforms.js";
 
 const WORKGROUP_SIZE = 64;
-const DELTA_T = 0.005;
+const DELTA_T = 0.01;
 
-const RADIUS_WITH_PADDING = MAX_RADIUS * 0.5;
+const RADIUS_WITH_PADDING = MAX_RADIUS * 1;
 const viewportMinXy = [-RADIUS_WITH_PADDING, -RADIUS_WITH_PADDING];
 const viewportMaxXy = [RADIUS_WITH_PADDING, RADIUS_WITH_PADDING];
 
