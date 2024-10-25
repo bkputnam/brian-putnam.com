@@ -4,7 +4,7 @@ shopt -s globstar
 # There should only be one file named workerHelpers.worker.js, but the folder it
 # lives in contains a probably-dynamic hash (of the build?) that I don't want to
 # hardcode
-for f in **/workerHelpers.worker.js; do
+for f in pkg/**/workerHelpers.worker.js; do
     # Work around a bug in wasm-bindgen-rayon where they try to import the main
     # file from a Worker, but it isn't named what they expected it to be named.
     sed -i "s|from '\.\./\.\./\.\./'|from '../../../nbody_wasm.js'|g" $f
