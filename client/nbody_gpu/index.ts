@@ -2,18 +2,21 @@ import { fail } from "./fail.js";
 import * as bkp from "./bkplib.js";
 import { Swapper } from "./swapper.js";
 import { initBodies, MAX_RADIUS, NUM_BODIES } from "./populate_data.js";
+import { COMPUTE_UNIFORM_ALIGNER, RENDER_UNIFORM_ALIGNER } from "./uniforms.js";
 
 const WORKGROUP_SIZE = 64;
-const DELTA_T = 0.01;
+const DELTA_T = 0.005;
 
-const RADIUS_WITH_PADDING = MAX_RADIUS * 1.2;
-const VIEWPORT_MIN_XY = [-RADIUS_WITH_PADDING, -RADIUS_WITH_PADDING];
-const VIEWPORT_MAX_XY = [RADIUS_WITH_PADDING, RADIUS_WITH_PADDING];
+const RADIUS_WITH_PADDING = MAX_RADIUS * 0.5;
+const viewportMinXy = [-RADIUS_WITH_PADDING, -RADIUS_WITH_PADDING];
+const viewportMaxXy = [RADIUS_WITH_PADDING, RADIUS_WITH_PADDING];
 
 interface SwapGroup {
     renderBindGroup: GPUBindGroup,
+    renderUniforms: GPUBuffer,
+
     computeBindGroup: GPUBindGroup,
-    outputBuffer: GPUBuffer,
+    computeUniforms: GPUBuffer,
 }
 
 function createBindGroups(
@@ -42,17 +45,13 @@ function createBindGroups(
 
     const computeUniformBuffer = device.createBuffer({
         label: 'compute uniform buffer',
-        size: 4 // numBodies: u32
-            + 4 // deltaT: f32
-        ,
+        size: COMPUTE_UNIFORM_ALIGNER.byteSize,
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
-    const computeUniformArrayBuffer =
-        new ArrayBuffer(computeUniformBuffer.size);
-    new Uint32Array(computeUniformArrayBuffer, 0, 1)[0] = NUM_BODIES;
-    new Float32Array(computeUniformArrayBuffer, 4, 1)[0] = DELTA_T;
+    COMPUTE_UNIFORM_ALIGNER.set('numBodies', NUM_BODIES);
+    COMPUTE_UNIFORM_ALIGNER.set('deltaT', DELTA_T);
     device.queue.writeBuffer(
-        computeUniformBuffer, 0, computeUniformArrayBuffer);
+        computeUniformBuffer, 0, COMPUTE_UNIFORM_ALIGNER.arrayBuffer);
 
     const computeBindGroupA = device.createBindGroup({
         label: 'nbody compute BindGroup A',
@@ -89,7 +88,7 @@ function createBindGroups(
     const renderUniformArrayBuffer =
         new ArrayBuffer(renderUniformsBuffer.size);
     const floats = new Float32Array(renderUniformArrayBuffer, 0, 4);
-    floats.set([...VIEWPORT_MIN_XY, ...VIEWPORT_MAX_XY], 0);
+    floats.set([...viewportMinXy, ...viewportMaxXy], 0);
     device.queue.writeBuffer(
         renderUniformsBuffer, 0, renderUniformArrayBuffer);
 
@@ -117,13 +116,17 @@ function createBindGroups(
     return new Swapper<SwapGroup>(
         {
             renderBindGroup: renderBindGroupA,
+            renderUniforms: renderUniformsBuffer,
+
             computeBindGroup: computeBindGroupA,
-            outputBuffer: bodiesB,
+            computeUniforms: computeUniformBuffer,
         },
         {
             renderBindGroup: renderBindGroupB,
+            renderUniforms: renderUniformsBuffer,
+
             computeBindGroup: computeBindGroupB,
-            outputBuffer: bodiesA,
+            computeUniforms: computeUniformBuffer,
         }
     );
 }
@@ -146,6 +149,7 @@ async function main() {
     context?.configure({
         device,
         format: presentationFormat,
+        alphaMode: 'premultiplied',
     });
 
     const shaderSrc = await shaderPromise;
@@ -162,7 +166,19 @@ async function main() {
         },
         fragment: {
             module,
-            targets: [{ format: presentationFormat }],
+            targets: [{
+                format: presentationFormat,
+                blend: {
+                    color: {
+                        srcFactor: 'one',
+                        dstFactor: 'one-minus-src-alpha'
+                    },
+                    alpha: {
+                        srcFactor: 'one',
+                        dstFactor: 'one-minus-src-alpha'
+                    },
+                }
+            }],
         },
         primitive: {
             topology: 'point-list',
@@ -184,14 +200,18 @@ async function main() {
             computePipeline,
             bodies);
 
-    let runCount = 0;
     async function run() {
-        runCount++;
-
         // Encode commands to do the computation
         const encoder = device.createCommandEncoder({
             label: 'nbody encoder',
         });
+
+        RENDER_UNIFORM_ALIGNER.set('viewportMinXy', ...viewportMinXy);
+        RENDER_UNIFORM_ALIGNER.set('viewportMaxXy', ...viewportMaxXy);
+        device.queue.writeBuffer(
+            swapper.get().renderUniforms,
+            0,
+            RENDER_UNIFORM_ALIGNER.arrayBuffer);
 
         const renderPass = encoder.beginRenderPass({
             label: 'nbody render pass',
@@ -239,6 +259,21 @@ async function main() {
             canvas.height = Math.max(
                 1,
                 Math.min(height, device.limits.maxTextureDimension2D));
+
+            const aspectRatio = width / height;
+            if (aspectRatio < 1) {
+                const worldHeight = RADIUS_WITH_PADDING * (height / width);
+                viewportMinXy[0] = -RADIUS_WITH_PADDING;
+                viewportMinXy[1] = -worldHeight;
+                viewportMaxXy[0] = RADIUS_WITH_PADDING;
+                viewportMaxXy[1] = worldHeight;
+            } else {
+                const worldWidth = RADIUS_WITH_PADDING * (width / height);
+                viewportMinXy[0] = -worldWidth;
+                viewportMinXy[1] = -RADIUS_WITH_PADDING;
+                viewportMaxXy[0] = worldWidth;
+                viewportMaxXy[1] = RADIUS_WITH_PADDING;
+            }
         }
     });
     observer.observe(canvas);

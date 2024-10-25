@@ -103,5 +103,8 @@ fn vertexShader(@builtin(vertex_index) id: u32)
 
 @fragment
 fn fragmentShader() -> @location(0) vec4f {
-    return vec4f(1, 1, 1, 0.5);
+    const alpha = 0.25;
+    // Premultiplied alpha:
+    // https://webgpufundamentals.org/webgpu/lessons/webgpu-transparency.html
+    return vec4f(alpha, alpha, alpha, alpha);
 }
