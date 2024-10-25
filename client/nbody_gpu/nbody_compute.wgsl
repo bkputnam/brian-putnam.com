@@ -3,7 +3,7 @@
 @group(0) @binding(2) var<uniform> computeUniforms: ComputeUniforms;
 @group(0) @binding(3) var<uniform> renderUniforms: RenderUniforms;
 
-const BODY_SIZE = 5;
+const BODY_SIZE: u32 = 5;
 const WORKGROUP_SIZE = 64;
 
 const CLIP_MIN_XY = vec2f(-1, -1);

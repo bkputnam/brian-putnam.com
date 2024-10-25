@@ -194,8 +194,8 @@ async function main() {
     });
 
     const bodies = new Float32Array([
-        ...body({ x: 1, y: 0, x_vel: 0, y_vel: -1, mass: 1 }),
-        ...body({ x: -1, y: 0, x_vel: 0, y_vel: 1, mass: 1 })
+        ...body({ x: 1, y: 0, x_vel: 0, y_vel: -0.5, mass: 1 }),
+        ...body({ x: -1, y: 0, x_vel: 0, y_vel: 0.5, mass: 1 })
     ]);
     const swapper =
         createBindGroups(
