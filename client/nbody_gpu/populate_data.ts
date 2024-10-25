@@ -1,7 +1,7 @@
 export const MIN_MASS = 1.0;
 export const MAX_MASS = 100.0;
 export const MAX_RADIUS = 350.0;
-export const NUM_BODIES = 20_000;
+export const NUM_BODIES = 8_000;
 export const BODY_SIZE = 5;
 
 function randBetween(min: number, max: number): number {
