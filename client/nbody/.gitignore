@@ -1,3 +1,6 @@
 # Ignore built files
 *.js
 *.js.map
+
+# Don't ignore generated .js files in wasm/ directory
+!wasm/**/*.js

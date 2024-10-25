@@ -1,0 +1,39 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+
+    background-color: black;
+    color: #999;
+}
+
+strong {
+    color: #aaa;
+}
+
+a {
+    color: #0087ff
+}
+
+a:visited {
+    color: #b806f9;
+}
+
+.fail {
+    max-width: 600px;
+    margin: auto;
+    padding: 5px;
+}
+
+#the-canvas {
+    width: 100%;
+    height: 100%;
+
+    background-color: black;
+}
+
+.fail #the-canvas {
+    display: none;
+}

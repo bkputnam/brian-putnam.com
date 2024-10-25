@@ -49,6 +49,11 @@ handlers:
   http_headers:
     Cross-Origin-Embedder-Policy: require-corp
 
+- url: /nbody_gpu
+  secure: always
+  static_files: client/redirectAddSlash.html
+  upload: client/redirectAddSlash.html
+
 - url: /(.*)/
   secure: always
   static_files: client/\1/index.html
