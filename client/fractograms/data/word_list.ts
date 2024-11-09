@@ -1,4 +1,5 @@
 export const WORD_LIST = [
+    "elate",
     "there",
     "about",
     "their",
