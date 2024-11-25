@@ -1,0 +1,4 @@
+# Ignore built files
+*.js
+*.js.map
+
