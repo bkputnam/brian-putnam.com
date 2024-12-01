@@ -2,4 +2,31 @@ html,
 body {
     margin: 0;
     padding: 0;
+
+    background-color: #888;
+}
+
+h1 {
+    text-align: center;
+}
+
+.crossword-root {
+    width: 500px;
+    margin: auto;
+    display: flex;
+    justify-content: center;
+}
+
+.crossword-table {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+.crossword-table td {
+    border: 1px solid black;
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    font-size: 25px;
+    font-family: 'Courier New', Courier, monospace;
 }
