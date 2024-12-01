@@ -54,6 +54,11 @@ handlers:
   static_files: client/redirectAddSlash.html
   upload: client/redirectAddSlash.html
 
+- url: /fractal
+  secure: always
+  static_files: client/redirectAddSlash.html
+  upload: client/redirectAddSlash.html
+
 - url: /(.*)/
   secure: always
   static_files: client/\1/index.html
