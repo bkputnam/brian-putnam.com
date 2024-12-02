@@ -6,6 +6,10 @@ struct Complex {
     vals: vec2f,
 }
 
+fn cx(real: f32, imaginary: f32) -> Complex {
+    return Complex(vec2f(real, imaginary));
+}
+
 fn cxAdd(a: Complex, b: Complex) -> Complex {
     return Complex(a.vals + b.vals);
 }
@@ -13,7 +17,7 @@ fn cxAdd(a: Complex, b: Complex) -> Complex {
 fn cxSquare(a: Complex) -> Complex {
     let r = a.vals.x;
     let i = a.vals.y;
-    return Complex(r * r - i * i, 2.0 * r * i);
+    return cx(r * r - i * i, 2.0 * r * i);
 }
 
 fn cxMagnitudeSquared(a: Complex) -> f32 {
@@ -50,11 +54,11 @@ fn vertexShader(
     return VertexShaderOutput(clipCoord, clipCoord.xy);
 }
 
-fn convergenceSpeed(c: Complex) -> int32 {
-    let numSteps: int32 = 0;
-    let z = Complex(vec2f(0.0, 0.0));
-    for (let i = 0; i < MAX_ITERATIONS; i++) {
-        z = cxSquare(z) + c;
+fn convergenceSpeed(c: Complex) -> i32 {
+    var numSteps: i32 = 0;
+    var z = Complex(vec2f(0.0, 0.0));
+    for (var i = 0; i < MAX_ITERATIONS; i++) {
+        z = cxAdd(cxSquare(z), c);
         if (cxMagnitudeSquared(z) > 4.0) {
             return i;
         }
@@ -66,5 +70,6 @@ fn convergenceSpeed(c: Complex) -> int32 {
     vertexOutput: VertexShaderOutput,
 ) -> @location(0) vec4f {
     // return vec4f(vertexOutput.clipPosition, 0.0, 1.0);
-    const complex = Complex(vertexOutput.clipCoord * 2);
+    let complex = Complex(vertexOutput.clipPosition * 2);
+    return vec4f(vertexOutput.clipPosition, 0.0, 1.0);
 }
