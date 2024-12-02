@@ -69,7 +69,11 @@ fn convergenceSpeed(c: Complex) -> i32 {
 @fragment fn fs(
     vertexOutput: VertexShaderOutput,
 ) -> @location(0) vec4f {
-    // return vec4f(vertexOutput.clipPosition, 0.0, 1.0);
     let complex = Complex(vertexOutput.clipPosition * 2);
-    return vec4f(vertexOutput.clipPosition, 0.0, 1.0);
+    let iters = convergenceSpeed(complex);
+    if (iters < 0) {
+        return vec4f(0.0, 0.0, 0.0, 1.0);
+    }
+    let whiteVal = f32(iters) / f32(MAX_ITERATIONS) / 2.0 + 0.5;
+    return vec4f(whiteVal, whiteVal, whiteVal, 1.0);
 }
