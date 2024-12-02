@@ -147,7 +147,11 @@ class BufferAligner {
             throw new Error(`Unrecognized name: "${name}"`);
         }
         const byteOffset = index * this.indexByteSize + offset;
-        const typedArrayCtor = getTypedArrayCtor(type);
+        const typedArrayCtor:
+            // This type definition is just here to make the compiler happy - it
+            // seems like it shouldn't be necessary.
+            new (buffer: ArrayBufferLike, byteOffset: number) => TypedArray
+            = getTypedArrayCtor(type);
         const typedArray = new typedArrayCtor(this.arrayBuffer, byteOffset);
         typedArray.set(values);
     }
