@@ -14,6 +14,7 @@ async function main() {
     const device = maybeDevice;
 
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
+    bkp.observeResizes(canvas, device);
     const context = canvas.getContext('webgpu')!;
     const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
     context?.configure({
@@ -60,7 +61,8 @@ async function main() {
         renderPass.end();
         const commandBuffer = encoder.finish();
         device.queue.submit([commandBuffer]);
+        requestAnimationFrame(run);
     }
-    await run();
+    requestAnimationFrame(run);
 }
 main();

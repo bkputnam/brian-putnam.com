@@ -7,14 +7,9 @@ body {
 }
 
 html {
-    /* Dumb hack to get rid of whitespace below canvas caused
-    by whitespace in HTML markup */
+    /* Dumb hack to get rid of whitespace below canvas caused by whitespace in
+    HTML markup. This only works because we won't have any text on the page. */
     font-size: 0;
-}
-
-body {
-    /* Undo the dumb hack above. */
-    font-size: initial;
 }
 
 canvas {
