@@ -1,0 +1,38 @@
+h1 {
+    text-align: center;
+    margin: 10px 0 15px 0;
+    font-family: var(--font-family);
+}
+
+#timer-hint-form {
+    width: calc(var(--letter-side-len) * 5 + var(--border-width) * 6);
+    margin: 0 auto 15px auto;
+    text-align: center;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+#timer-hint-form>* {
+    flex-basis: 1;
+}
+
+#timer {
+    width: 120px;
+    text-align: center;
+}
+
+#hint-btn {
+    width: 80px;
+}
+
+div#play-area {
+    width: 100%;
+    height: auto;
+    flex-grow: 1;
+
+    /* Play area should also be display:flex so that we can make room for the
+    WinMessage later on */
+    display: flex;
+    flex-direction: column;
+}
