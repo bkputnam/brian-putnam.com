@@ -2,10 +2,57 @@
 <html>
 
 <head>
+    <script>
+        window.__PAGE_LOAD_START = performance.now();
+    </script>
     <title>Fractograms</title>
     <link rel="stylesheet" href="./index.css">
     <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0" />
     <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- Poor man's bundling: grab everything from the Network tab and manually
+     turn it into a preload request. The 'crossorigin' attribute seems like it
+     shouldn't be necessary but Chrome ignores the preloaded resource unless
+     this is present (at least in localhost) -->
+    <link rel="preload" crossorigin href="bkp_drag_drop/drag_drop_service.js" as="script">
+    <link rel="preload" crossorigin href="bkp_drag_drop/events.js" as="script">
+    <link rel="preload" crossorigin href="consts.js" as="script">
+    <link rel="preload" crossorigin href="data_structures/board.js" as="script">
+    <link rel="preload" crossorigin href="data_structures/game.js" as="script">
+    <link rel="preload" crossorigin href="data_structures/piece.js" as="script">
+    <link rel="preload" crossorigin href="data_structures/solution_stats.js" as="script">
+    <link rel="preload" crossorigin href="data_structures/solution.js" as="script">
+    <link rel="preload" crossorigin href="data/solutions.js" as="script">
+    <link rel="preload" crossorigin href="data/solutions.js" as="script">
+    <link rel="preload" crossorigin href="data/tetrominoes.js" as="script">
+    <link rel="preload" crossorigin href="data/word_list.js" as="script">
+    <link rel="preload" crossorigin href="data/word_list.js" as="script">
+    <link rel="preload" crossorigin href="index.js" as="script">
+    <link rel="preload" crossorigin href="render/board_controller.js" as="script">
+    <link rel="preload" crossorigin href="render/carousel.js" as="script">
+    <link rel="preload" crossorigin href="render/controller.js" as="script">
+    <link rel="preload" crossorigin href="render/dialog.js" as="script">
+    <link rel="preload" crossorigin href="render/intro_carousel.js" as="script">
+    <link rel="preload" crossorigin href="render/intro_dialog.js" as="script">
+    <link rel="preload" crossorigin href="render/letter.js" as="script">
+    <link rel="preload" crossorigin href="render/page_controller.js" as="script">
+    <link rel="preload" crossorigin href="render/piece_controller.js" as="script">
+    <link rel="preload" crossorigin href="render/play_area_controller.js" as="script">
+    <link rel="preload" crossorigin href="render/play_area_model.js" as="script">
+    <link rel="preload" crossorigin href="render/win_message.js" as="script">
+    <link rel="preload" crossorigin href="render/z_indices.js" as="script">
+    <link rel="preload" crossorigin href="util/array_helpers.js" as="script">
+    <link rel="preload" crossorigin href="util/date_math.js" as="script">
+    <link rel="preload" crossorigin href="util/deserializer.js" as="script">
+    <link rel="preload" crossorigin href="util/fetch_slices.js" as="script">
+    <link rel="preload" crossorigin href="util/fragment_hash.js" as="script">
+    <link rel="preload" crossorigin href="util/geometry.js" as="script">
+    <link rel="preload" crossorigin href="util/random.js" as="script">
+    <link rel="preload" crossorigin href="util/resolver.js" as="script">
+    <link rel="preload" crossorigin href="util/solutions.js" as="script">
+    <link rel="preload" crossorigin href="util/svg_path_util.js" as="script">
+    <link rel="preload" crossorigin href="util/svg_util.js" as="script">
+    <link rel="preload" crossorigin href="util/time.js" as="script">
 </head>
 
 <body>
