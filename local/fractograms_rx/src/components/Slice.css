@@ -1,0 +1,44 @@
+.piece {
+    stroke-width: calc(var(--border-width));
+    stroke: black;
+    fill: #00e8e8;
+}
+
+.piece.p1 {
+    fill: #51A3A3;
+}
+
+.piece.p2 {
+    fill: #F18F01;
+}
+
+.piece.p3 {
+    fill: #5448C8;
+}
+
+.piece.p4 {
+    fill: #99C24D;
+}
+
+.piece.p5 {
+    fill: #41BBD9;
+}
+
+.piece.p6 {
+    fill: #297373;
+}
+
+.letter {
+    /* See also: FONT_SIZE in consts.ts */
+    font-size: calc(var(--letter-side-len) * 0.75);
+    font-family: var(--font-family);
+
+    /* Don't allow clicking on letters, which would prevent drag-n-drop */
+    pointer-events: none;
+
+    /* Set these explicitly so that we don't accidentally inherit them from
+        .piece */
+    fill: black;
+    stroke: black;
+    stroke-width: 1px;
+}

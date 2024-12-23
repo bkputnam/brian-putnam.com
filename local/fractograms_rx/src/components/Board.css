@@ -1,0 +1,14 @@
+#board {
+    transform:
+        translateX(calc((var(--letter-side-len) + var(--border-width)) * -2.5));
+}
+
+#board .cell {
+    fill: rgb(255, 255, 255);
+    stroke-width: calc(var(--border-width));
+    stroke: black;
+}
+
+#board .cell.hint {
+    fill: rgb(200, 200, 200);
+}

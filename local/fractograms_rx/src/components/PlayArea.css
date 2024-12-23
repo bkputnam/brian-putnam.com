@@ -1,3 +1,7 @@
+svg#centering-svg {
+    overflow: visible;
+}
+
 div#play-area {
     width: 100%;
     height: auto;

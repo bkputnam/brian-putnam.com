@@ -18,12 +18,22 @@ body {
     user-select: none;
 }
 
-body {
+:focus-visible {
+    outline: 1px dotted black;
+}
+
+#root {
+    height: 100%;
     display: flex;
     flex-direction: column;
     background-color: rgb(245, 245, 245);
 }
 
-:focus-visible {
-    outline: 1px dotted black;
+[bkp-draggable] {
+    cursor: grab;
+    user-select: none;
+}
+
+.solved [bkp-draggable] {
+    cursor: auto;
 }
