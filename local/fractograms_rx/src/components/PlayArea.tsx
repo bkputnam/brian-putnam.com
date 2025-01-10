@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useReducer } from "react";
 import "./PlayArea.css";
 import { AppState } from "../data_structures/app_state.ts";
 import { RowCol } from "../data_structures/coords.ts";
 import { SliceData } from "../data_structures/slice.ts";
 import Board from "./Board.tsx";
 import Slice from "./Slice.tsx";
+import { appStateReducer } from "./AppStateReducer.ts";
+import { BkpDragEvent } from "../bkp_drag_drop/events.ts";
 
 export default function PlayArea() {
-  // const [gameState, setGameState] = useState(null as AppState | null);
-  const [gameState, setGameState] = useState({
+  const [gameState, dispatchGameState] = useReducer(appStateReducer, {
     slices: [
       {
         width: 2,
@@ -36,10 +37,18 @@ export default function PlayArea() {
     board: new Map<SliceData, RowCol>(),
   } as const satisfies AppState);
 
+  const onDrop = (e: BkpDragEvent) => {
+    dispatchGameState({
+      type: "drop",
+      sliceIndex: Number(e.detail.id),
+      pos: e.detail.curPos,
+    });
+  };
+
   return (
     <svg id="play-area-svg">
       <svg id="centering-svg" x="50%">
-        <Board></Board>
+        <Board onDrop={onDrop}></Board>
         {gameState.slices.map((slice, index) => {
           return (
             <Slice

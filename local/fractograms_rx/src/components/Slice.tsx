@@ -15,7 +15,7 @@ import {
   toTranslateStr,
 } from "../data_structures/coords.ts";
 import { getTranslateXY } from "../util/svg_utils.ts";
-import { Z_INDICES } from "../util/z_indices.ts";
+import { iterNested } from "../util/iter_util.ts";
 
 interface SliceProps {
   slice: SliceData;
@@ -37,6 +37,7 @@ export default function Slice({ slice, index, initialTranslate }: SliceProps) {
     dragStartCoords.current = getTranslateXY(
       dragEvent.target as SVGGraphicsElement
     );
+    dragEvent.detail.id = String(index);
 
     // Make el the last child inside of parentEl, so that it stays on top
     const gEl = gRef.current;
@@ -98,23 +99,26 @@ export default function Slice({ slice, index, initialTranslate }: SliceProps) {
       ref={gRef}
     >
       <path d={outlinePath} />
-      {letterConfigs.map(({ letter, row, col }) => {
-        const shiftX = CELL_WIDTH_PX / 2;
-        const shiftY = CELL_WIDTH_PX / 2;
+      {[...iterNested(slice.height, slice.width)]
+        .filter(([row, col]) => !!slice.letters[row][col])
+        .map(([row, col]) => {
+          const letter = slice.letters[row][col]!;
+          const shiftX = CELL_WIDTH_PX / 2;
+          const shiftY = CELL_WIDTH_PX / 2;
 
-        return (
-          <text
-            key={`${row}.${col}`}
-            className="letter"
-            x={col * (CELL_WIDTH_PX + BORDER_WIDTH) + shiftX}
-            y={row * (CELL_WIDTH_PX + BORDER_WIDTH) + shiftY}
-            textAnchor="middle"
-            dominantBaseline="mathematical"
-          >
-            {letter}
-          </text>
-        );
-      })}
+          return (
+            <text
+              key={`${row}.${col}`}
+              className="letter"
+              x={col * (CELL_WIDTH_PX + BORDER_WIDTH) + shiftX}
+              y={row * (CELL_WIDTH_PX + BORDER_WIDTH) + shiftY}
+              textAnchor="middle"
+              dominantBaseline="mathematical"
+            >
+              {letter}
+            </text>
+          );
+        })}
     </g>
   );
 }

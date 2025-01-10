@@ -1,4 +1,4 @@
-import { RowCol } from "./coords.ts";
+import { BoardData } from "./board.ts";
 import { SliceData } from "./slice.ts";
 
 export interface AppState {
@@ -13,5 +13,5 @@ export interface AppState {
   //    but not overlap. E.g. an upside-down T at (1, 1) would not overlap a
   //    1x1 piece at (1, 1) because the T doesn't actually fill the (1, 1)
   //    coord. That coord is just used as a positioning reference.
-  board: Map<SliceData, RowCol>;
+  board: BoardData;
 }

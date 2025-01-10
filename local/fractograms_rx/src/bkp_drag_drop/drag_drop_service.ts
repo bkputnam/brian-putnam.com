@@ -13,7 +13,7 @@ interface DragInfo {
   identifier: number;
   el: HTMLElement;
   startPos: ScreenCoord;
-  dropController?: unknown;
+  id?: string;
 }
 
 class DragDropService {
@@ -61,7 +61,7 @@ class DragDropService {
       return false;
     }
     this.claimedEls.add(el);
-    dragInfo.dropController = detail.dropController;
+    dragInfo.id = detail.id;
     this.drags.set(id, dragInfo);
     return true;
   }
@@ -103,7 +103,7 @@ class DragDropService {
           eventType: BKP_DROP,
           startPos: dragInfo.startPos,
           curPos: endPos,
-          dropController: dragInfo.dropController,
+          id: dragInfo.id,
         })
       );
       // Children of <svg> elements won't be returned by elementsFromPoint
@@ -126,7 +126,7 @@ class DragDropService {
               eventType: BKP_DROP,
               startPos: dragInfo.startPos,
               curPos: endPos,
-              dropController: dragInfo.dropController,
+              id: dragInfo.id,
             })
           );
         }

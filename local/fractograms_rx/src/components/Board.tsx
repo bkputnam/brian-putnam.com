@@ -3,38 +3,37 @@
 
 import { useEffect, useRef } from "react";
 import { BKP_DROP_TARGET_ATTR } from "../bkp_drag_drop/drag_drop_service.ts";
-import { BKP_DROP } from "../bkp_drag_drop/events.ts";
+import { BKP_DROP, BkpDragEvent } from "../bkp_drag_drop/events.ts";
 import { BORDER_WIDTH, CELL_WIDTH_PX } from "../util/consts.ts";
 import { WORD_SIZE } from "../data/solutions.ts";
 import { iterNested } from "../util/iter_util.ts";
 import "./Board.css";
 
-// interface BoardProps {
-//   appState: AppState;
-//   onDrop: (e: BkpDragEvent) => void;
-// }
+interface BoardProps {
+  // appState: AppState;
+  onDrop: (e: BkpDragEvent) => void;
+}
 
-export default function Board() {
+export default function Board({ onDrop }: BoardProps) {
   const boardRef = useRef(null as unknown as SVGPathElement);
 
-  function onDrop(e: Event) {
-    debugger;
-  }
+  const onDropWrapper = (e: Event) => {
+    onDrop(e as BkpDragEvent);
+  };
 
   useEffect(() => {
     const el = boardRef.current;
     el.setAttribute(BKP_DROP_TARGET_ATTR, "true");
 
-    el.addEventListener(BKP_DROP, onDrop);
+    el.addEventListener(BKP_DROP, onDropWrapper);
 
     return () => {
-      el.removeEventListener(BKP_DROP, onDrop);
+      el.removeEventListener(BKP_DROP, onDropWrapper);
     };
   });
 
   // Shift most y-coordinates down to account for thicker borders
   const shiftY = BORDER_WIDTH / 2;
-  const maxOffset = WORD_SIZE * (CELL_WIDTH_PX + BORDER_WIDTH) + shiftY;
 
   return (
     <g id="board" ref={boardRef}>
