@@ -10,6 +10,13 @@
     <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0" />
     <meta name="mobile-web-app-capable" content="yes" />
 
+    <!-- iOS-specific web app meta tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-title" content="Fractograms">
+    <link rel="apple-touch-icon" sizes="780x780" href="img/icon-with-fill-780.png">
+
     <!-- Poor man's bundling: grab everything from the Network tab and manually
      turn it into a preload request. The 'crossorigin' attribute seems like it
      shouldn't be necessary but Chrome ignores the preloaded resource unless
