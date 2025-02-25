@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" style="
+    display: block;
+    overflow: hidden;"
+    width="32" height="32"
+    viewBox="0 0 390 390">
+    <g transform="translate(294 40)">
+        <path d="M 30 0 q -30 0 -30 30 v 2 q 0 30 30 30 h 62 h 32 v 30 v 2 q 0 30 30 30 h 2 q 30 0 30 -30 v -62 v -2 q 0 -30 -30 -30 h -62 h -62 h -2 q -30 0 -30 30"
+        style="transform: scaleX(-1);"
+        fill="#F18F01"
+        stroke="#000"
+        stroke-width="20px"></path>
+    </g>
+    <g transform="translate(108 352)">
+        <path d="M 30 0 q -30 0 -30 30 v 2 q 0 30 30 30 h 62 h 32 v 30 v 2 q 0 30 30 30 h 2 q 30 0 30 -30 v -62 v -2 q 0 -30 -30 -30 h -62 h -62 h -2 q -30 0 -30 30"
+        style="transform: rotate(270deg);overflow: visible;"
+        fill="#F18F01"
+        stroke="#000"
+        stroke-width="20px"></path>
+    </g>
+</svg>
